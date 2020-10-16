@@ -1,0 +1,16 @@
+.vscode/*
+*.o
+*.exe
+*.out
+*.zip
+*.txt
+*.todo
+*.plt
+*.py
+*debug
+!/help.txt
+/data/*
+/logs/*
+!/logs/changelog.md
+/screenshots/*
+/command_files/*
