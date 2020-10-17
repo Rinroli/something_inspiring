@@ -9,7 +9,7 @@ using namespace std;
 
 ///// WAVE_CLUSTERS /////
 
-WaveClusters::WaveClusters(BinMatrix matrix, ofstream &logs_field,
+WaveClusters::WaveClusters(const BinMatrix &matrix, ofstream &logs_field,
                            Field *field)
     : logs_a(logs_field), matrix_inc(matrix)
 {
@@ -104,27 +104,7 @@ FindClusters WaveClusters::mainAlgorithm()
     return result_vector;
 }
 
-void WaveClusters::printEdges()
-{
-    /* Print edges for gnuplot in file. */
-    ofstream graph_edges("data/graph_edges.plt");
-    for (int poi = 0; poi < marks.size(); ++poi) {
-        if (marks[poi] != 0) {
-            continue;
-        }
-        for (int nei_p = poi + 1; nei_p < marks.size(); nei_p++) {
-            if (marks[nei_p] == 0 & matrix_inc[poi][nei_p]) {
-                (*p_field).points[poi].print(graph_edges);
-                (*p_field).points[nei_p].print(graph_edges);
-                graph_edges << endl
-                            << endl;
-            }
-        }
-    }
-    graph_edges.close();
-}
-
-void WaveClusters::writeLog(string message)
+void WaveClusters::writeLog(const string &message)
 {
     /* Write log-message with date-time note. */
     logs_a << timeLog() << "WAVE: " << message << endl;

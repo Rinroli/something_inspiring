@@ -22,19 +22,17 @@ using namespace std;
 
 ///// CONTROLLER /////
 
-Controller::Controller(bool iflogg, string log_name)
+Controller::Controller()
 {
-    logs.open("logs/" + log_name, ios_base::app);
+    logs.open("logs/logs_ctrl.txt", ios_base::app);
     logs << endl
         << "New session" << endl;
     writeLog("INIT");
 }
 
-void Controller::writeLog(string message)
+void Controller::writeLog(const string &message)
 {
     /* Write log-message with date-time note. */
-    time_t seconds = time(0);
-    tm* timeinfo = localtime(&seconds);
     logs << timeLog() << message << endl;
 }
 
@@ -97,7 +95,6 @@ bool Controller::showInfoField()
     cout << "Info about field:\n"
          << "\tNumber of points: " << field.numPoints() << "\tNumber of clouds: " 
          << field.numClouds() << "\tNumber of FindClusters: " << field.numFClusters() << endl;
-    vector<double> box;
     cout << "Clouds:" << endl;
     for (int cl = 0; cl < field.numClouds(); ++cl) {
         field[cl].coutInfo();
@@ -280,12 +277,9 @@ bool Controller::displayGraph(int i) {
 
 ///// INTERFACE /////
 
-Interface::Interface(bool iflogg, string log_namee, int idd, int nu_of_logff)
-{
-    iflog = iflogg;
-    log_name = log_namee;
+Interface::Interface(int idd)
+ {
     id = idd;
-    nu_of_logf = nu_of_logff;
 
     logs.open("logs/logs_interface.txt", ios_base::app);
     logs << endl
@@ -293,11 +287,9 @@ Interface::Interface(bool iflogg, string log_namee, int idd, int nu_of_logff)
     writeLog("INIT");
 }
 
-void Interface::writeLog(string message)
+void Interface::writeLog(const string &message)
 {
     /* Write log-message with date-time note. */
-    time_t seconds = time(0);
-    tm* timeinfo = localtime(&seconds);
     logs << timeLog() << message << endl;
 }
 
@@ -313,8 +305,8 @@ void Interface::runCommand(string command)
     writeLog("GET COMMAND <" + command + ">");
     cout << command << ": ";
     bool result = false;
-    // try
-    // {
+    try
+    {
         char* s = new char[command.size() + 1];
         strcpy(s, command.c_str());
         char* pch = strtok(s, ", ()");
@@ -331,7 +323,7 @@ void Interface::runCommand(string command)
             result = ctrl.showHelp();
         }
 
-        else if (com == "GEN_CLOUD" | com == "GC") {
+        else if ((com == "GEN_CLOUD") | (com == "GC")) {
             if (args.size() == 0) {result = ctrl.genCloud(0, 0, 1, 1);}
             else if (args.size() < 4) {throw - 1;} 
             else {
@@ -351,12 +343,12 @@ void Interface::runCommand(string command)
             else {result = ctrl.createDBMatrix(stod(args[0]), stod(args[1]));}
         }
 
-        else if (com == "WAVE" | com == "DBWAVE") {
+        else if ((com == "WAVE") | (com == "DBWAVE")) {
             if (args.size() == 0) {result = ctrl.waveClusters(-1);}
             else {result = ctrl.waveClusters(stod(args[0]));}
         }
 
-        else if (com == "DIBINARY" | com == "DIDBSCAN" | com == "DIB" | com == "DID") {
+        else if ((com == "DIBINARY") | (com == "DIDBSCAN") | (com == "DIB") | (com == "DID")) {
             if (args.size() == 0) {result =  ctrl.displayGraph(-1);}
             else { result = ctrl.displayGraph(stod(args[0])); }
         }
@@ -380,7 +372,7 @@ void Interface::runCommand(string command)
             result = ctrl.showInfoField();
         } else if (com == "INFOFC") {
             result = ctrl.showInfoFClusters();
-        } else if (com == "MATRIX" | com == "ANALYSIS") {
+        } else if ((com == "MATRIX") | (com == "ANALYSIS")) {
             result = ctrl.enterAnalysis();
         }
 
@@ -388,11 +380,11 @@ void Interface::runCommand(string command)
             cout << "No such command, sorry." << endl
                 << "Would you like to get some HELP?" << endl;
         }
-    // }
-    // catch (...) {
-    //     result = false;
-    //     cout << "Somethig wrong, sorry.\nWould you like to get some HELP?" << endl;
-    // }
+    }
+    catch (...) {
+        result = false;
+        cout << "Somethig wrong, sorry.\nWould you like to get some HELP?" << endl;
+    }
     if (result) {
         writeLog("\tCorrect <" + command + ">");
     } else {

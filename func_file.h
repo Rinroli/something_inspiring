@@ -37,7 +37,7 @@ private:
     int a, b;
     string mark = "base";
     ofstream &logs_f;
-    void writeLog(string message);
+    void writeLog(const string &message);
 };
 
 #endif // POINT
@@ -66,7 +66,7 @@ public:
 protected:
     vector<int> id_points;
     ofstream &logs_a;
-    void writeLog(string message);
+    void writeLog(const string &message);
     bool updated = false;
     double R = INF, D = 0;
     vector<int> center;
@@ -90,7 +90,7 @@ public:
     ~Cloud();
 
 private:
-    void writeLog(string message);
+    void writeLog(const string &message);
 };
 
 #endif // CLOUD
@@ -113,7 +113,7 @@ public:
 
 private:
     vector<Cluster> clusters;
-    void writeLog(string message);
+    void writeLog(const string &message);
     ofstream &logs_a;
 };
 
@@ -175,7 +175,7 @@ public:
 private:
     vector<FindClusters> fclusters;
     vector<Cloud> clouds;
-    void writeLog(string message);
+    void writeLog(const string &message);
     bool readonly;
     int nextCloud();
     int nextPoint();

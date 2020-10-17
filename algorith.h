@@ -13,20 +13,19 @@ using namespace std;
 class WaveClusters
 {
 public:
-    WaveClusters(BinMatrix matrix, ofstream &logs_field,
+    WaveClusters(const BinMatrix &matrix, ofstream &logs_field,
                  Field *field);
     ~WaveClusters();
     FindClusters mainAlgorithm();
 
 private:
-    void printEdges();
     bool stepWave();
     void checkNeighbors(int i);
     bool findNextBegin();
-    void writeLog(string message);
+    void writeLog(const string &message);
     vector<int> marks, step_points, sec_step_points;
     BinMatrix matrix_inc;
-    int cur_step;
+    int cur_step = 0;
     ofstream &logs_a;
     Field *p_field;
 };

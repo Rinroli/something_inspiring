@@ -59,7 +59,7 @@ ostream& operator<<(ostream& out, const Point& point)
     return out;
 }
 
-void Point::writeLog(string message)
+void Point::writeLog(const string &message)
 {
     /* Write log-message with date-time note. */
     logs_f << timeLog() << "POINT(id:" << id << "): " << message << endl;
@@ -93,10 +93,10 @@ void Cluster::updateProp()
     /* Update Radius, Diameter and etc. of the Cluster(Cloud). */
     if (updated) { return; }
 
-    double dist_f, tmp_dist;
+    double tmp_dist;
     center.clear();
     for (int first : id_points) {
-        dist_f = 0;
+        double dist_f = 0;
         for (int second : id_points) {
             tmp_dist = p_field->getDist(first, second);
             if (tmp_dist > dist_f) { dist_f = tmp_dist; }
@@ -184,7 +184,7 @@ void Cluster::coutInfo()
     cout << "]" << endl;
 }
 
-void Cluster::writeLog(string message)
+void Cluster::writeLog(const string &message)
 {
     /* Write log-message with date-time note. */
     logs_a << timeLog() << "CLUSTER(id:" << id << "): " << message << endl;
@@ -207,7 +207,7 @@ Cloud::~Cloud()
     writeLog("DELETE");
 }
 
-void Cloud::writeLog(string message)
+void Cloud::writeLog(const string &message)
 {
     /* Write log-message with date-time note. */
     logs_a << timeLog() << "CLOUD(id:" << id << "): " << message << endl;
@@ -393,7 +393,7 @@ void Field::setAPoint(int i, int value)
 void Field::updateD()
 {
     /* Update distance matrix if field was changed. */
-    double dist = 0;
+    double dist;
     matrix.resize(cur_id_points + 1);
     for (int i = 0; i < cur_id_points + 1; ++i) {
         matrix[i].resize(cur_id_points + 1);
@@ -439,7 +439,7 @@ void Field::binMatrix(double delta)
     for (int ind_poi = 0; ind_poi < numPoints(); ++ind_poi) {
         matrix_inc[ind_poi][ind_poi] = 0;
         for (int ind_poi_sec = ind_poi; ind_poi_sec < numPoints(); ++ind_poi_sec) {
-            if (ind_poi != ind_poi_sec & matrix[ind_poi][ind_poi_sec] < delta) {
+            if ((ind_poi != ind_poi_sec) & (matrix[ind_poi][ind_poi_sec] < delta)) {
                 matrix_inc[ind_poi][ind_poi_sec] = 1;
                 matrix_inc[ind_poi_sec][ind_poi] = 1;
             }
@@ -457,12 +457,11 @@ void Field::binDBMatrix(double delta, int k) {
     /* Create matrix (graph) with info about incident points and neighbors. */
     writeLog("Begin creating binary db matrix (" + to_string(delta) + ", " + to_string(k) + ")");
     BinMatrix matrix_inc(numPoints(), delta, k);
-    int tmp;
     for (int ind_poi = 0; ind_poi < numPoints(); ++ind_poi) {
-        tmp = 0;
+        int tmp = 0;
         matrix_inc[ind_poi][ind_poi] = 0;
         for (int ind_poi_sec = ind_poi; ind_poi_sec < numPoints(); ++ind_poi_sec) {
-            if (ind_poi != ind_poi_sec & matrix[ind_poi][ind_poi_sec] < delta) {
+            if ((ind_poi != ind_poi_sec) & (matrix[ind_poi][ind_poi_sec] < delta)) {
                 matrix_inc[ind_poi][ind_poi_sec] = 1;
                 matrix_inc[ind_poi_sec][ind_poi] = 1;
                 tmp++;
@@ -481,7 +480,7 @@ void Field::binDBMatrix(double delta, int k) {
     for (int ind_poi = 0; ind_poi < numPoints(); ++ind_poi) {
         if (matrix_inc.marks[ind_poi] == -1) {
             for (int ind_poi_sec = 0; ind_poi_sec < numPoints(); ++ind_poi_sec) {
-                if (matrix_inc.marks[ind_poi_sec] == 0 & matrix_inc[ind_poi][ind_poi_sec]) {
+                if ((matrix_inc.marks[ind_poi_sec] == 0) & (matrix_inc[ind_poi][ind_poi_sec])) {
                     matrix_inc.marks[ind_poi] = -2;
                     break;
                 }
@@ -510,8 +509,8 @@ void Field::drawBinGraph(int i) {
             continue;
         }
         for (int nei_p = 0; nei_p < numPoints(); nei_p++) {
-            if ((points[poi].mark == "peripheral" | poi < nei_p) &
-                matrix_inc[poi][nei_p] & points[nei_p].mark == "base") {
+            if (((points[poi].mark == "peripheral") |(poi < nei_p)) &
+                (matrix_inc[poi][nei_p]) & (points[nei_p].mark == "base")) {
                 points[poi].print(graph_edges);
                 points[nei_p].print(graph_edges);
                 graph_edges << endl << endl;
@@ -535,7 +534,7 @@ void Field::drawBinGraph(int i) {
     graph_points.close();
 }
 
-void Field::writeLog(string message)
+void Field::writeLog(const string &message)
 {
     /* Write log-message with date-time note. */
     logs << timeLog() << "FIELD: " << message << endl;
@@ -588,7 +587,7 @@ int FindClusters::numClusters()
     return clusters.size();
 }
 
-void FindClusters::writeLog(string message)
+void FindClusters::writeLog(const string &message)
 {
     /* Write log-message with date-time note. */
     logs_a << timeLog() << "FIND_CLUSTERS: " << message << endl;

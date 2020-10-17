@@ -10,7 +10,7 @@ using namespace std;
 class Controller
 {
 public:
-   explicit Controller(bool iflogg = 0, string log_name = "logs_ctrl.txt");
+   explicit Controller();
    ~Controller();
    bool showHelp();
    bool showInfoField();
@@ -18,7 +18,6 @@ public:
    bool printField(bool clouds, int i);
    bool saveHist();
    bool saveHist(Cluster cluster);
-   void writeLog(string message);
    bool enterAnalysis();
    bool createIncMatrix(double delta);
    bool createDBMatrix(double delta, int k);
@@ -26,9 +25,9 @@ public:
    bool genCloud(double mX, double mY, double sX, double sY);
    bool waveClusters(int i);
    bool displayGraph(int i);
+   void writeLog(const string& message);
 
 private:
-   bool iflog;
    Field field;
    ofstream logs;
 };
@@ -41,16 +40,13 @@ private:
 class Interface
 {
 public:
-   explicit Interface(bool iflogg = 0, string log_namee = "logs/logs_interface.txt",
-                      int idd = 0, int nu_of_logff = 0);
+   explicit Interface(int idd = 0);
    ~Interface();
    void runCommand(string command);
-   void writeLog(string command);
+   void writeLog(const string &command);
 
 private:
-   int id, nu_of_logf;
-   bool iflog;
-   string log_name;
+   int id;
    ofstream logs;
    Controller ctrl;
 };
