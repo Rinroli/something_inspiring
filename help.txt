@@ -38,5 +38,7 @@ Commands:
     STRHIST >> build histogram on edges of spanning tree. Print it to the file 'tree_hist.plt'.
         For gnuplot - 'gnu_tree_hist.plt'. 
     
-
     FINDR >> find the best delta for wave algorithm basing on minimal spanning tree.
+
+    KMEANS (number_of_clusters) >> make clustering using k-means algorithm.
+        number_of_clusters is initial number of clusters, default 25.

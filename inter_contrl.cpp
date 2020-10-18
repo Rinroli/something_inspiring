@@ -29,9 +29,8 @@ Controller::Controller()
     writeLog("INIT");
 }
 
-void Controller::writeLog(const string &message)
-{
-    /* Write log-message with date-time note. */
+// Write log-message with date-time note.
+void Controller::writeLog(const string &message) {
     logs << timeLog() << message << endl;
 }
 
@@ -205,9 +204,9 @@ bool Controller::saveHist(Cluster cluster)
     return true;
 }
 
+// Save histogram to the file for command HIST.
 bool Controller::saveHist()
 {
-    /* Save histogram to the file for command HIST. */
     writeLog("Begin saveHist (field)");
     Cluster field_cluster(-1, field.logs, &field);
     for (int i = 0; i < field.numPoints(); i++) {
@@ -342,6 +341,16 @@ bool Controller::waveClusters(int i)
     return true;
 }
 
+// Create clusters by k-Means algorithm.
+bool Controller::kMeans(int n) {
+    writeLog("Begin kMeans");
+    KMeans new_k_means(n, field, field.logs_a);
+    field.addFC(new_k_means.mainAlgorithm());
+    writeLog("\tEnd kMeans");
+    cout << "Done!" << endl;
+    return true;
+}
+
 // Print to the file all points and edges by binary matrix.
 bool Controller::displayGraph(int i) {
     writeLog("Begin displayPoints");
@@ -384,9 +393,9 @@ Interface::~Interface()
     writeLog("DELETE");
 }
 
+// Get command from the user and compile it.
 bool Interface::runCommand(string command)
 {
-    /* Get command from the user and compile it. */
     writeLog("GET COMMAND <" + command + ">");
     cout << command << ": ";
     bool result = false;
@@ -443,6 +452,11 @@ bool Interface::runCommand(string command)
                 result = ctrl.saveHist();
             } else if (args.size() == 1) {throw - 1;}
             else {result = ctrl.preHist(args);}
+        }
+
+        else if (com == "KMEANS") {
+            if (args.size() == 0) { result = ctrl.kMeans(25); }
+            else { result = ctrl.kMeans(stod(args[0])); }
         }
 
         else if (com == "SAVE") {

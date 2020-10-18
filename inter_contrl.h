@@ -20,6 +20,7 @@ public:
    bool saveHist(Cluster cluster);
    bool streeHist();
    bool findR();
+   bool kMeans(int n);
    bool enterAnalysis();
    bool minSpanTree();
    bool createIncMatrix(double delta);

@@ -7,12 +7,14 @@
 
 using namespace std;
 
+#define EPS 0.0001
+
 class BinMatrix;
 
 ///// WAVE_CLUSTERS /////
 
-WaveClusters::WaveClusters(const BinMatrix &matrix, ofstream &logs_field,
-                           Field *field)
+WaveClusters::WaveClusters(const BinMatrix& matrix, ofstream& logs_field,
+    Field* field)
     : logs_a(logs_field), matrix_inc(matrix)
 {
     p_field = field;
@@ -107,7 +109,7 @@ FindClusters WaveClusters::mainAlgorithm()
 }
 
 // Write log-message with date-time note. 
-void WaveClusters::writeLog(const string &message)
+void WaveClusters::writeLog(const string& message)
 {
     logs_a << timeLog() << "WAVE: " << message << endl;
 }
@@ -149,15 +151,12 @@ Tree Tree::operator[](int i) {
 }
 
 // Find vertex with index.
-Tree *Tree::findIndex(int i) {
+Tree* Tree::findIndex(int i) {
     for (int nei = 0; nei < neighbors.size(); nei++) {
-        if (neighbors[nei].point.id == i) {
-            return &neighbors[nei];
-        }
-        Tree *result = neighbors[nei].findIndex(i);
-        if (result != NULL) {
-            return result;
-        }
+        if (neighbors[nei].point.id == i) { return &neighbors[nei]; }
+
+        Tree* result = neighbors[nei].findIndex(i);
+        if (result != NULL) { return result; }
     }
     return NULL;
 }
@@ -172,6 +171,7 @@ void Tree::displayTree(ofstream& out_f) {
     }
 }
 
+// Return vector with all edges.
 vector<double> Tree::allDist() {
     vector<double> all_dist;
     all_dist.push_back(dist_parent);
@@ -186,4 +186,77 @@ vector<double> Tree::allDist() {
 // Write log-message with date-time note.
 void Tree::writeLog(const string& message) {
     logs_a << timeLog() << "TREE: " << message << endl;
+}
+
+///// KMEANS /////
+
+KMeans::KMeans(int nn, Field& fieldd, ofstream& logs_al)
+    : n(nn), field(fieldd), logs_a(logs_al) {
+    writeLog("INIT");
+    for (int ind = 0; ind < n; ind++) {
+        int point_ind = rand() % n;
+        centers.push_back(field.points[point_ind].getCoord());
+        clusters.push_back(Cluster(ind, logs_a, &field));
+    }
+}
+
+// Make clustering using k-means algorithm.
+FindClusters KMeans::mainAlgorithm() {
+    writeLog("Begin mainAlgorithm");
+    pointDistribution();
+    while (findNewCenters()) {
+        pointDistribution();
+    }
+    FindClusters result(logs_a, "KMeans algorithm");
+    int ind = 0;
+    for (Cluster cluster : clusters) {
+        if (cluster.numPoints() != 0) {
+            cluster.id = ind++;
+            result += cluster;
+        }
+    }
+    writeLog("\tTurned out " + to_string(result.numClusters()) + " clusters");
+    cout << "Turned out " << to_string(result.numClusters()) << " clusters. ";
+    return result;
+}
+
+// Find new centers as average of the cluster. 
+// Return true, if there is any new ones, else false.
+bool KMeans::findNewCenters() {
+    writeLog("New step");
+    bool result = false;
+    for (int ind = 0; ind < centers.size(); ind++) {
+        vector<double> new_center = clusters[ind].findAverage();
+        if (distPoints(centers[ind], new_center) > EPS) { result = true; }
+        centers[ind] = new_center;
+    }
+    return result;
+}
+
+// Find the nearest points to the centers.
+void KMeans::pointDistribution() {
+    for (int ind = 0; ind < clusters.size(); ind++) {
+        clusters[ind].clear();
+    }
+    for (Point point : field.points) {
+        clusters[nearestCenter(point)] += point.id;
+    }
+}
+
+// Find the nearest center to the given point.
+int KMeans::nearestCenter(const Point& point) {
+    double min_dist = INF;
+    int nearest_center = -1;
+    for (int ind_center = 0; ind_center < centers.size(); ind_center++) {
+        double dist = distPoints(point, centers[ind_center]);
+        if (dist < min_dist) {
+            min_dist = dist;
+            nearest_center = ind_center;
+        }
+    }
+    return nearest_center;
+}
+
+void KMeans::writeLog(const string& message) {
+    logs_a << timeLog() << "KMEANS: " << message << endl;
 }

@@ -7,7 +7,13 @@ List of commands can be found in [help.txt](../help.txt).
 
 ## Changelog
 
-### **Version 1.4.2 (18.10.2020)** - CURRENT VERSION
+### **Version 1.4.3 (18.10.2020)** - CURRENT VERSION
+
+Added:
+
+* *KMEANS* - make clustering using k-means algorithm. Argument is initial number of clusters. New clustering stores in FindClusters.
+
+### **Version 1.4.2 (18.10.2020)**
 
 Added:
 
@@ -36,7 +42,7 @@ Added:
 
 * New commands:
   + *BINARY* and *DBSCAN* - create binary matrix by delta (and k - number of neighbors for DBScan). All binary matrix stores in vector, you can call any of them.
-  + *WAVE* and *DBWAVE* - create clustering by binary matrix (created by command *BINARY* or *DBSCAN*). New clustering stores in FindClusters.
+  + *WAVE* and *DBWAVE* - make clustering by binary matrix (created by command *BINARY* or *DBSCAN*). New clustering stores in FindClusters.
 * Points now have attributs - a, b and mark.
 
 ### **Version 1.3.1 (13.10.2020)**

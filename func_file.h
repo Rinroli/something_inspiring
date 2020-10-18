@@ -44,6 +44,8 @@ private:
 #endif // POINT
 
 double distPoints(Point f_poi, Point s_poi);
+double distPoints(Point point, const vector<double> &center);
+double distPoints(const vector<double>& center1, const vector<double>& center2);
 
 #ifndef CLUSTER
 #define CLUSTER
@@ -62,6 +64,8 @@ public:
     vector<int> getCenter();
     void coutInfo();
     Point operator[](int i);
+    void clear();
+    vector<double> findAverage();
     friend Cluster &operator+=(Cluster &left, int i);
 
 protected:
@@ -78,7 +82,6 @@ protected:
 };
 
 #endif // CLUSTER
-// friend Cluster& operator+=(Cluster& left, int i);
 
 #ifndef CLOUD
 #define CLOUD
@@ -126,7 +129,6 @@ private:
 class BinMatrix
 {
 public:
-    // BinMatrix(BinMatrix &bin_matrix);
     BinMatrix(int size, double delta, int k=1);
     ~BinMatrix();
     vector<bool>& operator[](int i);
@@ -192,6 +194,28 @@ private:
 
 #endif // WAVE_CLUSTERS
 
+#if !defined(KMEANS)
+#define KMEANS
+
+class KMeans 
+{
+public:
+    explicit KMeans(int n, Field& field, ofstream& logs_al);
+    ~KMeans() {}
+    FindClusters mainAlgorithm();
+private:
+    int n;
+    vector<vector<double>> centers;
+    Field &field;
+    ofstream& logs_a;
+    vector<Cluster> clusters;
+    void pointDistribution();
+    int nearestCenter(const Point &point);
+    bool findNewCenters();
+    void writeLog(const string& message);
+};
+
+#endif // KMEANS
 
 
 #ifndef FIELD
@@ -210,6 +234,7 @@ public:
     int numFClusters();
     int numPoints();
     double getDist(int ind1, int ind2);
+    double getDist(Point point1, int ind2);
     Cloud &operator[](int i);
     FindClusters &getFCluster(int i);
     BinMatrix &getBinMatrix(int i);

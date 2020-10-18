@@ -30,9 +30,8 @@ Point::Point(double mX, double mY, double sX, double sY,
     id_cloud = id_cloudd;
 }
 
-void Point::changeTo(Point point)
-{
-    /* Changes point to the given one. */
+// Changes point to the given one.
+void Point::changeTo(Point point) {
     x = point.x;
     y = point.y;
     id = point.id;
@@ -42,29 +41,25 @@ void Point::changeTo(Point point)
     mark = point.mark;
 }
 
-vector<double> Point::getCoord()
-{
-    /* Return coords of the point. */
+// Return coords of the point.
+vector<double> Point::getCoord() {
     vector<double> coords = { x, y };
     return coords;
 }
 
-void Point::print(ofstream& out_f)
-{
-    /* Save coords of the point to the file. */
+// Save coords of the point to the file.
+void Point::print(ofstream& out_f) {
     out_f << x << "  " << y << " ---- " << id_cloud << endl;
 }
 
 // Put point to the given stream.
-ostream& operator<<(ostream& out, const Point& point)
-{ 
+ostream& operator<<(ostream& out, const Point& point) { 
     out << "(" << point.x << ", " << point.y << ")";
     return out;
 }
 
-void Point::writeLog(const string &message)
-{
-    /* Write log-message with date-time note. */
+// Write log-message with date-time note.
+void Point::writeLog(const string &message) {
     logs_f << timeLog() << "POINT(id:" << id << "): " << message << endl;
 }
 
@@ -85,15 +80,13 @@ Cluster::~Cluster()
     writeLog("DELETE");
 }
 
-int Cluster::numPoints()
-{
-    /* Return number of points in the cloud. */
+// Return number of points in the cloud.
+int Cluster::numPoints() {
     return id_points.size();
 }
 
-void Cluster::updateProp()
-{
-    /* Update Radius, Diameter and etc. of the Cluster(Cloud). */
+// Update Radius, Diameter and etc. of the Cluster(Cloud). 
+void Cluster::updateProp() {
     if (updated) { return; }
 
     double tmp_dist;
@@ -131,50 +124,62 @@ void Cluster::updateProp()
     }
 }
 
-double Cluster::getR()
-{
-    /* Getter for (R)adius. */
+// Find average of coords.
+vector<double> Cluster::findAverage() {
+    vector<double> aver(2);
+    for (int id_point : id_points) {
+        vector<double> coords = (*p_field_points)[id_point].getCoord();
+        aver[0] += coords[0];
+        aver[1] += coords[1];
+    }
+    aver[0] /= numPoints();
+    aver[1] /= numPoints();
+    return aver;
+}
+
+// Getter for (R)adius.
+double Cluster::getR() {
     updateProp();
     return R;
 }
 
-double Cluster::getD()
-{
-    /* Getter for (D)iameter. */
+// Getter for (D)iameter.
+double Cluster::getD() {
     updateProp();
     return D;
 }
 
-vector<double> Cluster::getBox()
-{
-    /* Getter for the box containing the cluster. */
+// Getter for the box containing the cluster.
+vector<double> Cluster::getBox() {
     updateProp();
     return box;
 }
 
-vector<int> Cluster::getCenter()
-{
-    /* Getter for points from center of the cluster. */
+// Getter for points from center of the cluster.
+vector<int> Cluster::getCenter() {
     updateProp();
     return center;
 }
 
-Point Cluster::operator[](int i)
-{
-    /* Getter for point by its index. */
+// Getter for point by its index.
+Point Cluster::operator[](int i) {
     return (*p_field_points)[id_points[i]];
 }
 
+// Add point with absolut index i to the cluster.
 Cluster& operator+=(Cluster& left, int i)
 {
-    /* Add point with absolut index i to the cluster; */
     left.id_points.push_back(i);
     return left;
 }
 
-void Cluster::coutInfo()
-{
-    /* Print info abput cluster. */
+// Clear vector of points' id.
+void Cluster::clear() {
+    id_points.clear();
+}
+
+// Print info abput cluster.
+void Cluster::coutInfo() {
     updateProp();
     cout << "\t\t#" << id << "  Points " << numPoints() << ";  Box: x:[" << setw(8) << box[0] << ":"
         << setw(8) << box[1] << "] y:[" << setw(8) << box[2] << ":" << setw(8) << box[3] << "]" << endl
@@ -187,9 +192,8 @@ void Cluster::coutInfo()
     cout << "]" << endl;
 }
 
-void Cluster::writeLog(const string &message)
-{
-    /* Write log-message with date-time note. */
+// Write log-message with date-time note.
+void Cluster::writeLog(const string &message) {
     logs_a << timeLog() << "CLUSTER(id:" << id << "): " << message << endl;
 }
 
@@ -210,9 +214,8 @@ Cloud::~Cloud()
     writeLog("DELETE");
 }
 
-void Cloud::writeLog(const string &message)
-{
-    /* Write log-message with date-time note. */
+// Write log-message with date-time note.
+void Cloud::writeLog(const string &message) {
     logs_a << timeLog() << "CLOUD(id:" << id << "): " << message << endl;
 }
 
@@ -262,10 +265,9 @@ Field::~Field()
     writeLog("DELETE");
 }
 
+// Create new normally distributed cloud of points.
 bool Field::createCloud(double mX, double mY,
-    double sX, double sY)
-{
-    /* Create new normally distributed cloud of points. */
+    double sX, double sY) {
     writeLog("CREATE CLOUD");
     Cloud new_cloud(nextCloud(), logs, this);
     if (!readonly) {
@@ -350,10 +352,14 @@ int Field::numFClusters()
     return fclusters.size();
 }
 
-double Field::getDist(int ind1, int ind2)
-{
-    /* return distance between two points (by id) */
+// Return distance between two points (both by id)
+double Field::getDist(int ind1, int ind2) {
     return matrix[ind1][ind2];
+}
+
+// Return distance between two points (by point and id)
+double Field::getDist(Point point1, int ind2) {
+    return matrix[point1.id][ind2];
 }
 
 Cloud& Field::operator[](int i)
@@ -541,6 +547,7 @@ void Field::drawBinGraph(int i) {
     graph_points.close();
 }
 
+// Create minimal spanning tree.
 void Field::minSpanTree() {
     writeLog("Begin minSpanTree");
     p_tree = new Tree(points[0], logs_a);
@@ -659,4 +666,18 @@ double distPoints(Point f_poi, Point s_poi) {
 
     return sqrt((f_poi.x - s_poi.x) * (f_poi.x - s_poi.x) +
         ((f_poi.y - s_poi.y) * (f_poi.y - s_poi.y)));
+}
+
+// Return distance between point and vector with coords.
+double distPoints(Point point, const vector<double> &center) {
+
+    return sqrt((point.x -center[0]) * (point.x -center[0]) +
+        ((point.y - center[1]) * (point.y - center[1])));
+}
+
+// Return distance between two vectors with coords.
+double distPoints(const vector<double>& center1, const vector<double>& center2) {
+
+    return sqrt((center1[0] - center2[0]) * (center1[0] - center2[0]) +
+        ((center1[1] - center2[1]) * (center1[1] - center2[1])));
 }
