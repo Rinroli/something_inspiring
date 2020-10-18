@@ -176,7 +176,6 @@ vector<double> Tree::allDist() {
     vector<double> all_dist;
     all_dist.push_back(dist_parent);
     for (Tree nei : neighbors) {
-        all_dist.push_back(nei.dist_parent);
         vector<double> res = nei.allDist();
         all_dist.insert(all_dist.end(), res.begin(), res.end());
     }

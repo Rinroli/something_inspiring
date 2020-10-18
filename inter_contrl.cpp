@@ -226,22 +226,25 @@ bool Controller::streeHist() {
         return false;
     }
     vector<double> all_dist = field.p_tree->allDist();
-    double min_d = INF, max_d = 0;
+    double max_d = 0;
     for (double dist : all_dist) {
         if (dist > max_d) {max_d = dist;}
-        if (dist < min_d) {min_d = dist;}
     }
-    double step = (max_d - min_d) / N;
+    double step = max_d / N;
 
     vector<double> freq(N);
     for (double dist : all_dist) {
-        freq[int(dist - min_d) / step]++;
+        if (dist == max_d) {
+            freq[N - 1]++;
+            continue;
+        }
+        freq[int(dist / step)]++;
     }
 
     ofstream hist;
     hist.open("data/tree_hist.plt");
     for (int k = 0; k < N; ++k) {
-        hist << k * step + min_d << "\t" << freq[k] << endl;
+        hist << k * step << "\t" << freq[k] << endl;
     }
     writeLog("\tEnd streeHist");
     cout << "Done!" << endl;
