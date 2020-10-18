@@ -14,6 +14,7 @@ string timeLog();
 
 class Field;
 class Controller;
+class Tree;
 
 #ifndef POINT
 #define POINT
@@ -139,6 +140,60 @@ private:
 
 #endif // BIN_MATRIX
 
+
+#if !defined(TREE)
+#define TREE
+
+class Tree {
+public:
+    Tree(Point& point, ofstream& logs_al, double dist=0);
+    ~Tree();
+    void addVert(Point& point, double dist);
+    void print(int indent = 0);
+    int numTrees();
+    vector<double> allDist(); 
+    Tree operator[](int i);
+    Tree* findIndex(int i);
+    void displayTree(ofstream &out_f);
+
+private:
+    Point& point;
+    double dist_parent = 0;
+    vector<Tree> neighbors;
+    void writeLog(const string& message);
+    ofstream& logs_a;
+};
+
+#endif // TREE
+
+
+#ifndef WAVE_CLUSTERS
+#define WAVE_CLUSTERS
+
+class WaveClusters
+{
+public:
+    WaveClusters(const BinMatrix& matrix, ofstream& logs_field,
+        Field* field);
+    ~WaveClusters();
+    FindClusters mainAlgorithm();
+
+private:
+    bool stepWave();
+    void checkNeighbors(int i);
+    bool findNextBegin();
+    void writeLog(const string& message);
+    vector<int> marks, step_points, sec_step_points;
+    BinMatrix matrix_inc;
+    int cur_step = 0;
+    ofstream& logs_a;
+    Field* p_field;
+};
+
+#endif // WAVE_CLUSTERS
+
+
+
 #ifndef FIELD
 #define FIELD
 
@@ -161,6 +216,7 @@ public:
     int numBinMatrix();
     bool ifReadonly();
     bool enterAnalysis();
+    void minSpanTree();
     void binDBMatrix(double delta, int k);
     void binMatrix(double delta);
     void setAPoint(int i, int value);
@@ -181,7 +237,8 @@ private:
     int nextPoint();
     void updateD();
     vector<BinMatrix> bin_matrixes;
-    // void swapClusters(vector<Cluster> clu);
+    Tree *p_tree = nullptr;
 };
 
 #endif // FIELD
+

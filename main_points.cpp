@@ -1,5 +1,5 @@
 // Copyright (c) 2020 Rinroli
-// Version 1.3.2
+// Version 1.4.1
 
 
 #include <stdlib.h>
@@ -10,6 +10,7 @@
 #include <fstream>
 #include <ctime>
 #include <iomanip>
+#include <queue>
 
 #include "func_file.h"
 
@@ -49,9 +50,9 @@ int main() {
             cout << "Wrong file! Exit..." << endl;
             return 0;
         }
-        while (command != "EXIT") {
+        getline(fin, command);
+        while (interface.runCommand(command)) {
             getline(fin, command);
-            interface.runCommand(command);
         }
     }
 

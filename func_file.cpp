@@ -14,6 +14,9 @@
 using namespace std;
 
 #define N 75
+#define INF 100000007
+
+class Tree;
 
 ///// POINT /////
 
@@ -52,9 +55,9 @@ void Point::print(ofstream& out_f)
     out_f << x << "  " << y << " ---- " << id_cloud << endl;
 }
 
+// Put point to the given stream.
 ostream& operator<<(ostream& out, const Point& point)
-{
-    /* Put point to the given stream. */
+{ 
     out << "(" << point.x << ", " << point.y << ")";
     return out;
 }
@@ -229,8 +232,8 @@ BinMatrix::BinMatrix(int sizee, double deltaa, int kk) {
 BinMatrix::~BinMatrix() {
 }
 
+// Getter for matrix line.
 vector<bool>& BinMatrix::operator[](int i) {
-    /* Getter for matrix line. */
     return matrix[i];
 }
 
@@ -278,9 +281,9 @@ bool Field::createCloud(double mX, double mY,
     return false;
 }
 
+// Save clouds to the file.
 void Field::print(ofstream& out_f)
 {
-    /* Save clouds to the file. */
     for (int ind_cl = 0; ind_cl < clouds.size(); ind_cl++) {
         Cloud cur_cl = clouds[ind_cl];
         for (int ind_poi = 0; ind_poi < cur_cl.numPoints(); ind_poi++) {
@@ -293,9 +296,9 @@ void Field::print(ofstream& out_f)
     writeLog("SAVE (clouds)");
 }
 
+// Save clusters to the file.
 void Field::print(int i, ofstream& out_f)
 {
-    /* Save clusters to the file. */
     FindClusters &cur_fd = getFCluster(i);
     for (int ind_cl = 0; ind_cl < cur_fd.numClusters(); ind_cl++) {
         Cluster cur_cl = cur_fd[ind_cl];
@@ -365,10 +368,14 @@ bool Field::ifReadonly()
     return readonly;
 }
 
+// Enter readonly 'Analysis' mode.
 bool Field::enterAnalysis()
 {
-    /* Enter readonly 'Analysis' mode */
     cout << "Entering 'Analysis' mode." << endl;
+    if (numPoints() == 0) {
+        cout << "There is no points. You can do nothing with them." << endl;
+        throw -2;
+    }
     try {
         readonly = true;
         updateD();
@@ -497,8 +504,8 @@ void Field::binDBMatrix(double delta, int k) {
     writeLog("\tCREATE binary matrix with neighbors");
 }
 
+// Print edges to the file graph_edges.plt.
 void Field::drawBinGraph(int i) {
-    /* Print edges to the file graph_edges.plt. */
     ofstream graph_edges("data/graph_edges.plt");
     ofstream graph_points("data/graph_points.plt");
 
@@ -534,9 +541,40 @@ void Field::drawBinGraph(int i) {
     graph_points.close();
 }
 
+void Field::minSpanTree() {
+    writeLog("Begin minSpanTree");
+    p_tree = new Tree(points[0], logs_a);
+
+    vector<bool> already_taken(numPoints());
+    already_taken[0] = true;
+    int min_ind, min_taken_ind;
+
+    for (int step = 0; step < numPoints() - 1; step++) {
+        double min_dist = INF;
+        for (int ind = 0; ind < numPoints(); ind++) {
+            if (!already_taken[ind]) {
+                for (int taken_poi = 0; taken_poi < numPoints(); taken_poi++) {
+                    if (already_taken[taken_poi]) {
+                        if (getDist(ind, taken_poi) < min_dist) {
+                            min_dist = getDist(ind, taken_poi);
+                            min_ind = ind; min_taken_ind = taken_poi;
+                        }
+                    }
+                }
+            }
+        }
+        if (min_taken_ind == 0) { p_tree->addVert(points[min_ind], min_dist); }
+        else { (*(p_tree->findIndex(min_taken_ind))).addVert(points[min_ind], min_dist); }
+        already_taken[min_ind] = true;
+    }
+
+    ofstream graph("data/tree_data.plt");
+    p_tree->displayTree(graph);
+}
+
+// Write log-message with date-time note.
 void Field::writeLog(const string &message)
 {
-    /* Write log-message with date-time note. */
     logs << timeLog() << "FIELD: " << message << endl;
 }
 
@@ -554,20 +592,18 @@ FindClusters::~FindClusters()
     writeLog("DELETE");
 }
 
-Cluster& FindClusters::operator[](int i)
-{
-    /* Getter for the cluster from vector. */
+// Getter for the cluster from vector.
+Cluster& FindClusters::operator[](int i) {
     return clusters[i];
 }
 
+// Setter for id.
 void FindClusters::setID(int i) {
-    /* Setter for id. */
     id = i;
 }
 
-void FindClusters::coutInfo()
-{
-    /* Cout info about FindClusters to the standart output. */
+// Cout info about FindClusters to the standart output.
+void FindClusters::coutInfo() {
     cout << "\t#" << id << " Source: " << source << ", "
         << clusters.size() << " clusters." << endl;
     for (Cluster cl : clusters) {
@@ -575,29 +611,25 @@ void FindClusters::coutInfo()
     }
 }
 
-void operator+=(FindClusters& left, Cluster new_cluster)
-{
-    /* Simple addition of new cluster to FindClusters. */
+// Simple addition of new cluster to FindClusters
+void operator+=(FindClusters& left, Cluster new_cluster) {
     left.clusters.push_back(new_cluster);
 }
 
-int FindClusters::numClusters()
-{
-    /* Return number of clusters. */
+// Return number of clusters.
+int FindClusters::numClusters() {
     return clusters.size();
 }
 
-void FindClusters::writeLog(const string &message)
-{
-    /* Write log-message with date-time note. */
+// Write log-message with date-time note.
+void FindClusters::writeLog(const string &message) {
     logs_a << timeLog() << "FIND_CLUSTERS: " << message << endl;
 }
 
 ///// FUNCTIONS /////
 
-double normalPoint(double mu, double sigma)
-{
-    /*   Normal distribution. */
+// Normal distribution.
+double normalPoint(double mu, double sigma) {
     double sum = 0;
     for (int i = 0; i < N; ++i) {
         sum += getRandom();
@@ -605,17 +637,15 @@ double normalPoint(double mu, double sigma)
     return mu + (sum / N) * sigma;
 }
 
-double getRandom()
-{
-    /*   Return random double in [-1, 1]. */
+// Return random double in [-1, 1].
+double getRandom() {
     int po = rand() % 10000 - 5000;
     double u_1 = (static_cast<double>(po) / 10000);
     return u_1;
 }
 
-string timeLog()
-{
-    /* Return clear string with time info for logs. */
+// Return clear string with time info for logs.
+string timeLog() {
     time_t seconds = time(0);
     tm* timeinfo = localtime(&seconds);
     string tmp = to_string(timeinfo->tm_mday);
@@ -624,9 +654,9 @@ string timeLog()
     return tmp;
 }
 
-double distPoints(Point f_poi, Point s_poi)
-{
-    /*  Return distance between two points.  */
+// Return distance between two points.
+double distPoints(Point f_poi, Point s_poi) {
+
     return sqrt((f_poi.x - s_poi.x) * (f_poi.x - s_poi.x) +
         ((f_poi.y - s_poi.y) * (f_poi.y - s_poi.y)));
 }

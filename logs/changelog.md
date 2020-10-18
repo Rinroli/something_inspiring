@@ -7,12 +7,28 @@ List of commands can be found in [help.txt](../help.txt).
 
 ## Changelog
 
-### **Version 1.4.0 (16.10.2020)** - CURRENT VERSION
+### **Version 1.4.2 (18.10.2020)** - CURRENT VERSION
+
+Added:
+
+* *STREE* - build minimal spanning tree on the field (bu Prim algorithm.)
+  Result can be seen in 'tree_data.plt'. For *gnuplot* - 'gnu_tree.plt'.
+* *STRHIST* - build histogram for the edges of the tree.
+  Result can be seen in 'tree_hist.plt'. For *gnuplot* - 'gnu_tree_hist.plt'.
+* *FINDR* - find the best *delta* for wave algorithm basing on minimal spanning tree.
+
+### **Version 1.4.1 (17.10.2020)**
+
+Fixed:
+
+* *HIST* work with clusters from FindClusters - new syntax can be seen in [help.txt](../help.txt).
+
+### **Version 1.4.0 (16.10.2020)**
 
 Added and fixed:
 
 * *DIBINARY* (index) and *DIDBSCAN*(index) (aliases are *DIB* and *DID*) - print graph with point marks and edges of the binary matrix to the file. Can be called by gnuplot as *gnuplot data/graph.plt*.
-* *SAVE* - now work (again) with clusters, taken from FindCluster.
+* *SAVE* now work (again) with clusters, taken from FindCluster.
 
 ### **Version 1.3.2 (14.10.2020)**
 

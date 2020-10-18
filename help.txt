@@ -13,7 +13,7 @@ Commands:
 
     GEN_CLOUD(mx=0, my=0, sx=1, sy=1) or GC >> create normally distributed cloud
 
-    HIST or HIST(clu/clo, id_cl) >> output to the gnuplot (data/gnu_hist.plt) histogram of x and y coords of points.
+    HIST or HIST(clo, id_cl) or HIST(clu, id_fc, id_cl) >> output for the gnuplot (data/gnu_hist.plt) histogram of x and y coords of points.
         By default use all points on the field. Can be called for cluster or cloud - by id (can be checked by command *INFO*)
 
     MATRIX or ANALYSIS >> set readonly 'Analysis' mod and create distance matrix.
@@ -31,3 +31,12 @@ Commands:
     DIBINARY or DIB (index) >> print graph with point marks and edges of the binary matrix to the file. 
         Index is the number of binary matrix, default is the last one.
         Can be called by gnuplot as *gnuplot data/graph.plt*.
+
+    STREE >> build minimal spanning tree for all points from the field. Print it to the file 'tree_data.plt'.
+        For gnuplot - 'gnu_tree.plt'.
+
+    STRHIST >> build histogram on edges of spanning tree. Print it to the file 'tree_hist.plt'.
+        For gnuplot - 'gnu_tree_hist.plt'. 
+    
+
+    FINDR >> find the best delta for wave algorithm basing on minimal spanning tree.

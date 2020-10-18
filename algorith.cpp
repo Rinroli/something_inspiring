@@ -1,11 +1,13 @@
 // Copyright (c) 2020 Rinroli
 
 #include "func_file.h"
-#include "algorith.h"
+#include <queue>
 // #include <string>
 #include <vector>
 
 using namespace std;
+
+class BinMatrix;
 
 ///// WAVE_CLUSTERS /////
 
@@ -70,9 +72,9 @@ bool WaveClusters::findNextBegin()
     return false;
 }
 
+// Create clusters by wave (dbscan) algorithm.
 FindClusters WaveClusters::mainAlgorithm()
 {
-    /* Create clusters by wave (dbscan) algorithm. */
     writeLog("BEGIN CLUSTERING");
     string name_wave = "Wave clustering (delta = " + to_string(matrix_inc.delta) + ")";
     string name_dbscan = "DBSCAN (k=" + to_string(matrix_inc.k) + ", delta = " + to_string(matrix_inc.delta) + ")";
@@ -104,8 +106,84 @@ FindClusters WaveClusters::mainAlgorithm()
     return result_vector;
 }
 
+// Write log-message with date-time note. 
 void WaveClusters::writeLog(const string &message)
 {
-    /* Write log-message with date-time note. */
     logs_a << timeLog() << "WAVE: " << message << endl;
+}
+
+///// Tree /////
+
+Tree::Tree(Point& pointt, ofstream& logs_al, double dist)
+    : point(pointt), logs_a(logs_al), dist_parent(dist) {
+    writeLog("INIT (of point #" + to_string(point.id) + ")");
+}
+
+Tree::~Tree() {
+    neighbors.clear();
+}
+
+// Add new vertex to the current Tree.
+void Tree::addVert(Point& new_point, double dist) {
+    Tree new_vert(new_point, logs_a, dist);
+    neighbors.push_back(new_vert);
+}
+
+// Print Tree as nested list.
+void Tree::print(int indent) {
+    string cur_indent(indent, '\t');
+    cout << cur_indent << point << endl;
+    for (Tree nei : neighbors) {
+        nei.print(indent + 1);
+    }
+}
+
+// Getter for number of neighboring vertexes.
+int Tree::numTrees() {
+    return neighbors.size();
+}
+
+//Getter for neighboring vertex.
+Tree Tree::operator[](int i) {
+    return neighbors[i];
+}
+
+// Find vertex with index.
+Tree *Tree::findIndex(int i) {
+    for (int nei = 0; nei < neighbors.size(); nei++) {
+        if (neighbors[nei].point.id == i) {
+            return &neighbors[nei];
+        }
+        Tree *result = neighbors[nei].findIndex(i);
+        if (result != NULL) {
+            return result;
+        }
+    }
+    return NULL;
+}
+
+// Print tree to the file.
+void Tree::displayTree(ofstream& out_f) {
+    for (Tree nei : neighbors) {
+        point.print(out_f);
+        nei.point.print(out_f);
+        out_f << endl << endl;
+        nei.displayTree(out_f);
+    }
+}
+
+vector<double> Tree::allDist() {
+    vector<double> all_dist;
+    all_dist.push_back(dist_parent);
+    for (Tree nei : neighbors) {
+        all_dist.push_back(nei.dist_parent);
+        vector<double> res = nei.allDist();
+        all_dist.insert(all_dist.end(), res.begin(), res.end());
+    }
+    return all_dist;
+}
+
+// Write log-message with date-time note.
+void Tree::writeLog(const string& message) {
+    logs_a << timeLog() << "TREE: " << message << endl;
 }

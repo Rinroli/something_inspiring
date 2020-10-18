@@ -2,7 +2,6 @@
 
 #include "inter_contrl.h"
 #include "func_file.h"
-#include "algorith.h"
 #include <stdio.h>
 #include <unistd.h>
 #include "time.h"
@@ -16,7 +15,7 @@
 
 using namespace std;
 
-#define N 100
+#define N 200
 #define DELTA 0.1
 #define K 10
 
@@ -122,20 +121,29 @@ bool Controller::showInfoFClusters()
 bool Controller::preHist(vector<string> args)
 {
     /* Process input-data to gain cluster or cloud. */
+    writeLog("Begin preHist");
+    int first_arg = stod(args[1]);
     if (args[0] == "clu") {
-        if (stod(args[1]) >= field.numFClusters()) {
+        if (args.size() < 3) {throw -1;}
+        if (first_arg >= field.numFClusters()) {
+            writeLog("\t Wrong FCluster.");
+            cout << "No FCluster, no histogram." << endl;
+            return false;
+        }
+        FindClusters& cur_fc = (field.getFCluster(first_arg));
+        if (stod(args[2]) >= cur_fc.numClusters()) {
             writeLog("\t Wrong cluster.");
-            cout << "Wrong id of cluster, no histogram." << endl;
+            cout << "No cluster, no histogram." << endl;
             return false;
         }
-        return true;
+        return saveHist(cur_fc[stod(args[2])]);
     } else {
-        if (stod(args[1]) >= field.numClouds()) {
+        if (first_arg >= field.numClouds()) {
             writeLog("\t Wrong cloud.");
-            cout << "Wrong id of cloud, no histogram." << endl;
+            cout << "No cloud, no histogram." << endl;
             return false;
         }
-        return saveHist(field[stod(args[1])]);
+        return saveHist(field[first_arg]);
     }
 }
 
@@ -147,7 +155,13 @@ bool Controller::saveHist(Cluster cluster)
     double max_x, min_x, max_y, min_y;
     double step_x, step_y;
     if (field.numPoints() == 0) {
+        cout << "No points." << endl;
         writeLog("\t No points.");
+        return false;
+    }
+    else if (cluster.numPoints() == 1) {
+        cout << "Only one point." << endl;
+        writeLog("\t Only one point.");
         return false;
     }
 
@@ -199,13 +213,75 @@ bool Controller::saveHist()
     for (int i = 0; i < field.numPoints(); i++) {
         field_cluster += i;
     }
+    writeLog("\tEnd");
 
     return saveHist(field_cluster);
 }
 
+// Create histogram on edges of the tree.
+bool Controller::streeHist() {
+    writeLog("Begin streeHist");
+    if (field.p_tree == NULL) {
+        cout << "No tree yet" << endl;
+        writeLog("\tEnd streeHist(no tree)");
+        return false;
+    }
+    vector<double> all_dist = field.p_tree->allDist();
+    double min_d = INF, max_d = 0;
+    for (double dist : all_dist) {
+        if (dist > max_d) {max_d = dist;}
+        if (dist < min_d) {min_d = dist;}
+    }
+    double step = (max_d - min_d) / N;
+
+    vector<double> freq(N);
+    for (double dist : all_dist) {
+        freq[int(dist - min_d) / step]++;
+    }
+
+    ofstream hist;
+    hist.open("data/tree_hist.plt");
+    for (int k = 0; k < N; ++k) {
+        hist << k * step + min_d << "\t" << freq[k] << endl;
+    }
+    writeLog("\tEnd streeHist");
+    cout << "Done!" << endl;
+    return true;
+}
+
+// Find good delta for wave algorithm.
+bool Controller::findR() {
+    writeLog("Begin findR");
+    if (field.p_tree == NULL) {
+        cout << "No tree yet" << endl;
+        writeLog("\tEnd findR(no tree)");
+        return false;
+    }
+    vector<double> all_dist = field.p_tree->allDist();
+
+    double aver_dist = 0, max_dist;
+    for (double edge : all_dist) {
+        aver_dist += edge;
+        if (max_dist < edge) { max_dist = edge; }
+    }
+    aver_dist /= all_dist.size();
+
+    double delta = max_dist;
+    for (double edge : all_dist) {
+        if ((edge > 5 * aver_dist) & (edge < delta)) { 
+            delta = edge;
+        }
+    }
+
+    writeLog("\tEnd findR");
+    cout << "Result delta = " << delta / 2 << endl;
+    cout << "Done!" << endl;
+    return true;
+}
+
+// Save field to the file for command SAVE.
 bool Controller::printField(bool clouds = true, int i = 0)
 {
-    /* Save field to the file for command SAVE. */
     string what = (clouds) ? "(clouds)" : "(clusters)";
     writeLog("Begin printField " + what);
     string file_name = (clouds) ? "output.plt" : "clusters.plt";
@@ -237,9 +313,9 @@ bool Controller::printField(bool clouds = true, int i = 0)
     return true;
 }
 
+// Generate cloud for the command GEN_CLOUD.
 bool Controller::genCloud(double mX, double mY, double sX, double sY)
 {
-    /* Generate cloud for the command GEN_CLOUD. */
     writeLog("Begin genCloud");
     if (field.createCloud(mX, mY, sX, sY)) {
         cout << "DONE!" << endl;
@@ -253,9 +329,9 @@ bool Controller::genCloud(double mX, double mY, double sX, double sY)
     return true;
 }
 
+// Create new cluster selection by wave algorithm. 
 bool Controller::waveClusters(int i)
 {
-    /* Create new cluster selection by wave algorithm. */
     writeLog("Begin waveClusters");
     if (field.numBinMatrix() <= i) { return false; }
     if (not field.ifReadonly()) {field.enterAnalysis();}
@@ -266,12 +342,21 @@ bool Controller::waveClusters(int i)
     return true;
 }
 
+// Print to the file all points and edges by binary matrix.
 bool Controller::displayGraph(int i) {
     writeLog("Begin displayPoints");
-    /* Print to the file all points and edges by binary matrix. */
     if (field.numBinMatrix() <= i) { return false; }
     field.drawBinGraph(i);
     cout << "Done! Saved!" << endl;
+    return true;
+}
+
+// Create minimal spanning tree for field.
+bool Controller::minSpanTree() {
+    writeLog("Begin minSpanTree");
+    if (not field.ifReadonly()) { field.enterAnalysis(); }
+    field.minSpanTree();
+    cout << "Done!" << endl;
     return true;
 }
 
@@ -299,7 +384,7 @@ Interface::~Interface()
     writeLog("DELETE");
 }
 
-void Interface::runCommand(string command)
+bool Interface::runCommand(string command)
 {
     /* Get command from the user and compile it. */
     writeLog("GET COMMAND <" + command + ">");
@@ -356,7 +441,7 @@ void Interface::runCommand(string command)
         else if (com == "HIST") {
             if (args.size() == 0) {
                 result = ctrl.saveHist();
-            } else if (args.size() != 2) {throw - 1;}
+            } else if (args.size() == 1) {throw - 1;}
             else {result = ctrl.preHist(args);}
         }
 
@@ -367,13 +452,20 @@ void Interface::runCommand(string command)
 
         else if (com == "EXIT") {
             cout << "Okay..." << endl;
-            return;
+            writeLog("\tCorrect <" + command + ">");
+            return false;
         } else if (com == "INFO") {
             result = ctrl.showInfoField();
         } else if (com == "INFOFC") {
             result = ctrl.showInfoFClusters();
         } else if ((com == "MATRIX") | (com == "ANALYSIS")) {
             result = ctrl.enterAnalysis();
+        } else if (com == "STREE") {
+            result = ctrl.minSpanTree();
+        } else if (com == "STRHIST") {
+            result = ctrl.streeHist();
+        } else if (com == "FINDR") {
+            result = ctrl.findR();
         }
 
         else {
@@ -381,13 +473,26 @@ void Interface::runCommand(string command)
                 << "Would you like to get some HELP?" << endl;
         }
     }
+    catch (int i) {
+        result = false;
+        if (i == -1) {
+            cout << "Wrong command."
+                 << "nWould you like to get some HELP?" << endl;
+        } else if (i == -2) {
+            cout << "Exit." << endl;
+            writeLog("\tIncorrect <" + command + ">");
+            return false;
+        }
+        else {
+            throw;
+        }
+    }
     catch (...) {
         result = false;
-        cout << "Somethig wrong, sorry.\nWould you like to get some HELP?" << endl;
+        cout << "Somethig wrong, sorry."
+             << "Would you like to get some HELP?" << endl;
     }
-    if (result) {
-        writeLog("\tCorrect <" + command + ">");
-    } else {
-        writeLog("\tIncorrect <" + command + ">");
-    }
+    if (result) { writeLog("\tCorrect <" + command + ">"); } 
+    else { writeLog("\tIncorrect <" + command + ">"); }
+    return true;
 }

@@ -18,7 +18,10 @@ public:
    bool printField(bool clouds, int i);
    bool saveHist();
    bool saveHist(Cluster cluster);
+   bool streeHist();
+   bool findR();
    bool enterAnalysis();
+   bool minSpanTree();
    bool createIncMatrix(double delta);
    bool createDBMatrix(double delta, int k);
    bool preHist(vector<string> args);
@@ -42,7 +45,7 @@ class Interface
 public:
    explicit Interface(int idd = 0);
    ~Interface();
-   void runCommand(string command);
+   bool runCommand(string command);
    void writeLog(const string &command);
 
 private:
