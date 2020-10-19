@@ -1,13 +1,21 @@
 <!-- markdownlint-disable-file MD001 -->
 # Some Data Analysis, Chaplygina Svetlana, group 211
 
+# [Github](https://github.com/Rinroli/something_inspiring)
+
 ## MSU MechMath, fall 2020
 
 List of commands can be found in [help.txt](../help.txt).
 
 ## Changelog
 
-### **Version 1.4.3 (18.10.2020)** - CURRENT VERSION
+### **Version 1.4.4 (19.10.2020)** - CURRENT VERSION
+
+Changed:
+
+* Сhanged the implementation of the algorithm k-means - now it works through scalar products.
+
+### **Version 1.4.3 (18.10.2020)**
 
 Added:
 

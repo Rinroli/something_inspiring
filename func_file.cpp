@@ -74,6 +74,16 @@ Cluster::Cluster(int cur_id_cloud, ofstream& logs_field, Field* field)
     writeLog("INIT >> id(" + to_string(id) + ")");
 }
 
+Cluster::Cluster(int idd, const vector<int> &points, ofstream& logs_field, Field* field)
+    : logs_a{ logs_field }, id_points(points)
+{
+    p_field_points = &(field->points);
+    p_field = field;
+    id = idd;
+
+    writeLog("INIT >> id(" + to_string(id) + ")");
+}
+
 Cluster::~Cluster()
 {
     id_points.clear();
@@ -314,41 +324,35 @@ void Field::print(int i, ofstream& out_f)
     writeLog("SAVE (clusters, FD #" + to_string(cur_fd.id) + ")");
 }
 
-FindClusters& Field::getFCluster(int i)
-{
-    /* Getter for cluster by index. */
+// Getter for cluster by index.
+FindClusters& Field::getFCluster(int i) {
     return fclusters[i];
 }
 
-int Field::nextCloud()
-{
-    /* Return next unused cloud id. */
+// Return next unused cloud id.
+int Field::nextCloud() {
     cur_id_cloud++;
     return cur_id_cloud;
 }
 
-int Field::nextPoint()
-{
-    /* Return next unused point id. */
+// Return next unused point id.
+int Field::nextPoint() {
     cur_id_points++;
     return cur_id_points;
 }
 
-int Field::numClouds()
-{
-    /* Return number of clouds. */
+// Return number of clouds.
+int Field::numClouds() {
     return cur_id_cloud + 1;
 }
 
-int Field::numPoints()
-{
-    /* Return number of points. */
+// Return number of points.
+int Field::numPoints() {
     return cur_id_points + 1;
 }
 
-int Field::numFClusters()
-{
-    /* Return number of clusters. */
+// Return number of clusters.
+int Field::numFClusters() {
     return fclusters.size();
 }
 
@@ -362,15 +366,13 @@ double Field::getDist(Point point1, int ind2) {
     return matrix[point1.id][ind2];
 }
 
-Cloud& Field::operator[](int i)
-{
-    /* Provide access to clouds by index. */
+// Provide access to clouds by index.
+Cloud& Field::operator[](int i) {
     return clouds[i];
 }
 
-bool Field::ifReadonly()
-{
-    /* Say if modee is readonly. */
+// Say if modee is readonly.
+bool Field::ifReadonly() {
     return readonly;
 }
 
@@ -397,15 +399,13 @@ bool Field::enterAnalysis()
     return true;
 } 
 
-void Field::setAPoint(int i, int value)
-{
-    /* Set value of the mark. */
+// Set value of the mark.
+void Field::setAPoint(int i, int value) {
     points[i].a = value;
 }
 
-void Field::updateD()
-{
-    /* Update distance matrix if field was changed. */
+// Update distance matrix if field was changed.
+void Field::updateD() {
     double dist;
     matrix.resize(cur_id_points + 1);
     for (int i = 0; i < cur_id_points + 1; ++i) {
@@ -422,31 +422,27 @@ void Field::updateD()
     writeLog("MATRIX UPDATED");
 }
 
-void Field::addFC(FindClusters new_fc)
-{
-    /* Add new FindClusters to the vector with them. */
+// Add new FindClusters to the vector with them.
+void Field::addFC(FindClusters new_fc) {
     new_fc.setID(fclusters.size());
     fclusters.push_back(new_fc);
     writeLog("ADD FIND_CLUSTERS - Source " + new_fc.source);
 }
 
+// Get binary matrix by index.
+// >> -1 is the last one.
 BinMatrix& Field::getBinMatrix(int i) {
-    /* Get binary matrix by index.
-
-    -1 is the last one.
-    */
     if (i == -1) { return bin_matrixes[bin_matrixes.size() - 1]; }
     return bin_matrixes[i];
 }
 
+// Return number of binary matrixes.
 int Field::numBinMatrix() {
-    /* Return number of binary matrixes. */
     return bin_matrixes.size();
 }
 
-void Field::binMatrix(double delta)
-{
-    /* Create matrix (graph) with info about incident points. */
+// Create matrix (graph) with info about incident points.
+void Field::binMatrix(double delta) {
     writeLog("Begin creating binary matrix (" + to_string(delta) + ")");
     BinMatrix matrix_inc(numPoints(), delta);
     for (int ind_poi = 0; ind_poi < numPoints(); ++ind_poi) {
@@ -466,8 +462,8 @@ void Field::binMatrix(double delta)
     writeLog("\tCREATE binary matrix");
 }
 
+// Create matrix (graph) with info about incident points and neighbors.
 void Field::binDBMatrix(double delta, int k) {
-    /* Create matrix (graph) with info about incident points and neighbors. */
     writeLog("Begin creating binary db matrix (" + to_string(delta) + ", " + to_string(k) + ")");
     BinMatrix matrix_inc(numPoints(), delta, k);
     for (int ind_poi = 0; ind_poi < numPoints(); ++ind_poi) {

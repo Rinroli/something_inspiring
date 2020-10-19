@@ -54,18 +54,16 @@ bool Controller::showHelp()
     return true;
 }
 
-bool Controller::enterAnalysis()
-{
-    /* Enter readonly 'Analysis' mode. */
+// Enter readonly 'Analysis' mode.
+bool Controller::enterAnalysis() {
     writeLog("Begin enterAnalysis");
     bool result = field.enterAnalysis();
     writeLog("\t End enterAnalysis, result=" + to_string(result));
     return result;
 }
 
-bool Controller::createIncMatrix(double delta)
-{
-    /* Create incedent matrix for k. */
+// Create incedent matrix for k.
+bool Controller::createIncMatrix(double delta) {
     writeLog("Begin createIncMatrix");
     if (not field.ifReadonly()) {field.enterAnalysis();}
     field.binMatrix(delta);
@@ -74,9 +72,8 @@ bool Controller::createIncMatrix(double delta)
     return true;
 }
 
-bool Controller::createDBMatrix(double delta, int k)
-{
-    /* Create binary matrix for delta and k. Change mode if neccessary. */
+// Create binary matrix for delta and k. Change mode if neccessary.
+bool Controller::createDBMatrix(double delta, int k) {
     writeLog("Begin createIncDBMatrix");
     if (not field.ifReadonly()) {field.enterAnalysis();}
     field.binDBMatrix(delta, k);
@@ -85,9 +82,8 @@ bool Controller::createDBMatrix(double delta, int k)
     return true;
 }
 
-bool Controller::showInfoField()
-{
-    /* Show info about field and clouds for command INFO. */
+// Show info about field and clouds for command INFO.
+bool Controller::showInfoField() {
     writeLog("Begin showInfoField");
     if (not field.ifReadonly()) {field.enterAnalysis();}
     cout << "Info about field:\n"
@@ -103,9 +99,8 @@ bool Controller::showInfoField()
     return true;
 }
 
-bool Controller::showInfoFClusters()
-{
-    /* Show info about FindClusters to the standart output. */
+// Show info about FindClusters to the standart output.
+bool Controller::showInfoFClusters() {
     writeLog("Begin showInfoFClusters");
     if (not field.ifReadonly()) {field.enterAnalysis();}
     cout << "Info about FindClusters:" << endl;
@@ -117,9 +112,8 @@ bool Controller::showInfoFClusters()
     return true;
 }
 
-bool Controller::preHist(vector<string> args)
-{
-    /* Process input-data to gain cluster or cloud. */
+// Process input-data to gain cluster or cloud.
+bool Controller::preHist(vector<string> args) {
     writeLog("Begin preHist");
     int first_arg = stod(args[1]);
     if (args[0] == "clu") {
@@ -146,9 +140,8 @@ bool Controller::preHist(vector<string> args)
     }
 }
 
-bool Controller::saveHist(Cluster cluster)
-{
-    /* Generate and save histogram of points from cluster. */
+// Generate and save histogram of points from cluster.
+bool Controller::saveHist(Cluster cluster) {
     writeLog("Begin saveHist (cluster)");
     vector<int> fr_x(N), fr_y(N);
     double max_x, min_x, max_y, min_y;
@@ -384,12 +377,6 @@ Interface::Interface(int idd)
     writeLog("INIT");
 }
 
-void Interface::writeLog(const string &message)
-{
-    /* Write log-message with date-time note. */
-    logs << timeLog() << message << endl;
-}
-
 Interface::~Interface()
 {
     logs.close();
@@ -512,4 +499,9 @@ bool Interface::runCommand(string command)
     if (result) { writeLog("\tCorrect <" + command + ">"); } 
     else { writeLog("\tIncorrect <" + command + ">"); }
     return true;
+}
+
+// Write log-message with date-time note.
+void Interface::writeLog(const string& message) {
+    logs << timeLog() << message << endl;
 }

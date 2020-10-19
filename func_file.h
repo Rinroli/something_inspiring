@@ -55,6 +55,7 @@ class Cluster
 public:
     Cluster(int cur_id_cloud, ofstream &logs_field,
             Field *field);
+    Cluster(int id, const vector<int> &points, ofstream& logs_field, Field* field);
     ~Cluster();
     int numPoints();
     int id;
@@ -204,11 +205,12 @@ public:
     ~KMeans() {}
     FindClusters mainAlgorithm();
 private:
-    int n;
+    int n, size_field, step = 1;
     vector<vector<double>> centers;
     Field &field;
     ofstream& logs_a;
-    vector<Cluster> clusters;
+    // vector<Cluster> clusters;
+    vector<vector<int>> clusters;
     void pointDistribution();
     int nearestCenter(const Point &point);
     bool findNewCenters();

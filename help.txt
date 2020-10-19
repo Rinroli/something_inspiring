@@ -28,7 +28,7 @@ Commands:
 
     DBSCAN(number_b_matrix) >> find clusters using dbscan-algorithm on binary matrix (default the last one)
 
-    DIBINARY or DIB (index) >> print graph with point marks and edges of the binary matrix to the file. 
+    DIBINARY or DIB or DIDBSCAN or DID (index) >> print graph with point marks and edges of the binary matrix to the file. 
         Index is the number of binary matrix, default is the last one.
         Can be called by gnuplot as *gnuplot data/graph.plt*.
 

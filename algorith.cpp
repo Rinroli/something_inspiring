@@ -192,10 +192,11 @@ void Tree::writeLog(const string& message) {
 KMeans::KMeans(int nn, Field& fieldd, ofstream& logs_al)
     : n(nn), field(fieldd), logs_a(logs_al) {
     writeLog("INIT");
+    size_field = field.numPoints();
     for (int ind = 0; ind < n; ind++) {
-        int point_ind = rand() % n;
+        int point_ind = rand() % size_field;
         centers.push_back(field.points[point_ind].getCoord());
-        clusters.push_back(Cluster(ind, logs_a, &field));
+        clusters.push_back(vector<int>(size_field));
     }
 }
 
@@ -205,17 +206,25 @@ FindClusters KMeans::mainAlgorithm() {
     pointDistribution();
     while (findNewCenters()) {
         pointDistribution();
+        step++;
     }
     FindClusters result(logs_a, "KMeans algorithm");
     int ind = 0;
-    for (Cluster cluster : clusters) {
-        if (cluster.numPoints() != 0) {
-            cluster.id = ind++;
-            result += cluster;
+    for (vector<int> cluster : clusters) {
+        for (int a : cluster) {
+            if (a) {
+                vector<int> tmp_id_points;
+                for (int id_poi = 0; id_poi < size_field; id_poi++) {
+                    if (cluster[id_poi]) { tmp_id_points.push_back(id_poi); }
+                }
+                result += Cluster(ind, tmp_id_points, logs_a, &field);
+                ind++;
+                break;
+            }
         }
     }
-    writeLog("\tTurned out " + to_string(result.numClusters()) + " clusters");
-    cout << "Turned out " << to_string(result.numClusters()) << " clusters. ";
+    writeLog("\tTurned out " + to_string(result.numClusters()) + " clusters in " + to_string(step) + " steps");
+    cout << "Turned out " << to_string(result.numClusters()) << " clusters in " << step << " steps\n";
     return result;
 }
 
@@ -225,9 +234,19 @@ bool KMeans::findNewCenters() {
     writeLog("New step");
     bool result = false;
     for (int ind = 0; ind < centers.size(); ind++) {
-        vector<double> new_center = clusters[ind].findAverage();
-        if (distPoints(centers[ind], new_center) > EPS) { result = true; }
-        centers[ind] = new_center;
+        vector<double> tmp(2);
+        int num_points = 0;
+        for (int a_ind = 0; a_ind < size_field; a_ind++) {
+            vector<double> point = field.points[a_ind].getCoord();
+            int cur_mark = clusters[ind][a_ind];
+            tmp[0] += cur_mark * point[0];
+            tmp[1] += cur_mark * point[1];
+            num_points += cur_mark;
+        }
+        tmp[0] /= num_points;
+        tmp[1] /= num_points;
+        if (distPoints(centers[ind], tmp) > EPS) { result = true; }
+        centers[ind] = tmp;
     }
     return result;
 }
@@ -235,10 +254,12 @@ bool KMeans::findNewCenters() {
 // Find the nearest points to the centers.
 void KMeans::pointDistribution() {
     for (int ind = 0; ind < clusters.size(); ind++) {
-        clusters[ind].clear();
+        for (int ind_p = 0; ind_p < size_field; ind_p++) {
+            clusters[ind][ind_p] = 0;
+        }
     }
     for (Point point : field.points) {
-        clusters[nearestCenter(point)] += point.id;
+        clusters[nearestCenter(point)][point.id] = 1;
     }
 }
 
@@ -256,6 +277,7 @@ int KMeans::nearestCenter(const Point& point) {
     return nearest_center;
 }
 
+// Write log-message with date-time note.
 void KMeans::writeLog(const string& message) {
     logs_a << timeLog() << "KMEANS: " << message << endl;
 }
