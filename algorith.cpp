@@ -29,9 +29,8 @@ WaveClusters::~WaveClusters()
     writeLog("DELETE");
 }
 
-bool WaveClusters::stepWave()
-{
-    /* One step of "burning" points. */
+// One step of "burning" points.
+bool WaveClusters::stepWave() {
     cur_step++;
     for (int i = 0; i < step_points.size(); ++i) {
         checkNeighbors(step_points[i]);
@@ -46,9 +45,8 @@ bool WaveClusters::stepWave()
     return true;
 }
 
-void WaveClusters::checkNeighbors(int i)
-{
-    /* Check if neighbors can be marked. */
+// Check if neighbors can be marked.
+void WaveClusters::checkNeighbors(int i) {
     for (int ind_poi = 0; ind_poi < matrix_inc.size; ++ind_poi) {
         if (matrix_inc[i][ind_poi]) {
             if (not marks[ind_poi]) {
@@ -60,9 +58,8 @@ void WaveClusters::checkNeighbors(int i)
     }
 }
 
-bool WaveClusters::findNextBegin()
-{
-    /* Find begining of the next cluster. */
+// Find begining of the next cluster.
+bool WaveClusters::findNextBegin() {
     writeLog("Begin findNextBegin");
     for (int i = 0; i < marks.size(); ++i) {
         if (marks[i] == 0) {
@@ -131,15 +128,6 @@ void Tree::addVert(Point& new_point, double dist) {
     neighbors.push_back(new_vert);
 }
 
-// Print Tree as nested list.
-void Tree::print(int indent) {
-    string cur_indent(indent, '\t');
-    cout << cur_indent << point << endl;
-    for (Tree nei : neighbors) {
-        nei.print(indent + 1);
-    }
-}
-
 // Getter for number of neighboring vertexes.
 int Tree::numTrees() {
     return neighbors.size();
@@ -168,6 +156,15 @@ void Tree::displayTree(ofstream& out_f) {
         nei.point.print(out_f);
         out_f << endl << endl;
         nei.displayTree(out_f);
+    }
+}
+
+// Print Tree as nested list.
+void Tree::print(int indent) {
+    string cur_indent(indent, '\t');
+    cout << cur_indent << point << endl;
+    for (Tree nei : neighbors) {
+        nei.print(indent + 1);
     }
 }
 

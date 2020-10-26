@@ -15,6 +15,10 @@ public:
    bool showHelp();
    bool showInfoField();
    bool showInfoFClusters();
+   bool showBuffer();
+   bool addToBuffer(int ind);
+   bool putBuffer();
+   bool rotateBuffer(double alpha);
    bool printField(bool clouds, int i);
    bool saveHist();
    bool saveHist(Cluster cluster);

@@ -15,6 +15,7 @@ string timeLog();
 class Field;
 class Controller;
 class Tree;
+class Buffer;
 
 #ifndef POINT
 #define POINT
@@ -25,6 +26,11 @@ public:
     Point(double mX, double mY, double sX, double sY,
           int idd, ofstream &logs_field, int id_cloudd);
     void changeTo(Point point);
+    void setID(int id);
+    void setCoords(double x, double y);
+    double getX();
+    double getY();
+    void rotatePoint(double alpha);
     ~Point() {}
     vector<double> getCoord();
     void print(ofstream &out_f);
@@ -64,10 +70,11 @@ public:
     vector<double> getBox();
     vector<int> getCenter();
     void coutInfo();
-    Point operator[](int i);
+    Point& operator[](int i);
     void clear();
     vector<double> findAverage();
     friend Cluster &operator+=(Cluster &left, int i);
+    friend Buffer;
 
 protected:
     vector<int> id_points;
@@ -79,10 +86,34 @@ protected:
     vector<double> box{0, 0, 0, 0};
     void updateProp();
     vector<Point> *p_field_points;
-    Field *p_field;
+    Field *p_field = nullptr;
 };
 
 #endif // CLUSTER
+
+#if !defined(BUFFER)
+#define BUFFER
+
+class Buffer
+{
+public:
+    explicit Buffer(Field* field);
+    ~Buffer();
+    void coutInfo();
+    friend void operator+=(Buffer& left, Cluster& new_cl);
+    void putToField();
+    bool isEmpty();
+    void rotatePoints(double alpha);
+private:
+    void writeLog(const string& message);
+    void addCluster(Cluster& new_cl);
+    vector<Point> points;
+    ofstream& logs_f;
+    Field *p_field;
+    int id = 1;
+};
+
+#endif // BUFFER
 
 #ifndef CLOUD
 #define CLOUD
@@ -92,6 +123,8 @@ class Cloud : public Cluster
 public:
     Cloud(int cur_id_cloud, ofstream &logs_field,
           Field *field);
+    Cloud(int id, const vector<int>& points,
+            ofstream& logs_field, Field* field);
     ~Cloud();
 
 private:
@@ -209,7 +242,6 @@ private:
     vector<vector<double>> centers;
     Field &field;
     ofstream& logs_a;
-    // vector<Cluster> clusters;
     vector<vector<int>> clusters;
     void pointDistribution();
     int nearestCenter(const Point &point);
@@ -230,16 +262,22 @@ public:
     ~Field();
     bool createCloud(double mX, double mY,
                      double sX, double sY);
+    bool createCloud(vector<Point> points);
     void print(ofstream &out_f);
     void print(int i, ofstream& out_f);
+    void showBuffer();
     int numClouds();
     int numFClusters();
     int numPoints();
     double getDist(int ind1, int ind2);
     double getDist(Point point1, int ind2);
-    Cloud &operator[](int i);
-    FindClusters &getFCluster(int i);
-    BinMatrix &getBinMatrix(int i);
+    Cloud& operator[](int i);
+    FindClusters& getFCluster(int i);
+    BinMatrix& getBinMatrix(int i);
+    Point& getPoint(int i);
+    bool addToBuffer(int i);
+    bool putBuffer();
+    bool rotateBuffer(double alpha);
     int numBinMatrix();
     bool ifReadonly();
     bool enterAnalysis();
@@ -249,7 +287,6 @@ public:
     void setAPoint(int i, int value);
     void addFC(FindClusters new_fc);
     void drawBinGraph(int i);
-    int cur_id_points, cur_id_cloud;
     vector<Point> points;
     vector<vector<double>> matrix;
     ofstream logs, logs_a;
@@ -258,10 +295,9 @@ public:
 private:
     vector<FindClusters> fclusters;
     vector<Cloud> clouds;
+    Buffer buffer;
     void writeLog(const string &message);
     bool readonly;
-    int nextCloud();
-    int nextPoint();
     void updateD();
     vector<BinMatrix> bin_matrixes;
     Tree *p_tree = nullptr;

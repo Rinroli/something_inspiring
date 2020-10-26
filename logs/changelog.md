@@ -9,7 +9,13 @@ List of commands can be found in [help.txt](../help.txt).
 
 ## Changelog
 
-### **Version 1.4.4 (19.10.2020)** - CURRENT VERSION
+### **Version 1.5.0 (26.10.2020)** - CURRENT VERSION
+
+Added:
+
+* **Buffer!** Now you can add clouds to the buffer and then modify them. Commands are *ADDB*, *SHOWB*, *ROTB* and *PUTB* -- more info can be seen in [help.txt](../help.txt).
+
+### **Version 1.4.4 (19.10.2020)**
 
 Changed:
 

@@ -1,24 +1,24 @@
 Commands:
     HELP >> show help (this message)
 
-    INFO >> show information about field, clouds and clusters
+    INFO >> show information about field and clouds
 
-    EXIT >> exit program
+    INFOFC >> display info about FindClusters.
 
-    SAVE(index) >> save points to file for gnuplot (default).
+    SAVE(index) >> save all points to the file for gnuplot (default).
         Index is the number of FindCluster to print.
         Default value is the whole field.
         Files for call from gnuplot are 'clus_gnu.plt' for FindCluster
                                         'gnuplot.plt' for whole Field
 
-    GEN_CLOUD(mx=0, my=0, sx=1, sy=1) or GC >> create normally distributed cloud
+    GEN_CLOUD or GC(mx, my, sx, sy) >> create normally distributed cloud by average value and dispersion.
+        Default values are: mx = 0, my = 0,
+                            sx = 1, sy = 1
 
     HIST or HIST(clo, id_cl) or HIST(clu, id_fc, id_cl) >> output for the gnuplot (data/gnu_hist.plt) histogram of x and y coords of points.
         By default use all points on the field. Can be called for cluster or cloud - by id (can be checked by command *INFO*)
 
-    MATRIX or ANALYSIS >> set readonly 'Analysis' mod and create distance matrix.
-
-    INFOFC >> display info about cluster bundles.
+    MATRIX or ANALYSIS >> set readonly 'Analysis' mode and create distance matrix.
 
     BINARY >> create binary matrix by delta (default = 0.1).
 
@@ -42,3 +42,13 @@ Commands:
 
     KMEANS (number_of_clusters) >> make clustering using k-means algorithm.
         number_of_clusters is initial number of clusters, default 25.
+
+    ADDB (index_of_the_cloud) >> add (copy) cloud to the buffer by index. Default index is the last one.
+
+    SHOWB >> print points from the buffer.
+
+    ROTB (angle) >> rotate points relative to the center by an angle. No default angle.
+
+    PUTB >> copy points from the buffer to the field.
+
+    EXIT >> exit program

@@ -58,7 +58,7 @@ bool Controller::showHelp()
 bool Controller::enterAnalysis() {
     writeLog("Begin enterAnalysis");
     bool result = field.enterAnalysis();
-    writeLog("\t End enterAnalysis, result=" + to_string(result));
+    writeLog("\tEnd enterAnalysis, result=" + to_string(result));
     return result;
 }
 
@@ -67,8 +67,8 @@ bool Controller::createIncMatrix(double delta) {
     writeLog("Begin createIncMatrix");
     if (not field.ifReadonly()) {field.enterAnalysis();}
     field.binMatrix(delta);
-    cout << "Done!" << endl;
-    writeLog("End createIncMatrix");
+    cout << "DONE!" << endl;
+    writeLog("\tEnd createIncMatrix");
     return true;
 }
 
@@ -77,8 +77,8 @@ bool Controller::createDBMatrix(double delta, int k) {
     writeLog("Begin createIncDBMatrix");
     if (not field.ifReadonly()) {field.enterAnalysis();}
     field.binDBMatrix(delta, k);
-    cout << "Done!" << endl;
-    writeLog("End createIncDBMatrix");
+    cout << "DONE!" << endl;
+    writeLog("\tEnd createIncDBMatrix");
     return true;
 }
 
@@ -109,6 +109,56 @@ bool Controller::showInfoFClusters() {
     }
 
     writeLog("\tEnd showInfoFClusters");
+    return true;
+}
+
+// Show info about buffer.
+bool Controller::showBuffer() {
+    writeLog("Begin showBuffer");
+    field.showBuffer();
+    writeLog("\tEnd showBuffer");
+    return true;
+}
+
+// Add cloud to the buffer (if not Analysis)
+bool Controller::addToBuffer(int ind) {
+    writeLog("Begin addBuffer");
+    if (field.ifReadonly()) {
+        cout << "Analysis mode. I can't." << endl;
+        writeLog("\tEnd addBuffer (bad)");
+        return false;
+    }
+    bool result = field.addToBuffer(ind);
+    cout << "DONE!" << endl;
+    writeLog("\tEnd addBuffer (success)");
+    return result;
+}
+
+// Copy buffer to the field.
+bool Controller::putBuffer() {
+    writeLog("Begin putBuffer");
+    if (field.ifReadonly()) {
+        cout << "Analysis mode. I can't." << endl;
+        writeLog("\tEnd addBuffer (bad)");
+        return false;
+    }
+    bool result = field.putBuffer();
+    cout << "DONE!" << endl;
+    writeLog("\tEnd addBuffer (success)");
+    return result;
+}
+
+// Rotate buffer on alpha angle.
+bool Controller::rotateBuffer(double alpha) {
+    writeLog("Begin rotateBuffer");
+    if (field.ifReadonly()) {
+        cout << "Analysis mode. I can't." << endl;
+        writeLog("\tEnd rotateBuffer (bad)");
+        return false;
+    }
+    field.rotateBuffer(alpha);
+    cout << "DONE!" << endl;
+    writeLog("\tEnd rotateBuffer (success)");
     return true;
 }
 
@@ -192,7 +242,7 @@ bool Controller::saveHist(Cluster cluster) {
         hist << n * step_y + min_y << "\t" << fr_y[n] << endl;
     }
     hist.close();
-    cout << "Done!" << endl;
+    cout << "DONE!" << endl;
     writeLog("\tEnd saveHist");
     return true;
 }
@@ -240,7 +290,7 @@ bool Controller::streeHist() {
         hist << k * step << "\t" << freq[k] << endl;
     }
     writeLog("\tEnd streeHist");
-    cout << "Done!" << endl;
+    cout << "DONE!" << endl;
     return true;
 }
 
@@ -270,7 +320,7 @@ bool Controller::findR() {
 
     writeLog("\tEnd findR");
     cout << "Result delta = " << delta / 2 << endl;
-    cout << "Done!" << endl;
+    cout << "DONE!" << endl;
     return true;
 }
 
@@ -343,7 +393,7 @@ bool Controller::kMeans(int n) {
     KMeans new_k_means(n, field, field.logs_a);
     field.addFC(new_k_means.mainAlgorithm());
     writeLog("\tEnd kMeans");
-    cout << "Done!" << endl;
+    cout << "DONE!" << endl;
     return true;
 }
 
@@ -352,7 +402,7 @@ bool Controller::displayGraph(int i) {
     writeLog("Begin displayPoints");
     if (field.numBinMatrix() <= i) { return false; }
     field.drawBinGraph(i);
-    cout << "Done! Saved!" << endl;
+    cout << "DONE! Saved!" << endl;
     return true;
 }
 
@@ -361,7 +411,7 @@ bool Controller::minSpanTree() {
     writeLog("Begin minSpanTree");
     if (not field.ifReadonly()) { field.enterAnalysis(); }
     field.minSpanTree();
-    cout << "Done!" << endl;
+    cout << "DONE!" << endl;
     return true;
 }
 
@@ -454,6 +504,16 @@ bool Interface::runCommand(string command)
             else { result = ctrl.printField(false, stod(args[0])); }
         }
 
+        else if (com == "ADDB") {
+            if (args.size() == 0) { result = ctrl.addToBuffer(-1); }
+            else { result = ctrl.addToBuffer(stod(args[0])); }
+        }
+
+        else if (com == "ROTB") {
+            if (args.size() < 1) {throw -1;}
+            result = ctrl.rotateBuffer(stod(args[0]));
+        }
+
         else if (com == "EXIT") {
             cout << "Okay..." << endl;
             writeLog("\tCorrect <" + command + ">");
@@ -470,6 +530,10 @@ bool Interface::runCommand(string command)
             result = ctrl.streeHist();
         } else if (com == "FINDR") {
             result = ctrl.findR();
+        } else if (com == "SHOWB") {
+            result = ctrl.showBuffer();
+        } else if (com == "PUTB") {
+            result = ctrl.putBuffer();
         }
 
         else {

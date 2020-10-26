@@ -41,10 +41,35 @@ void Point::changeTo(Point point) {
     mark = point.mark;
 }
 
+// Set new id.
+void Point::setID(int idd) {
+    id = idd;
+}
+
+// Set new coords.
+void Point::setCoords(double new_x, double new_y) {
+    x = new_x; y = new_y;
+}
+
 // Return coords of the point.
 vector<double> Point::getCoord() {
     vector<double> coords = { x, y };
     return coords;
+}
+
+// Return X-coord of the point.
+double Point::getX() {
+    return x;
+}
+
+// Return Y-coord of the point.
+double Point::getY() {
+    return y;
+}
+
+void Point::rotatePoint(double alpha) {
+    x = x * cos(alpha) - y * sin(alpha);
+    y = x * sin(alpha) + y * cos(alpha);
 }
 
 // Save coords of the point to the file.
@@ -172,7 +197,7 @@ vector<int> Cluster::getCenter() {
 }
 
 // Getter for point by its index.
-Point Cluster::operator[](int i) {
+Point& Cluster::operator[](int i) {
     return (*p_field_points)[id_points[i]];
 }
 
@@ -207,6 +232,67 @@ void Cluster::writeLog(const string &message) {
     logs_a << timeLog() << "CLUSTER(id:" << id << "): " << message << endl;
 }
 
+///// BUFER /////
+
+Buffer::Buffer(Field* p_fieldd)
+: logs_f(p_fieldd->logs), p_field(p_fieldd)
+{
+    writeLog("INIT");
+}
+
+Buffer::~Buffer()
+{
+    points.clear();
+    writeLog("DELETE");
+}
+
+// Addition of id points from cluster to buffer.
+void Buffer::addCluster(Cluster& new_cluster) {
+    for (int id_in_cl = 0; id_in_cl < new_cluster.id_points.size(); id_in_cl++) {
+        Point new_point(new_cluster[id_in_cl]);
+        new_point.setID(p_field->numPoints() + new_point.id);
+        points.push_back(new_point);
+    }
+    writeLog("ADD_POINTS_FROM_CLOUD #" + to_string(new_cluster.id));
+}
+
+// Simple addition of new cluster to buffer.
+void operator+=(Buffer& left, Cluster& new_cluster) {
+    left.addCluster(new_cluster);
+}
+
+// Rotate points relative to the center by an alpha angle
+void Buffer::rotatePoints(double alpha) {
+    for (int ind_point = 0; ind_point < points.size(); ind_point++) {
+        points[ind_point].rotatePoint(alpha);
+    }
+}
+
+// Check if buffer is empty.
+bool Buffer::isEmpty() {
+    if (points.size() == 0) { return true; }
+    return false;
+}
+
+// Print some info about buffer to standart output.
+void Buffer::coutInfo() {
+    cout << "Buffer:" << endl;
+    for (Point point : points) {
+        cout << "\t" << point << endl;
+    }
+}
+
+// Copy all points from buffer to field as one cloud.
+void Buffer::putToField() {
+    p_field->createCloud(points);
+    writeLog("PUT_TO_FIELD");
+}
+
+// Write log-message with date-time note.
+void Buffer::writeLog(const string& message) {
+    logs_f << timeLog() << "BUFFER: " << message << endl;
+}
+
 ///// CLOUD /////
 
 Cloud::Cloud(int cur_id_cloud, ofstream& logs_field, Field* field)
@@ -215,6 +301,17 @@ Cloud::Cloud(int cur_id_cloud, ofstream& logs_field, Field* field)
     p_field_points = &(field->points);
     p_field = field;
     id = cur_id_cloud;
+
+    writeLog("INIT >> id(" + to_string(id) + ")");
+}
+
+Cloud::Cloud(int idd, const vector<int>& points, ofstream& logs_field, Field* field)
+    : Cluster(idd, points, logs_field, field)
+{
+    p_field_points = &(field->points);
+    p_field = field;
+    id = idd;
+
     writeLog("INIT >> id(" + to_string(id) + ")");
 }
 
@@ -229,7 +326,7 @@ void Cloud::writeLog(const string &message) {
     logs_a << timeLog() << "CLOUD(id:" << id << "): " << message << endl;
 }
 
-///// BIN_MATRIXes /////
+///// BIN_MATRIX /////
 
 BinMatrix::BinMatrix(int sizee, double deltaa, int kk) {
     delta = deltaa;
@@ -253,15 +350,12 @@ vector<bool>& BinMatrix::operator[](int i) {
 ///// FIELD /////
 
 Field::Field()
-{
-    cur_id_points = -1;
-    cur_id_cloud = -1;
+: buffer{this} {
     readonly = false;
 
     logs.open("logs/logs_field.txt", ios_base::app);
     logs << endl
         << "New session" << timeLog() << endl;
-
     writeLog("INIT_FIELD");
 }
 
@@ -278,11 +372,27 @@ Field::~Field()
 // Create new normally distributed cloud of points.
 bool Field::createCloud(double mX, double mY,
     double sX, double sY) {
-    writeLog("CREATE CLOUD");
-    Cloud new_cloud(nextCloud(), logs, this);
+    writeLog("CREATE CLOUD (normally distributed)");
     if (!readonly) {
+        Cloud new_cloud(numClouds(), logs, this);
         for (int tmp = 0; tmp < N; tmp++) {
-            Point point(mX, mY, sX, sY, nextPoint(), logs, new_cloud.id);
+            Point point(mX, mY, sX, sY, numPoints(), logs, new_cloud.id);
+            points.push_back(point);
+            new_cloud += point.id;
+        }
+        clouds.push_back(new_cloud);
+        return true;
+    }
+    writeLog("Access denied");
+    return false;
+}
+
+// Create new normally distributed cloud of points.
+bool Field::createCloud(vector<Point> new_points) {
+    writeLog("CREATE CLOUD (from buffer)");
+    if (!readonly) {
+        Cloud new_cloud(numClouds(), logs, this);
+        for (Point point : new_points) {
             points.push_back(point);
             new_cloud += point.id;
         }
@@ -308,6 +418,46 @@ void Field::print(ofstream& out_f)
     writeLog("SAVE (clouds)");
 }
 
+// Show info about buffer.
+void Field::showBuffer() {
+    if (buffer.isEmpty()) {
+        cout << "Empty buffer!" << endl;
+    }
+    buffer.coutInfo();
+    writeLog("SHOWBUFFER");
+}
+
+// Add cloud to the buffer.
+bool Field::addToBuffer(int ind_cl) {
+    if (numClouds() == 0) {
+        cout << "No clouds." << endl;
+        return false;
+    }
+    if (ind_cl == -1) { buffer += clouds[numClouds() - 1]; }
+    else { buffer += clouds[ind_cl]; }
+    return true;
+}
+
+// Copy buffer to the field.
+bool Field::putBuffer() {
+    if (buffer.isEmpty()) {
+        cout << "Empty buffer!" << endl;
+        return false;
+    }
+    buffer.putToField();
+    return true;
+}
+
+// Rotate buffer.
+bool Field::rotateBuffer(double alpha) {
+    if (buffer.isEmpty()) {
+        cout << "Empty buffer!" << endl;
+        return false;
+    }
+    buffer.rotatePoints(alpha);
+    return true;
+}
+
 // Save clusters to the file.
 void Field::print(int i, ofstream& out_f)
 {
@@ -329,26 +479,14 @@ FindClusters& Field::getFCluster(int i) {
     return fclusters[i];
 }
 
-// Return next unused cloud id.
-int Field::nextCloud() {
-    cur_id_cloud++;
-    return cur_id_cloud;
-}
-
-// Return next unused point id.
-int Field::nextPoint() {
-    cur_id_points++;
-    return cur_id_points;
-}
-
 // Return number of clouds.
 int Field::numClouds() {
-    return cur_id_cloud + 1;
+    return clouds.size();
 }
 
 // Return number of points.
 int Field::numPoints() {
-    return cur_id_points + 1;
+    return points.size();
 }
 
 // Return number of clusters.
@@ -368,6 +506,7 @@ double Field::getDist(Point point1, int ind2) {
 
 // Provide access to clouds by index.
 Cloud& Field::operator[](int i) {
+    if (i == -1) { return clouds[numClouds() - 1]; }
     return clouds[i];
 }
 
@@ -407,13 +546,13 @@ void Field::setAPoint(int i, int value) {
 // Update distance matrix if field was changed.
 void Field::updateD() {
     double dist;
-    matrix.resize(cur_id_points + 1);
-    for (int i = 0; i < cur_id_points + 1; ++i) {
-        matrix[i].resize(cur_id_points + 1);
+    matrix.resize(numPoints());
+    for (int i = 0; i < numPoints(); ++i) {
+        matrix[i].resize(numPoints());
     }
 
-    for (int first = 0; first < cur_id_points + 1; ++first) {
-        for (int second = first; second < cur_id_points + 1; ++second) {
+    for (int first = 0; first < numPoints(); ++first) {
+        for (int second = first; second < numPoints(); ++second) {
             dist = distPoints(points[first], points[second]);
             matrix[first][second] = dist;
             matrix[second][first] = dist;
@@ -434,6 +573,11 @@ void Field::addFC(FindClusters new_fc) {
 BinMatrix& Field::getBinMatrix(int i) {
     if (i == -1) { return bin_matrixes[bin_matrixes.size() - 1]; }
     return bin_matrixes[i];
+}
+
+// Getter for points by index.
+Point& Field::getPoint(int i) {
+    return points[i];
 }
 
 // Return number of binary matrixes.
@@ -518,8 +662,8 @@ void Field::drawBinGraph(int i) {
             continue;
         }
         for (int nei_p = 0; nei_p < numPoints(); nei_p++) {
-            if (((points[poi].mark == "peripheral") |(poi < nei_p)) &
-                (matrix_inc[poi][nei_p]) & (points[nei_p].mark == "base")) {
+            if (((points[poi].mark == "peripheral") | (poi < nei_p)) &
+                    (matrix_inc[poi][nei_p]) & (points[nei_p].mark == "base")) {
                 points[poi].print(graph_edges);
                 points[nei_p].print(graph_edges);
                 graph_edges << endl << endl;
