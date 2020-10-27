@@ -31,6 +31,8 @@ public:
     double getX();
     double getY();
     void rotatePoint(double alpha);
+    void movePoint(double x, double y);
+    void zoomPoint(double k);
     ~Point() {}
     vector<double> getCoord();
     void print(ofstream &out_f);
@@ -103,9 +105,13 @@ public:
     friend void operator+=(Buffer& left, Cluster& new_cl);
     void putToField();
     bool isEmpty();
-    void rotatePoints(double alpha);
+    friend Field;
 private:
     void writeLog(const string& message);
+    void rotatePoints(double alpha);
+    void movePoints(double x, double y);
+    void zoomPoints(double k);
+    void deletePoints();
     void addCluster(Cluster& new_cl);
     vector<Point> points;
     ofstream& logs_f;
@@ -277,7 +283,10 @@ public:
     Point& getPoint(int i);
     bool addToBuffer(int i);
     bool putBuffer();
+    bool emptyBuffer();
     bool rotateBuffer(double alpha);
+    bool moveBuffer(double x, double y);
+    bool zoomBuffer(double k);
     int numBinMatrix();
     bool ifReadonly();
     bool enterAnalysis();

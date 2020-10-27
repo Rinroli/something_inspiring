@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 #include <time.h>
-#include <math.h>
+#include <cmath>
 #include <iostream>
 // #include <string>
 #include <fstream>
@@ -15,6 +15,7 @@ using namespace std;
 
 #define N 75
 #define INF 100000007
+#define PI 3.14159265
 
 class Tree;
 
@@ -67,9 +68,24 @@ double Point::getY() {
     return y;
 }
 
+// Rotate point relative to the center on alpha angle in grad.
 void Point::rotatePoint(double alpha) {
-    x = x * cos(alpha) - y * sin(alpha);
-    y = x * sin(alpha) + y * cos(alpha);
+    alpha = alpha * PI / 180;
+    double new_x = x * cos(alpha) - y * sin(alpha);
+    double new_y = x * sin(alpha) + y * cos(alpha);
+    x = new_x; y = new_y;
+}
+
+// Move point on vector (new_x, new_y).
+void Point::movePoint(double new_x, double new_y) {
+    x += new_x;
+    y += new_y;
+}
+
+// Zoom in or zoom out k times (relative to the center) point
+void Point::zoomPoint(double k) {
+    x *= k;
+    y *= k;
 }
 
 // Save coords of the point to the file.
@@ -250,7 +266,7 @@ Buffer::~Buffer()
 void Buffer::addCluster(Cluster& new_cluster) {
     for (int id_in_cl = 0; id_in_cl < new_cluster.id_points.size(); id_in_cl++) {
         Point new_point(new_cluster[id_in_cl]);
-        new_point.setID(p_field->numPoints() + new_point.id);
+        new_point.setID(id_in_cl);
         points.push_back(new_point);
     }
     writeLog("ADD_POINTS_FROM_CLOUD #" + to_string(new_cluster.id));
@@ -266,6 +282,28 @@ void Buffer::rotatePoints(double alpha) {
     for (int ind_point = 0; ind_point < points.size(); ind_point++) {
         points[ind_point].rotatePoint(alpha);
     }
+    writeLog("ROTATE (" + to_string(alpha) + ")");
+}
+
+// Move points of the buffer.
+void Buffer::movePoints(double x, double y) {
+    for (int ind_point = 0; ind_point < points.size(); ind_point++) {
+        points[ind_point].movePoint(x, y);
+    }
+    writeLog("MOVE (" + to_string(x) + ", " + to_string(y) + ")");
+}
+
+// Zoom in or zoom out k times (relative to the center) points from the buffer.
+void Buffer::zoomPoints(double k) {
+    for (int ind_point = 0; ind_point < points.size(); ind_point++) {
+        points[ind_point].zoomPoint(k);
+    }
+    writeLog("ZOOM (" + to_string(k) + ")");
+}
+
+// Delete all points from the buffer.
+void Buffer::deletePoints() {
+    points.clear();
 }
 
 // Check if buffer is empty.
@@ -393,6 +431,7 @@ bool Field::createCloud(vector<Point> new_points) {
     if (!readonly) {
         Cloud new_cloud(numClouds(), logs, this);
         for (Point point : new_points) {
+            point.setID(numPoints());
             points.push_back(point);
             new_cloud += point.id;
         }
@@ -455,6 +494,36 @@ bool Field::rotateBuffer(double alpha) {
         return false;
     }
     buffer.rotatePoints(alpha);
+    return true;
+}
+
+// Move buffer.
+bool Field::moveBuffer(double x, double y) {
+    if (buffer.isEmpty()) {
+        cout << "Empty buffer!" << endl;
+        return false;
+    }
+    buffer.movePoints(x, y);
+    return true;
+}
+
+// Zoom buffer.
+bool Field::zoomBuffer(double k) {
+    if (buffer.isEmpty()) {
+        cout << "Empty buffer!" << endl;
+        return false;
+    }
+    buffer.zoomPoints(k);
+    return true;
+}
+
+// Empty buffer.
+bool Field::emptyBuffer() {
+    if (buffer.isEmpty()) {
+        cout << "Buffer is already empty!" << endl;
+        return false;
+    }
+    buffer.deletePoints();
     return true;
 }
 

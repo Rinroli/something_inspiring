@@ -47,7 +47,16 @@ Commands:
 
     SHOWB >> print points from the buffer.
 
-    ROTB (angle) >> rotate points relative to the center by an angle. No default angle.
+    ROTB (angle) >> rotate points relative to the center by an angle in degrees.
+        No default angle.
+
+    MOVEB (shift_by_x, shift_by_y) >> move points from buffer by vector (shift_by_x, shift_by_y).
+        No default vector.
+
+    ZOOMB (in_k_times) >> zoom buffer in 'in_k_times' times.
+        No default value.
+
+    EMPTYB >> delete all points from the buffer.
 
     PUTB >> copy points from the buffer to the field.
 

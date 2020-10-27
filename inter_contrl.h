@@ -18,7 +18,10 @@ public:
    bool showBuffer();
    bool addToBuffer(int ind);
    bool putBuffer();
+   bool emptyBuffer();
    bool rotateBuffer(double alpha);
+   bool moveBuffer(double x, double y);
+   bool zoomBuffer(double k);
    bool printField(bool clouds, int i);
    bool saveHist();
    bool saveHist(Cluster cluster);

@@ -139,12 +139,12 @@ bool Controller::putBuffer() {
     writeLog("Begin putBuffer");
     if (field.ifReadonly()) {
         cout << "Analysis mode. I can't." << endl;
-        writeLog("\tEnd addBuffer (bad)");
+        writeLog("\tEnd putBuffer (bad)");
         return false;
     }
     bool result = field.putBuffer();
     cout << "DONE!" << endl;
-    writeLog("\tEnd addBuffer (success)");
+    writeLog("\tEnd putBuffer (success)");
     return result;
 }
 
@@ -159,6 +159,48 @@ bool Controller::rotateBuffer(double alpha) {
     field.rotateBuffer(alpha);
     cout << "DONE!" << endl;
     writeLog("\tEnd rotateBuffer (success)");
+    return true;
+}
+
+// Move all points from the buffer.
+bool Controller::moveBuffer(double x, double y) {
+    writeLog("Begin moveBuffer");
+    if (field.ifReadonly()) {
+        cout << "Analysis mode. I can't." << endl;
+        writeLog("\tEnd moveBuffer (bad)");
+        return false;
+    }
+    field.moveBuffer(x, y);
+    cout << "DONE!" << endl;
+    writeLog("\tEnd moveBuffer (success)");
+    return true;
+}
+
+// zoom all points from the buffer.
+bool Controller::zoomBuffer(double k) {
+    writeLog("Begin zoomBuffer");
+    if (field.ifReadonly()) {
+        cout << "Analysis mode. I can't." << endl;
+        writeLog("\tEnd zoomBuffer (bad)");
+        return false;
+    }
+    field.zoomBuffer(k);
+    cout << "DONE!" << endl;
+    writeLog("\tEnd zoomBuffer (success)");
+    return true;
+}
+
+// Empty buffer.
+bool Controller::emptyBuffer() {
+    writeLog("Begin emptyBuffer");
+    if (field.ifReadonly()) {
+        cout << "Analysis mode. I can't." << endl;
+        writeLog("\tEnd emptyBuffer (bad)");
+        return false;
+    }
+    field.emptyBuffer();
+    cout << "DONE!" << endl;
+    writeLog("\tEnd emptyBuffer (success)");
     return true;
 }
 
@@ -510,8 +552,18 @@ bool Interface::runCommand(string command)
         }
 
         else if (com == "ROTB") {
-            if (args.size() < 1) {throw -1;}
+            if (args.size() < 1) { throw -1; }
             result = ctrl.rotateBuffer(stod(args[0]));
+        }
+
+        else if (com == "MOVEB") {
+            if (args.size() < 2) { throw - 1; }
+            result = ctrl.moveBuffer(stod(args[0]), stod(args[1]));
+        }
+
+        else if (com == "ZOOMB") {
+            if (args.size() < 1) { throw - 1; }
+            result = ctrl.zoomBuffer(stod(args[0]));
         }
 
         else if (com == "EXIT") {
@@ -534,6 +586,8 @@ bool Interface::runCommand(string command)
             result = ctrl.showBuffer();
         } else if (com == "PUTB") {
             result = ctrl.putBuffer();
+        } else if (com == "EMPTYB") {
+            result = ctrl.emptyBuffer();
         }
 
         else {

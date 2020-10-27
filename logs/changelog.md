@@ -9,7 +9,18 @@ List of commands can be found in [help.txt](../help.txt).
 
 ## Changelog
 
-### **Version 1.5.0 (26.10.2020)** - CURRENT VERSION
+### **Version 1.5.1 (27.10.2020)** - CURRENT VERSION
+
+Added:
+
+* New commands for the buffer - *MOVEB*, *ZOOMB* and *EMPTYB*.
+
+Fixed and changed:
+
+* Fix *ROTB* - rotate buffer. And now it works in *degrees*.
+* Small fixes.
+
+### **Version 1.5.0 (26.10.2020)**
 
 Added:
 
