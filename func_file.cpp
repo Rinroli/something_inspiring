@@ -13,7 +13,7 @@
 
 using namespace std;
 
-#define N 75
+#define N 375
 #define INF 100000007
 #define PI 3.14159265
 
@@ -860,6 +860,12 @@ double getRandom() {
     return u_1;
 }
 
+
+// Return random integer from [0, max_val)
+int randInt(int max_val) {
+    return rand() % max_val;
+}
+
 // Return clear string with time info for logs.
 string timeLog() {
     time_t seconds = time(0);
@@ -872,7 +878,6 @@ string timeLog() {
 
 // Return distance between two points.
 double distPoints(Point f_poi, Point s_poi) {
-
     return sqrt((f_poi.x - s_poi.x) * (f_poi.x - s_poi.x) +
         ((f_poi.y - s_poi.y) * (f_poi.y - s_poi.y)));
 }
@@ -886,7 +891,16 @@ double distPoints(Point point, const vector<double> &center) {
 
 // Return distance between two vectors with coords.
 double distPoints(const vector<double>& center1, const vector<double>& center2) {
-
     return sqrt((center1[0] - center2[0]) * (center1[0] - center2[0]) +
         ((center1[1] - center2[1]) * (center1[1] - center2[1])));
+}
+
+// Return distance between vectors.
+double distVectors(const vector<double>& vector_1, const vector<double>& vector_2) {
+    if (vector_1.size() != vector_2.size()) {cout << "!!!" << endl;return 0;}
+    double tmp_sum = 0;
+    for (int i = 0; i < vector_1.size(); i++) {
+        tmp_sum += (vector_1[i] - vector_2[i]) * (vector_1[i] - vector_2[i]);
+    }
+    return sqrt(tmp_sum);
 }

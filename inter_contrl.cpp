@@ -369,7 +369,13 @@ bool Controller::findR() {
 // Save field to the file for command SAVE.
 bool Controller::printField(bool clouds = true, int i = 0)
 {
-    string what = (clouds) ? "(clouds)" : "(clusters)";
+    string what;
+    if (clouds) {
+        what = "Clouds";
+    } else {
+        FindClusters cur_clu = field.getFCluster(i);
+        what = "Clusters, " + cur_clu.source;
+    }
     writeLog("Begin printField " + what);
     string file_name = (clouds) ? "output.plt" : "clusters.plt";
     string main_file_name = (clouds) ? "gnuplot.plt" : "clus_gnu.plt";
@@ -432,9 +438,21 @@ bool Controller::waveClusters(int i)
 // Create clusters by k-Means algorithm.
 bool Controller::kMeans(int n) {
     writeLog("Begin kMeans");
+    if (not field.ifReadonly()) {field.enterAnalysis();}
     KMeans new_k_means(n, field, field.logs_a);
     field.addFC(new_k_means.mainAlgorithm());
     writeLog("\tEnd kMeans");
+    cout << "DONE!" << endl;
+    return true;
+}
+
+// Create clusteres by EM-algorithm.
+bool Controller::eMAlgorithm(int n) {
+    writeLog("Begin eMalgorithm");
+    if (not field.ifReadonly()) {field.enterAnalysis();}
+    EMAlgorithm new_em(n, field, field.logs_a);
+    field.addFC(new_em.mainAlgorithm());
+    writeLog("\tEnd eMalgorithm");
     cout << "DONE!" << endl;
     return true;
 }
@@ -539,6 +557,11 @@ bool Interface::runCommand(string command)
         else if (com == "KMEANS") {
             if (args.size() == 0) { result = ctrl.kMeans(25); }
             else { result = ctrl.kMeans(stod(args[0])); }
+        }
+
+        else if (com == "EM") {
+            if (args.size() == 0) { result = ctrl.eMAlgorithm(25); }
+            else { result = ctrl.eMAlgorithm(stod(args[0])); }
         }
 
         else if (com == "SAVE") {

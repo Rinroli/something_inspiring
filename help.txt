@@ -43,6 +43,9 @@ Commands:
     KMEANS (number_of_clusters) >> make clustering using k-means algorithm.
         number_of_clusters is initial number of clusters, default 25.
 
+    EM (number_of_clusters) >> make clustering using em-algorithm.
+        number_of_clusters is initial number of clusters, default 25.
+
     ADDB (index_of_the_cloud) >> add (copy) cloud to the buffer by index. Default index is the last one.
 
     SHOWB >> print points from the buffer.

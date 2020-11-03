@@ -9,7 +9,13 @@ List of commands can be found in [help.txt](../help.txt).
 
 ## Changelog
 
-### **Version 1.5.1 (27.10.2020)** - CURRENT VERSION
+### **Version 1.6.0 (3.11.2020)** - CURRENT VERSION
+
+Added:
+
+* **ExpectationMaximization Algorithm!** Find clusters from mixture of gaussians by command *EM* and initial number of clusters.
+
+### **Version 1.5.1 (27.10.2020)**
 
 Added:
 

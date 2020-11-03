@@ -28,6 +28,7 @@ public:
    bool streeHist();
    bool findR();
    bool kMeans(int n);
+   bool eMAlgorithm(int n);
    bool enterAnalysis();
    bool minSpanTree();
    bool createIncMatrix(double delta);

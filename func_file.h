@@ -9,6 +9,9 @@ using namespace std;
 #define INF 100000007
 
 double getRandom();
+int randInt(int max_val);
+double distVectors(const vector<double>& vector_1, 
+                   const vector<double>& vector_2);
 double normalPoint(double mu, double sigma);
 string timeLog();
 
@@ -240,7 +243,7 @@ private:
 class KMeans 
 {
 public:
-    explicit KMeans(int n, Field& field, ofstream& logs_al);
+    KMeans(int n, Field& field, ofstream& logs_al);
     ~KMeans() {}
     FindClusters mainAlgorithm();
 private:
@@ -256,6 +259,32 @@ private:
 };
 
 #endif // KMEANS
+
+#if !defined(EMALGORITHM)
+#define EMALGORITHM
+
+class EMAlgorithm
+{
+public:
+    EMAlgorithm(int k, Field& field, ofstream& logs_al);
+    ~EMAlgorithm() {}
+    FindClusters mainAlgorithm();
+private:
+    vector<vector<double>> point_clu_prob;
+    vector<double> clu_prob, n_vect;
+    vector<vector<double>> all_mu;
+    vector<vector<vector<double>>> all_sigma;
+    int k, step = 0, size_field;
+    Field &field;
+    ofstream& logs_a;
+    double findPointProb(int p_j, int x_i);
+    bool stepE();
+    void stepM();
+    double distMahalanobis(int p_j, int x_i);
+    void writeLog(const string& message);
+};
+
+#endif // EMALGORITHM
 
 
 #ifndef FIELD
