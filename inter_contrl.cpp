@@ -40,9 +40,9 @@ Controller::~Controller()
     writeLog("DELETE");
 }
 
+// Show help for command HELP.
 bool Controller::showHelp()
 {
-    /* Show help for command HELP. */
     writeLog("Begin showHelp");
     ifstream help_file("help.txt");
     string readline;

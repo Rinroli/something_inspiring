@@ -3,8 +3,10 @@
 #include "func_file.h"
 #include <queue>
 #include <cmath>
+#include <algorithm>
 // #include <string>
 #include <vector>
+
 
 using namespace std;
 
@@ -307,11 +309,10 @@ EMAlgorithm::EMAlgorithm(int kk, Field& fieldd, ofstream& logs_al)
 double EMAlgorithm::distMahalanobis(int p_j, int x_i) {
     vector<double> tmp_point = field.getPoint(x_i).getCoord();
     vector<vector<double>> sigma_j = all_sigma[p_j];
-    double determ = sigma_j[0][0] * sigma_j[1][1] - sigma_j[0][1] * sigma_j[1][0];
     vector<vector<double>> inv_m{{sigma_j[1][1], -sigma_j[1][0]}, {-sigma_j[0][1], sigma_j[0][0]}};
     for (int a = 0; a < 2; a++) {
         for (int b = 0; b < 2; b++) {
-            inv_m[a][b] /= determ;
+            inv_m[a][b] /= determinant(sigma_j);
         }
     }
     tmp_point[0] -= all_mu[p_j][0];
@@ -326,10 +327,9 @@ double EMAlgorithm::distMahalanobis(int p_j, int x_i) {
 double EMAlgorithm::findPointProb(int p_j, int x_i) {
     double result = 1;
     vector<vector<double>> sigma_j = all_sigma[p_j];
-    double determ = sigma_j[0][0] * sigma_j[1][1] - sigma_j[0][1] * sigma_j[1][0];
     double delta_sq = distMahalanobis(p_j, x_i);
 
-    result /= 2 * PI * sqrt(determ);
+    result /= 2 * PI * sqrt(determinant(sigma_j));
     result *= exp((-1) * delta_sq / 2);
     return result;
 }
@@ -392,15 +392,39 @@ void EMAlgorithm::stepM() {
     writeLog("\tEnd step M");
 }
 
-FindClusters EMAlgorithm::mainAlgorithm() {
-    FindClusters result(logs_a, "EM-algorithm; k = " + to_string(k));
-    bool it_is_the_end = false;
-    while (not it_is_the_end) {
-        it_is_the_end = stepE();
-        stepM();
-        writeLog("STEP #" + to_string(step));
-        step++;
+// Save step to the files in directory data/em.
+void EMAlgorithm::saveStep() {
+    writeLog("SAVE STEP");
+    ofstream points_step("data/em/points_" + to_string(step) + ".plt");
+    ofstream ellipses_step("data/em/ellipse_" + to_string(step) + ".plt");
+    vector<vector<int>> clusters = findNearest();
+    for (int j = 0; j < k; j++) {
+        vector<int> cluster = clusters[j];
+        for (int point_id : cluster) {
+            field.getPoint(point_id).print(points_step);
+        }
+        points_step << endl << endl;
+
+        vector<vector<double>> eigen_data = eigen(all_sigma[j]);
+        int ind_max = (eigen_data[2][0] > eigen_data[2][1]) ? 0 : 1;
+        if (eigen_data[ind_max][1] < 0) { 
+            eigen_data[ind_max][0] *= -1;
+            eigen_data[ind_max][1] *= -1;
+        }
+        double angle = acos(eigen_data[ind_max][0] / sqrt(eigen_data[ind_max][0] * eigen_data[ind_max][0] +
+                                                eigen_data[ind_max][1] * eigen_data[ind_max][1]));
+        angle *= 180;
+        angle /= PI;
+        ellipses_step << all_mu[j][0] << " " << all_mu[j][1] << " " <<
+                         20 * eigen_data[2][1 - ind_max] << " " << 20 * eigen_data[2][ind_max] << " " << angle << endl;
     }
+
+    points_step.close();
+    ellipses_step.close();
+}
+
+// Find points thst fit probality.
+vector<vector<int>> EMAlgorithm::findNearest() {
     vector<vector<int>> clusters(k);
     for (int ind_point = 0; ind_point < size_field; ind_point++) {
         double max_prob = 0;
@@ -413,6 +437,21 @@ FindClusters EMAlgorithm::mainAlgorithm() {
         }
         clusters[max_clu].push_back(ind_point);
     }
+    return clusters;
+}
+
+// Find clusters by em-algorithm
+FindClusters EMAlgorithm::mainAlgorithm() {
+    FindClusters result(logs_a, "EM-algorithm; k = " + to_string(k));
+    bool it_is_the_end = false;
+    while (not it_is_the_end) {
+        it_is_the_end = stepE();
+        stepM();
+        saveStep();
+        writeLog("STEP #" + to_string(step));
+        step++;
+    }
+    vector<vector<int>> clusters = findNearest();
     for (int id_clu = 0; id_clu < k; id_clu++) {
         result += Cluster(id_clu, clusters[id_clu], logs_a, &field);
     }
@@ -420,10 +459,60 @@ FindClusters EMAlgorithm::mainAlgorithm() {
     writeLog("\tTurned out " + to_string(result.numClusters()) + " clusters in " + to_string(step) + " steps");
     cout << "Turned out " << to_string(result.numClusters()) << " clusters in " << step << " steps\n";
 
+    ifstream anim_templ("data/templates/em_animate.template");
+    ofstream anim("data/gnu_em_animate.plt");
+
+    string new_line;
+    while (!anim_templ.eof()) {
+        getline(anim_templ, new_line);
+        anim << new_line << endl;
+    }
+    anim << "do for [i=0:" << to_string(step - 1) << "] {" << endl << "\tplot ";
+    for (int ind_k = 0; ind_k < k; ind_k++) {
+        anim << "\t\t'data/em/points_'.i.'.plt' index " << to_string(ind_k) <<
+                " w p title \"#" << to_string(ind_k) << "\",\\" << endl; 
+    }
+    anim << "\t\t'data/em/ellipse_'.i.'.plt' using 1:2 : 3 : 4 : 5 with ellipses lc rgb \"red\" title \"ellipses\"\n}";
+
     return result;
 }
 
 // Write log-message with date-time note.
 void EMAlgorithm::writeLog(const string& message) {
     logs_a << timeLog() << "EMALGORITHM: " << message << endl;
+}
+
+
+///// FUNCTIONS /////
+
+// Return determinant for 2d matrix.
+double determinant(const vector<vector<double>>& sigma) {
+    return sigma[0][0] * sigma[1][1] - sigma[0][1] * sigma[1][0];
+}
+
+// Return vector with eigenvectors and eigenvalues for 2d matrix
+//  as {eivector1, eivector2, {eivalue1, eivalue2}}
+//  empty vector if they don't exist.
+vector<vector<double>> eigen(vector<vector<double>>& sigma) {
+    double a = sigma[0][0], c = sigma[1][0];
+    vector<double> eigenvalues = findEigenvalues(sigma);
+    vector<vector<double>> result;
+    if (eigenvalues.size() == 0) { return result; }
+    
+    result.push_back(vector<double>{a - eigenvalues[0], c});
+    result.push_back(vector<double>{a - eigenvalues[1], c});
+    result.push_back(eigenvalues);
+    return result;
+}
+
+// Return two or zero eigenvalues.
+vector<double> findEigenvalues(const vector<vector<double>>& sigma) {
+    double a = sigma[0][0], d = sigma[1][1];
+    double descr = (a + d) * (a + d) - 4 * determinant(sigma);
+    vector<double> lambdas;
+    if (descr >= 0) {
+        lambdas.push_back(((a + d) + sqrt(descr)) / 2.);
+        lambdas.push_back(((a + d) - sqrt(descr)) / 2.);
+    }
+    return lambdas;
 }

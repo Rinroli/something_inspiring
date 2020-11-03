@@ -8,6 +8,10 @@ using namespace std;
 
 #define INF 100000007
 
+double determinant(const vector<vector<double>>& sigma);
+vector<vector<double>> eigen(vector<vector<double>>& sigma);
+vector<double> findEigenvalues(const vector<vector<double>>& sigma);
+
 double getRandom();
 int randInt(int max_val);
 double distVectors(const vector<double>& vector_1, 
@@ -278,9 +282,11 @@ private:
     Field &field;
     ofstream& logs_a;
     double findPointProb(int p_j, int x_i);
+    vector<vector<int>> findNearest();
     bool stepE();
     void stepM();
     double distMahalanobis(int p_j, int x_i);
+    void saveStep();
     void writeLog(const string& message);
 };
 

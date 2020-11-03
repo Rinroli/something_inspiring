@@ -13,7 +13,7 @@
 
 using namespace std;
 
-#define N 375
+#define N 1000
 #define INF 100000007
 #define PI 3.14159265
 

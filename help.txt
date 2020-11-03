@@ -45,6 +45,8 @@ Commands:
 
     EM (number_of_clusters) >> make clustering using em-algorithm.
         number_of_clusters is initial number of clusters, default 25.
+        Save steps in special folder /em/ and can be glued together into *gif*-image
+            by bash script 'em_steps' or gnuplot 'gnu_em_anumate.plt' (with ellipses)
 
     ADDB (index_of_the_cloud) >> add (copy) cloud to the buffer by index. Default index is the last one.
 

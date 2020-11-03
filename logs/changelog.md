@@ -9,7 +9,14 @@ List of commands can be found in [help.txt](../help.txt).
 
 ## Changelog
 
-### **Version 1.6.0 (3.11.2020)** - CURRENT VERSION
+### **Version 1.6.1 (4.11.2020)** - CURRENT VERSION
+
+Added:
+
+* Now you can see *gif*-image with steps (and ellipses!) of em-algorithm.
+    More info in [help.txt](../help.txt)
+
+### **Version 1.6.0 (3.11.2020)**
 
 Added:
 

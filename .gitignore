@@ -3,9 +3,11 @@
 *.exe
 *.out
 *.zip
+*.gif
 *.txt
 *.todo
 *.plt
+*.bash
 *.py
 *debug
 !/help.txt
