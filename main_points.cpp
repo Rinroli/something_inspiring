@@ -1,5 +1,5 @@
 // Copyright (c) 2020 Rinroli
-// Version 1.6.0
+// Version 1.6.1
 
 
 #include <stdlib.h>
