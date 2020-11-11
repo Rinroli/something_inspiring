@@ -446,6 +446,17 @@ bool Controller::kMeans(int n) {
     return true;
 }
 
+// Create clusters by k-Means with kernels algorithm.
+bool Controller::kerKMeans(int k, int p) {
+    writeLog("Begin kerKMeans");
+    if (not field.ifReadonly()) { field.enterAnalysis(); }
+    KerKMeans new_ker_kmeans(k, p, field, field.logs_a);
+    field.addFC(new_ker_kmeans.mainAlgorithm());
+    writeLog("\tEnd kerKMeans");
+    cout << "DONE!" << endl;
+    return true;
+}
+
 // Create clusteres by EM-algorithm.
 bool Controller::eMAlgorithm(int n) {
     writeLog("Begin eMalgorithm");
@@ -557,6 +568,11 @@ bool Interface::runCommand(string command)
         else if (com == "KMEANS") {
             if (args.size() == 0) { result = ctrl.kMeans(25); }
             else { result = ctrl.kMeans(stod(args[0])); }
+        }
+
+        else if (com == "KERKMEANS") {
+            if (args.size() == 0) { result = ctrl.kerKMeans(25, 5); }
+            else { result = ctrl.kerKMeans(stod(args[0]), stod(args[1])); }
         }
 
         else if (com == "EM") {

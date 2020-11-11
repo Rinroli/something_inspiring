@@ -884,7 +884,6 @@ double distPoints(Point f_poi, Point s_poi) {
 
 // Return distance between point and vector with coords.
 double distPoints(Point point, const vector<double> &center) {
-
     return sqrt((point.x -center[0]) * (point.x -center[0]) +
         ((point.y - center[1]) * (point.y - center[1])));
 }

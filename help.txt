@@ -43,6 +43,10 @@ Commands:
     KMEANS (number_of_clusters) >> make clustering using k-means algorithm.
         number_of_clusters is initial number of clusters, default 25.
 
+    KERKMEANS (number_of_clusters, number_of_subclusters) >> make clustering using k-means algorithm with kernels.
+        number_of_clusters is initial number of clusters, default 25.
+        number_of_subclusters is the number of clusters in each group, default 5.
+
     EM (number_of_clusters) >> make clustering using em-algorithm.
         number_of_clusters is initial number of clusters, default 25.
         Save steps in special folder /em/ and can be glued together into *gif*-image

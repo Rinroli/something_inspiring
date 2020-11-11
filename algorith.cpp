@@ -12,6 +12,7 @@ using namespace std;
 
 #define EPS 0.0001
 #define PI 3.14159265
+#define LIMIT 250
 
 class BinMatrix;
 
@@ -191,18 +192,37 @@ void Tree::writeLog(const string& message) {
 ///// KMEANS /////
 
 KMeans::KMeans(int nn, Field& fieldd, ofstream& logs_al)
-    : n(nn), field(fieldd), logs_a(logs_al) {
-    writeLog("INIT");
-    size_field = field.numPoints();
-    for (int ind = 0; ind < n; ind++) {
-        int point_ind = rand() % size_field;
+    : k(nn), field(fieldd), logs_a(logs_al) {
+    writeLog("INIT (field)");
+    number_poi = field.numPoints();
+    for (int ind = 0; ind < k; ind++) {
+        int point_ind = rand() % number_poi;
         centers.push_back(field.points[point_ind].getCoord());
-        clusters.push_back(vector<int>(size_field));
+        clusters.push_back(vector<int>(number_poi));
+    }
+    for (int id_point = 0; id_point < number_poi; id_point++) {
+        id_points.push_back(id_point);
     }
 }
 
+KMeans::KMeans(int nn, Field& fieldd, const vector<int>& id_pointss, ofstream& logs_al)
+    : k(nn), field(fieldd), logs_a(logs_al), id_points(id_pointss) {
+    writeLog("INIT (cluster)");
+    number_poi = id_points.size();
+    for (int ind = 0; ind < k; ind++) {
+        int point_ind = rand() % number_poi;
+        centers.push_back(getCoord(point_ind));
+        clusters.push_back(vector<int>(number_poi));
+    }
+}
+
+// Get point coords by index,
+vector<double> KMeans::getCoord(int ind_poi) {
+    return (field.getPoint(id_points[ind_poi])).getCoord();
+}
+
 // Make clustering using k-means algorithm.
-FindClusters KMeans::mainAlgorithm() {
+FindClusters KMeans::mainAlgorithm(bool silent) {
     writeLog("Begin mainAlgorithm");
     pointDistribution();
     while (findNewCenters()) {
@@ -215,7 +235,7 @@ FindClusters KMeans::mainAlgorithm() {
         for (int a : cluster) {
             if (a) {
                 vector<int> tmp_id_points;
-                for (int id_poi = 0; id_poi < size_field; id_poi++) {
+                for (int id_poi = 0; id_poi < number_poi; id_poi++) {
                     if (cluster[id_poi]) { tmp_id_points.push_back(id_poi); }
                 }
                 result += Cluster(ind, tmp_id_points, logs_a, &field);
@@ -225,7 +245,9 @@ FindClusters KMeans::mainAlgorithm() {
         }
     }
     writeLog("\tTurned out " + to_string(result.numClusters()) + " clusters in " + to_string(step) + " steps");
-    cout << "Turned out " << to_string(result.numClusters()) << " clusters in " << step << " steps\n";
+    if (not silent) {
+        cout << "Turned out " << to_string(result.numClusters()) << " clusters in " << step << " steps\n";
+    }
     return result;
 }
 
@@ -237,8 +259,8 @@ bool KMeans::findNewCenters() {
     for (int ind = 0; ind < centers.size(); ind++) {
         vector<double> tmp(2);
         int num_points = 0;
-        for (int a_ind = 0; a_ind < size_field; a_ind++) {
-            vector<double> point = field.points[a_ind].getCoord();
+        for (int a_ind = 0; a_ind < number_poi; a_ind++) {
+            vector<double> point = getCoord(a_ind);
             int cur_mark = clusters[ind][a_ind];
             tmp[0] += cur_mark * point[0];
             tmp[1] += cur_mark * point[1];
@@ -254,13 +276,14 @@ bool KMeans::findNewCenters() {
 
 // Find the nearest points to the centers.
 void KMeans::pointDistribution() {
-    for (int ind = 0; ind < clusters.size(); ind++) {
-        for (int ind_p = 0; ind_p < size_field; ind_p++) {
+    for (int ind = 0; ind < k; ind++) {
+        for (int ind_p = 0; ind_p < number_poi; ind_p++) {
             clusters[ind][ind_p] = 0;
         }
     }
-    for (Point point : field.points) {
-        clusters[nearestCenter(point)][point.id] = 1;
+    for (int ind_poi = 0; ind_poi < number_poi; ind_poi++) {
+        Point point = field.getPoint(id_points[ind_poi]);
+        clusters[nearestCenter(point)][ind_poi] = 1;
     }
 }
 
@@ -281,6 +304,137 @@ int KMeans::nearestCenter(const Point& point) {
 // Write log-message with date-time note.
 void KMeans::writeLog(const string& message) {
     logs_a << timeLog() << "KMEANS: " << message << endl;
+}
+
+
+///// KERKMEANS /////
+
+KerKMeans::KerKMeans(int kk, int pp, Field& fieldd, ofstream& logs_al)
+    : k(kk), p(pp), logs_a(logs_al), field(fieldd) {
+    writeLog("INIT");
+    number_poi = field.numPoints();
+    clusters.resize(k);
+    centers.resize(k);
+    KMeans tmp_kmeans(k, field, logs_a);
+    tmp_kmeans.mainAlgorithm(true);
+    for (int ind_center = 0; ind_center < k; ind_center++) {
+        centers[ind_center].push_back(tmp_kmeans.centers[ind_center]);
+    }
+}
+
+// Main loop for clustering.
+FindClusters KerKMeans::mainAlgorithm() {
+    writeLog("Begin mainAlgorithm");
+    pointDistribution();
+    saveStep();
+    newKernels();
+    bool is_stable = false;
+    for (int i = 0; i < LIMIT; i++) {
+        step++;
+        if (pointDistribution()) {
+            saveStep();
+            is_stable = true;
+            break;
+            }
+        saveStep();
+        newKernels();
+    }
+
+    FindClusters result(logs_a, "KerKMeans algorithm (" + to_string(is_stable) + ")");
+    int ind = 0;
+    for (vector<int> cluster : clusters) {
+        result += Cluster(ind, cluster, logs_a, &field);
+        ind++;
+    }
+    ifstream anim_templ("data/templates/ker_animate.template");
+    ofstream anim("data/gnu_ker_animate.plt");
+    anim.setf(ios::boolalpha);
+
+    string new_line;
+    while (!anim_templ.eof()) {
+        getline(anim_templ, new_line);
+        anim << new_line << endl;
+    }
+    anim << "set title \"KMeans-algorithm with kernels (stable - " <<
+            is_stable << ", steps " << step << ")" << endl;
+    anim << "do for [i=0:" << to_string(step) << "] {" << endl << "\tplot ";
+    for (int ind_k = 0; ind_k < k; ind_k++) {
+        anim << "\t\t'data/ker/points_'.i.'.plt' index " << to_string(ind_k) <<
+            " w p title \"#" << to_string(ind_k) << "\",\\" << endl;
+    }
+    anim << "\t\t'data/ker/kernel_'.i.'.plt' w p lc rgb \"red\" title \"kernels\"" <<
+            endl << "}" << endl;
+    writeLog("\tTurned out " + to_string(result.numClusters()) + " clusters in " + to_string(step) + " steps");
+    cout << "Turned out " << to_string(result.numClusters()) << " clusters in " << step << " steps\n";
+    return result;
+}
+
+// Find the nearest kernels to the centers.
+bool KerKMeans::pointDistribution() {
+    vector<vector<int>> new_clusters = clusters;
+    clusters.clear();
+    clusters.resize(k);
+    for (int ind_poi = 0; ind_poi < number_poi; ind_poi++) {
+        Point point = field.getPoint(ind_poi);
+        clusters[nearestCenter(point)].push_back(ind_poi);
+    }
+    for (int clu = 0; clu < k; clu++) {
+        if (clusters[clu].size() != new_clusters[clu].size()) { return false; }
+        for (int poi = 0; poi < clusters[clu].size(); poi++) {
+            if (clusters[clu][poi] != new_clusters[clu][poi]) { return false; }
+        }
+    }
+    return true;
+}
+
+// Find the nearest center to the given point.
+int KerKMeans::nearestCenter(const Point& point) {
+    double min_dist = INF;
+    int nearest_center = -1;
+    for (int ind_group = 0; ind_group < k; ind_group++) {
+        for (int ind_cent = 0; ind_cent < centers[ind_group].size(); ind_cent++) {
+            vector<double> cent = centers[ind_group][ind_cent];
+            double dist = distPoints(point, cent);
+            if (dist < min_dist) {
+                min_dist = dist;
+                nearest_center = ind_group;
+            }
+        }        
+    }
+    return nearest_center;
+}
+
+// Find new kernels for group.
+void KerKMeans::newKernels() {
+    for (int ind_group = 0; ind_group < k; ind_group++) {
+        KMeans groupKM(p, field, clusters[ind_group], logs_a);
+        groupKM.mainAlgorithm(true);
+        centers[ind_group] = groupKM.centers;
+    }
+}
+
+// Save step to the files in directory data/em.
+void KerKMeans::saveStep() {
+    writeLog("SAVE STEP");
+    ofstream points_step("data/ker/points_" + to_string(step) + ".plt");
+    ofstream kernels_step("data/ker/kernel_" + to_string(step) + ".plt");
+    for (int j = 0; j < k; j++) {
+        for (int point_id : clusters[j]) {
+            field.getPoint(point_id).print(points_step);
+        }
+        points_step << endl << endl;
+        for (vector<double> kernel : centers[j]) {
+            kernels_step << kernel[0] << " " << kernel[1] << endl;
+        }
+    }
+
+    points_step.close();
+    kernels_step.close();
+}
+
+// Write log-message with date-time note.
+void KerKMeans::writeLog(const string& message) {
+    logs_a << timeLog() << "KERKMEANS: " << message << endl;
 }
 
 
@@ -472,7 +626,7 @@ FindClusters EMAlgorithm::mainAlgorithm() {
         anim << "\t\t'data/em/points_'.i.'.plt' index " << to_string(ind_k) <<
                 " w p title \"#" << to_string(ind_k) << "\",\\" << endl; 
     }
-    anim << "\t\t'data/em/ellipse_'.i.'.plt' using 1:2 : 3 : 4 : 5 with ellipses lc rgb \"red\" title \"ellipses\"\n}";
+    anim << "\t\t'data/em/ellipse_'.i.'.plt' using 1:2:3:4:5 with ellipses lc rgb \"red\" title \"ellipses\"\n}";
 
     return result;
 }
@@ -493,7 +647,7 @@ double determinant(const vector<vector<double>>& sigma) {
 // Return vector with eigenvectors and eigenvalues for 2d matrix
 //  as {eivector1, eivector2, {eivalue1, eivalue2}}
 //  empty vector if they don't exist.
-vector<vector<double>> eigen(vector<vector<double>>& sigma) {
+vector<vector<double>> eigen(const vector<vector<double>>& sigma) {
     double a = sigma[0][0], c = sigma[1][0];
     vector<double> eigenvalues = findEigenvalues(sigma);
     vector<vector<double>> result;

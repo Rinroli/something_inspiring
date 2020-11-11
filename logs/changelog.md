@@ -9,7 +9,13 @@ List of commands can be found in [help.txt](../help.txt).
 
 ## Changelog
 
-### **Version 1.6.1 (4.11.2020)** - CURRENT VERSION
+### **Version 1.7.0 (11.11.2020)** - CURRENT VERSION
+
+Added:
+
+* New custering algorithm - **k-means with kernels**! like a normal *k-means*, but with an additional call to the *k-means* at each step and each group. The command is *KERKMEANS*. *Gif*-image is included.
+
+### **Version 1.6.1 (4.11.2020)**
 
 Added:
 

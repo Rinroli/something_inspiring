@@ -9,13 +9,13 @@ using namespace std;
 #define INF 100000007
 
 double determinant(const vector<vector<double>>& sigma);
-vector<vector<double>> eigen(vector<vector<double>>& sigma);
+vector<vector<double>> eigen(const vector<vector<double>>& sigma);
 vector<double> findEigenvalues(const vector<vector<double>>& sigma);
 
 double getRandom();
 int randInt(int max_val);
-double distVectors(const vector<double>& vector_1, 
-                   const vector<double>& vector_2);
+double distVectors(const vector<double>& vector_1,
+    const vector<double>& vector_2);
 double normalPoint(double mu, double sigma);
 string timeLog();
 
@@ -31,7 +31,7 @@ class Point
 {
 public:
     Point(double mX, double mY, double sX, double sY,
-          int idd, ofstream &logs_field, int id_cloudd);
+        int idd, ofstream& logs_field, int id_cloudd);
     void changeTo(Point point);
     void setID(int id);
     void setCoords(double x, double y);
@@ -42,8 +42,8 @@ public:
     void zoomPoint(double k);
     ~Point() {}
     vector<double> getCoord();
-    void print(ofstream &out_f);
-    friend ostream &operator<<(ostream &out, const Point &point);
+    void print(ofstream& out_f);
+    friend ostream& operator<<(ostream& out, const Point& point);
     friend Field;
     int id;
     double x, y;
@@ -52,14 +52,14 @@ public:
 private:
     int a, b;
     string mark = "base";
-    ofstream &logs_f;
-    void writeLog(const string &message);
+    ofstream& logs_f;
+    void writeLog(const string& message);
 };
 
 #endif // POINT
 
 double distPoints(Point f_poi, Point s_poi);
-double distPoints(Point point, const vector<double> &center);
+double distPoints(Point point, const vector<double>& center);
 double distPoints(const vector<double>& center1, const vector<double>& center2);
 
 #ifndef CLUSTER
@@ -68,9 +68,9 @@ double distPoints(const vector<double>& center1, const vector<double>& center2);
 class Cluster
 {
 public:
-    Cluster(int cur_id_cloud, ofstream &logs_field,
-            Field *field);
-    Cluster(int id, const vector<int> &points, ofstream& logs_field, Field* field);
+    Cluster(int cur_id_cloud, ofstream& logs_field,
+        Field* field);
+    Cluster(int id, const vector<int>& points, ofstream& logs_field, Field* field);
     ~Cluster();
     int numPoints();
     int id;
@@ -82,20 +82,20 @@ public:
     Point& operator[](int i);
     void clear();
     vector<double> findAverage();
-    friend Cluster &operator+=(Cluster &left, int i);
+    friend Cluster& operator+=(Cluster& left, int i);
     friend Buffer;
 
 protected:
     vector<int> id_points;
-    ofstream &logs_a;
-    void writeLog(const string &message);
+    ofstream& logs_a;
+    void writeLog(const string& message);
     bool updated = false;
     double R = INF, D = 0;
     vector<int> center;
-    vector<double> box{0, 0, 0, 0};
+    vector<double> box{ 0, 0, 0, 0 };
     void updateProp();
-    vector<Point> *p_field_points;
-    Field *p_field = nullptr;
+    vector<Point>* p_field_points;
+    Field* p_field = nullptr;
 };
 
 #endif // CLUSTER
@@ -122,7 +122,7 @@ private:
     void addCluster(Cluster& new_cl);
     vector<Point> points;
     ofstream& logs_f;
-    Field *p_field;
+    Field* p_field;
     int id = 1;
 };
 
@@ -134,14 +134,14 @@ private:
 class Cloud : public Cluster
 {
 public:
-    Cloud(int cur_id_cloud, ofstream &logs_field,
-          Field *field);
+    Cloud(int cur_id_cloud, ofstream& logs_field,
+        Field* field);
     Cloud(int id, const vector<int>& points,
-            ofstream& logs_field, Field* field);
+        ofstream& logs_field, Field* field);
     ~Cloud();
 
 private:
-    void writeLog(const string &message);
+    void writeLog(const string& message);
 };
 
 #endif // CLOUD
@@ -152,20 +152,20 @@ private:
 class FindClusters
 {
 public:
-    FindClusters(ofstream &logs_al, string source);
+    FindClusters(ofstream& logs_al, string source);
     ~FindClusters();
-    Cluster &operator[](int i);
+    Cluster& operator[](int i);
     void coutInfo();
     int numClusters();
     void setID(int i);
     const string source;
     int id = 0;
-    friend void operator+=(FindClusters &left, Cluster new_cl);
+    friend void operator+=(FindClusters& left, Cluster new_cl);
 
 private:
     vector<Cluster> clusters;
-    void writeLog(const string &message);
-    ofstream &logs_a;
+    void writeLog(const string& message);
+    ofstream& logs_a;
 };
 
 #endif // FIND_CLUSTERS
@@ -176,10 +176,10 @@ private:
 class BinMatrix
 {
 public:
-    BinMatrix(int size, double delta, int k=1);
+    BinMatrix(int size, double delta, int k = 1);
     ~BinMatrix();
     vector<bool>& operator[](int i);
-    int size, k=1;
+    int size, k = 1;
     double delta;
     vector<int> marks;
 
@@ -195,15 +195,15 @@ private:
 
 class Tree {
 public:
-    Tree(Point& point, ofstream& logs_al, double dist=0);
+    Tree(Point& point, ofstream& logs_al, double dist = 0);
     ~Tree();
     void addVert(Point& point, double dist);
     void print(int indent = 0);
     int numTrees();
-    vector<double> allDist(); 
+    vector<double> allDist();
     Tree operator[](int i);
     Tree* findIndex(int i);
-    void displayTree(ofstream &out_f);
+    void displayTree(ofstream& out_f);
 
 private:
     Point& point;
@@ -241,25 +241,54 @@ private:
 
 #endif // WAVE_CLUSTERS
 
+
+#if !defined(KERKMEANS)
+#define KERKMEANS
+
+class KerKMeans
+{
+public:
+    KerKMeans(int k, int p, Field& field, ofstream& logs_al);
+    ~KerKMeans() {}
+    FindClusters mainAlgorithm();
+private:
+    int p, k, number_poi, step = 0;
+    Field& field;
+    vector<vector<int>> clusters;
+    vector<vector<vector<double>>> centers;
+    bool pointDistribution();
+    void newKernels();
+    void saveStep();
+    int nearestCenter(const Point& point);
+    ofstream& logs_a;
+    void writeLog(const string& message);
+};
+
+#endif // KERKMEANS
+
 #if !defined(KMEANS)
 #define KMEANS
 
-class KMeans 
+class KMeans
 {
 public:
-    KMeans(int n, Field& field, ofstream& logs_al);
+    KMeans(int k, Field& field, ofstream& logs_al);
+    KMeans(int k, Field& field, const vector<int>& id_points, ofstream& logs_al);
     ~KMeans() {}
-    FindClusters mainAlgorithm();
+    FindClusters mainAlgorithm(bool silent=false);
+    friend KerKMeans;
 private:
-    int n, size_field, step = 1;
-    vector<vector<double>> centers;
-    Field &field;
+    int k, number_poi, step = 1;
+    Field& field;
     ofstream& logs_a;
     vector<vector<int>> clusters;
     void pointDistribution();
-    int nearestCenter(const Point &point);
+    int nearestCenter(const Point& point);
     bool findNewCenters();
+    vector<double> getCoord(int ind_poi);
     void writeLog(const string& message);
+    vector<vector<double>> centers;
+    vector<int> id_points;
 };
 
 #endif // KMEANS
@@ -279,7 +308,7 @@ private:
     vector<vector<double>> all_mu;
     vector<vector<vector<double>>> all_sigma;
     int k, step = 0, size_field;
-    Field &field;
+    Field& field;
     ofstream& logs_a;
     double findPointProb(int p_j, int x_i);
     vector<vector<int>> findNearest();
@@ -302,9 +331,9 @@ public:
     Field();
     ~Field();
     bool createCloud(double mX, double mY,
-                     double sX, double sY);
+        double sX, double sY);
     bool createCloud(vector<Point> points);
-    void print(ofstream &out_f);
+    void print(ofstream& out_f);
     void print(int i, ofstream& out_f);
     void showBuffer();
     int numClouds();
@@ -340,11 +369,11 @@ private:
     vector<FindClusters> fclusters;
     vector<Cloud> clouds;
     Buffer buffer;
-    void writeLog(const string &message);
+    void writeLog(const string& message);
     bool readonly;
     void updateD();
     vector<BinMatrix> bin_matrixes;
-    Tree *p_tree = nullptr;
+    Tree* p_tree = nullptr;
 };
 
 #endif // FIELD
