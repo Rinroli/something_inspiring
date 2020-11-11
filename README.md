@@ -9,6 +9,7 @@ Currently, some clustering algorithms are implemented:
 * **DBSCAN**
 * **Minimal spanning tree** - can find *epsilon* for DBSCAN
 * **K-means**
+* **K-means with kernels**
 * **EM-algorithm** - and produce *gif*-image with all steps
 
 Before data analysis, you can work with normally distributed clouds by generating and working with a **buffer** - *rotate*, *shift*, *scale*.
