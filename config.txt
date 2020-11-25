@@ -1,0 +1,4 @@
+FIELD YES logs_field.txt
+CONTROLLER YES logs_ctrl.txt
+INTERFACE YES logs_interface.txt
+ALGORITHM YES logs_algorithm.txt

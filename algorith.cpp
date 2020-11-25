@@ -570,7 +570,8 @@ void EMAlgorithm::saveStep() {
         angle *= 180;
         angle /= PI;
         ellipses_step << all_mu[j][0] << " " << all_mu[j][1] << " " <<
-                         20 * eigen_data[2][1 - ind_max] << " " << 20 * eigen_data[2][ind_max] << " " << angle << endl;
+                         20 * eigen_data[2][1 - ind_max] << " " << 20 * eigen_data[2][ind_max] <<
+                         " " << angle << endl;
     }
 
     points_step.close();

@@ -2,18 +2,17 @@
 
 #include <stdlib.h>
 #include <time.h>
+#include <ctime>
 #include <cmath>
 #include <iostream>
 // #include <string>
 #include <fstream>
-#include <ctime>
 #include <iomanip>
 
 #include "func_file.h"
 
 using namespace std;
 
-#define N 1000
 #define INF 100000007
 #define PI 3.14159265
 
@@ -22,12 +21,12 @@ class Tree;
 ///// POINT /////
 
 Point::Point(double mX, double mY, double sX, double sY,
-    int idd, ofstream& logs_field, int id_cloudd)
+    int idd, ofstream& logs_field, int id_cloudd, int nu_points)
     : logs_f(logs_field)
 {
     id = idd;
-    x = normalPoint(mX, sX);
-    y = normalPoint(mY, sY);
+    x = normalPoint(mX, sX, nu_points);
+    y = normalPoint(mY, sY, nu_points);
     id_cloud = id_cloudd;
 }
 
@@ -387,14 +386,19 @@ vector<bool>& BinMatrix::operator[](int i) {
 
 ///// FIELD /////
 
-Field::Field()
+Field::Field(vector<bool> if_logs, vector<string> name_logs)
 : buffer{this} {
     readonly = false;
 
-    logs.open("logs/logs_field.txt", ios_base::app);
-    logs << endl
-        << "New session" << timeLog() << endl;
-    writeLog("INIT_FIELD");
+    if (if_logs[0]) {
+        logs.open("logs/" + name_logs[0], ios_base::app);
+        logs << endl << "New session" << endl;
+        writeLog("INIT");
+    }
+    if (if_logs[3]) {
+        logs_a.open("logs/" + name_logs[3], ios_base::app);
+        logs_a << endl << "New session" << timeLog() << endl;
+    }
 }
 
 Field::~Field()
@@ -409,12 +413,12 @@ Field::~Field()
 
 // Create new normally distributed cloud of points.
 bool Field::createCloud(double mX, double mY,
-    double sX, double sY) {
+    double sX, double sY, int nu_points) {
     writeLog("CREATE CLOUD (normally distributed)");
     if (!readonly) {
         Cloud new_cloud(numClouds(), logs, this);
-        for (int tmp = 0; tmp < N; tmp++) {
-            Point point(mX, mY, sX, sY, numPoints(), logs, new_cloud.id);
+        for (int tmp = 0; tmp < nu_points; tmp++) {
+            Point point(mX, mY, sX, sY, numPoints(), logs, new_cloud.id, nu_points);
             points.push_back(point);
             new_cloud += point.id;
         }
@@ -595,9 +599,6 @@ bool Field::enterAnalysis()
     try {
         readonly = true;
         updateD();
-        logs_a.open("logs/logs_algorithm.txt", ios_base::app);
-        logs_a << endl
-            << "New session" << timeLog() << endl;
     }
     catch (...) {
         writeLog("\tSomething went wrong.");
@@ -845,12 +846,12 @@ void FindClusters::writeLog(const string &message) {
 ///// FUNCTIONS /////
 
 // Normal distribution.
-double normalPoint(double mu, double sigma) {
+double normalPoint(double mu, double sigma, int nu_points) {
     double sum = 0;
-    for (int i = 0; i < N; ++i) {
+    for (int i = 0; i < nu_points; ++i) {
         sum += getRandom();
     }
-    return mu + (sum / N) * sigma;
+    return mu + (sum / nu_points) * sigma;
 }
 
 // Return random double in [-1, 1].

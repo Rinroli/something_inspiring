@@ -11,9 +11,10 @@ Commands:
         Files for call from gnuplot are 'clus_gnu.plt' for FindCluster
                                         'gnuplot.plt' for whole Field
 
-    GEN_CLOUD or GC(mx, my, sx, sy) >> create normally distributed cloud by average value and dispersion.
+    GEN_CLOUD or GC(mx, my, sx, sy, nu_points) >> create normally distributed cloud by average value and dispersion.
         Default values are: mx = 0, my = 0,
-                            sx = 1, sy = 1
+                            sx = 1, sy = 1,
+                            nu_points = 1000
 
     HIST or HIST(clo, id_cl) or HIST(clu, id_fc, id_cl) >> output for the gnuplot (data/gnu_hist.plt) histogram of x and y coords of points.
         By default use all points on the field. Can be called for cluster or cloud - by id (can be checked by command *INFO*)

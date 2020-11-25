@@ -16,7 +16,7 @@ double getRandom();
 int randInt(int max_val);
 double distVectors(const vector<double>& vector_1,
     const vector<double>& vector_2);
-double normalPoint(double mu, double sigma);
+double normalPoint(double mu, double sigma, int nu_points);
 string timeLog();
 
 class Field;
@@ -31,7 +31,7 @@ class Point
 {
 public:
     Point(double mX, double mY, double sX, double sY,
-        int idd, ofstream& logs_field, int id_cloudd);
+        int idd, ofstream& logs_field, int id_cloudd, int nu_points);
     void changeTo(Point point);
     void setID(int id);
     void setCoords(double x, double y);
@@ -328,10 +328,10 @@ private:
 class Field
 {
 public:
-    Field();
+    Field(vector<bool> if_logs, vector<string> name_logs);
     ~Field();
     bool createCloud(double mX, double mY,
-        double sX, double sY);
+        double sX, double sY, int nu_points);
     bool createCloud(vector<Point> points);
     void print(ofstream& out_f);
     void print(int i, ofstream& out_f);
@@ -370,6 +370,7 @@ private:
     vector<Cloud> clouds;
     Buffer buffer;
     void writeLog(const string& message);
+    
     bool readonly;
     void updateD();
     vector<BinMatrix> bin_matrixes;

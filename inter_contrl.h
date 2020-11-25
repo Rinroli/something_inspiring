@@ -10,7 +10,7 @@ using namespace std;
 class Controller
 {
 public:
-   explicit Controller();
+   explicit Controller(vector<bool> if_logs, vector<string> name_logs);
    ~Controller();
    bool showHelp();
    bool showInfoField();
@@ -35,7 +35,7 @@ public:
    bool createIncMatrix(double delta);
    bool createDBMatrix(double delta, int k);
    bool preHist(vector<string> args);
-   bool genCloud(double mX, double mY, double sX, double sY);
+   bool genCloud(double mX, double mY, double sX, double sY,  int nu_points);
    bool waveClusters(int i);
    bool displayGraph(int i);
    void writeLog(const string& message);
@@ -53,15 +53,35 @@ private:
 class Interface
 {
 public:
-   explicit Interface(int idd = 0);
+   explicit Interface(vector<bool> if_logs, vector<string> name_logs);
    ~Interface();
    bool runCommand(string command);
+   void printConfigs();
+   void changeConfigs();
+   void writeConfigs(vector<vector<string>>);
    void writeLog(const string &command);
 
 private:
-   int id;
    ofstream logs;
    Controller ctrl;
 };
 
 #endif // INTERFACE
+
+
+///// CONFIGS /////
+
+#if !defined(CONFIGS)
+#define CONFIGS
+
+class Configs
+{
+public:
+   void printConfigs();
+   void changeConfigs();
+   void writeConfigs(vector<vector<string>> all_changes);
+   vector<bool> if_logs{ true, true, true, true };  // f/c/i/a
+   vector<string> name_logs{"", "", "", ""};
+};
+
+#endif // CONFIGS

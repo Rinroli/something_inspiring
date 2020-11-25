@@ -9,7 +9,15 @@ List of commands can be found in [help.txt](../help.txt).
 
 ## Changelog
 
-### **Version 1.7.0 (11.11.2020)** - CURRENT VERSION
+### **Version 1.8.0 (26.11.2020)** - CURRENT VERSION
+
+Added:
+
+* Absolutly **new** config-system! Now you can disable (or enable) logs and save them to your own files. All your your configs will be saved for future use in [config.txt](../config.txt). Edits can be made either directly to the file or at the start of the program.
+
+* Now you can enter number of points at normally distributed cloud, in command *GC*
+
+### **Version 1.7.0 (11.11.2020)**
 
 Added:
 

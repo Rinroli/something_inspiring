@@ -1,5 +1,5 @@
 // Copyright (c) 2020 Rinroli
-// Version 1.7.0
+// Version 1.8.0
 
 
 #include <stdlib.h>
@@ -26,8 +26,20 @@ int main() {
     cout.width(8);
     cout.precision(4);
 
-    Interface interface;
     string command;
+    Configs configs;
+    configs.printConfigs();
+
+    cout << "Do you want to change configs? (Y/(N)) ";
+    getline(cin, command);
+    if (command == "Y") {
+        configs.changeConfigs();
+        cout << "All changes will take effect immediately." << endl <<
+            "Current configs are:" << endl << endl;
+        configs.printConfigs();
+    }
+
+    Interface interface(configs.if_logs, configs.name_logs);
 
     ifstream fin;
 

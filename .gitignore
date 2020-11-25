@@ -11,6 +11,7 @@
 *.py
 *debug
 !/help.txt
+!/config.txt
 /data/*
 /logs/*
 !/logs/changelog.md
