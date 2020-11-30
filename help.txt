@@ -52,6 +52,10 @@ Commands:
         number_of_clusters is initial number of clusters, default 25.
         Save steps in special folder /em/ and can be glued together into *gif*-image
             by bash script 'em_steps' or gnuplot 'gnu_em_anumate.plt' (with ellipses)
+    
+    FOREL (radius) make clustering using FOREL algorithm.
+        radius is algorithm parameter - the radius of the neighborhood of the center,
+            default is 0.05.
 
     ADDB (index_of_the_cloud) >> add (copy) cloud to the buffer by index. Default index is the last one.
 

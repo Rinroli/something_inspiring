@@ -32,6 +32,7 @@ class Point
 public:
     Point(double mX, double mY, double sX, double sY,
         int idd, ofstream& logs_field, int id_cloudd, int nu_points);
+    Point(const vector<double>& coords, int idd, int id_cloud, ofstream& logs);
     void changeTo(Point point);
     void setID(int id);
     void setCoords(double x, double y);
@@ -50,7 +51,7 @@ public:
     int id_cloud;
 
 private:
-    int a, b;
+    int a = -1, b = -1;
     string mark = "base";
     ofstream& logs_f;
     void writeLog(const string& message);
@@ -79,10 +80,13 @@ public:
     vector<double> getBox();
     vector<int> getCenter();
     void coutInfo();
+    void printGnu(ofstream& file_out);
     Point& operator[](int i);
+    Cluster& operator=(const Cluster& new_cluster);
     void clear();
     vector<double> findAverage();
     friend Cluster& operator+=(Cluster& left, int i);
+    friend Cluster& operator+=(Cluster& left, Point point);
     friend Buffer;
 
 protected:
@@ -322,6 +326,37 @@ private:
 #endif // EMALGORITHM
 
 
+#if !defined(FOREL)
+#define FOREL
+
+class Forel
+{
+public:
+    Forel(double R, const vector<int>& pointss, Field* p_field,
+        ofstream& logs_al, int g_stepp, int frame);
+    ~Forel();
+    vector<FindClusters> mainAlgorithm();
+private:
+    double R;
+    vector<int> points;
+    vector<vector<double>> centroids;
+    FindClusters f_clusters;
+    Forel* centroid_clustering = nullptr;
+    int step = 0, frame, global_step;
+    Field* p_field;
+    ofstream& logs_a;
+    Cluster oneNewCluster();
+    Cluster findNeighbourhood(const vector<double>& center);
+    void removePoint(int i);
+    Point& getPoint(int i);
+    void saveAnimation();
+    void newFrame();
+    void writeLog(const string& message);
+};
+
+#endif // FOREL
+
+
 #ifndef FIELD
 #define FIELD
 
@@ -341,10 +376,11 @@ public:
     int numPoints();
     double getDist(int ind1, int ind2);
     double getDist(Point point1, int ind2);
-    Cloud& operator[](int i);
+    Point& operator[](int i);
     FindClusters& getFCluster(int i);
     BinMatrix& getBinMatrix(int i);
     Point& getPoint(int i);
+    Cloud& getCloud(int i);
     bool addToBuffer(int i);
     bool putBuffer();
     bool emptyBuffer();
@@ -378,4 +414,3 @@ private:
 };
 
 #endif // FIELD
-

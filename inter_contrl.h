@@ -30,6 +30,7 @@ public:
    bool kMeans(int n);
    bool kerKMeans(int k, int p);
    bool eMAlgorithm(int n);
+   bool forelAlg(double R);
    bool enterAnalysis();
    bool minSpanTree();
    bool createIncMatrix(double delta);

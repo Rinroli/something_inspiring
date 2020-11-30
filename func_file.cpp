@@ -30,6 +30,11 @@ Point::Point(double mX, double mY, double sX, double sY,
     id_cloud = id_cloudd;
 }
 
+Point::Point(const vector<double>& coords, int idd, int id_cloudd, ofstream& logs)
+: x(coords[0]), y(coords[1]), id(idd), id_cloud(id_cloudd), logs_f(logs)
+{
+}
+
 // Changes point to the given one.
 void Point::changeTo(Point point) {
     x = point.x;
@@ -223,6 +228,28 @@ Cluster& operator+=(Cluster& left, int i)
     return left;
 }
 
+Cluster& Cluster::operator=(const Cluster& new_cluster) {
+    if (this == &new_cluster) {
+        return *this;
+    }
+    id = new_cluster.id;
+    id_points = new_cluster.id_points;
+    updated = new_cluster.updated;
+    R = new_cluster.R; D = new_cluster.D;
+    center = new_cluster.center;
+    box = new_cluster.box;
+    p_field = new_cluster.p_field;
+    p_field_points = new_cluster.p_field_points;
+    return *this;
+}
+
+// Add point to the cluster.
+Cluster& operator+=(Cluster& left, Point point)
+{
+    left.id_points.push_back(point.id);
+    return left;
+}
+
 // Clear vector of points' id.
 void Cluster::clear() {
     id_points.clear();
@@ -240,6 +267,12 @@ void Cluster::coutInfo() {
         cout << (*p_field_points)[center[i]] << ", ";
     }
     cout << "]" << endl;
+}
+
+void Cluster::printGnu(ofstream& ofile) {
+    for (int point_id : id_points) {
+        (*p_field).getPoint(point_id).print(ofile);
+    }
 }
 
 // Write log-message with date-time note.
@@ -578,9 +611,9 @@ double Field::getDist(Point point1, int ind2) {
 }
 
 // Provide access to clouds by index.
-Cloud& Field::operator[](int i) {
-    if (i == -1) { return clouds[numClouds() - 1]; }
-    return clouds[i];
+Point& Field::operator[](int i) {
+    if (i == -1) { return points[numPoints() - 1]; }
+    return points[i];
 }
 
 // Say if modee is readonly.
@@ -648,6 +681,11 @@ BinMatrix& Field::getBinMatrix(int i) {
 // Getter for points by index.
 Point& Field::getPoint(int i) {
     return points[i];
+}
+
+// Getter for clouds by index.
+Cloud& Field::getCloud(int i) {
+    return clouds[i];
 }
 
 // Return number of binary matrixes.

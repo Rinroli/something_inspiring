@@ -37,6 +37,8 @@ int main() {
         cout << "All changes will take effect immediately." << endl <<
             "Current configs are:" << endl << endl;
         configs.printConfigs();
+    } else {
+        configs.writeConfigs(vector<vector<string>>());
     }
 
     Interface interface(configs.if_logs, configs.name_logs);

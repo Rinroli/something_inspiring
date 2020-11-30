@@ -9,7 +9,13 @@ List of commands can be found in [help.txt](../help.txt).
 
 ## Changelog
 
-### **Version 1.8.0 (26.11.2020)** - CURRENT VERSION
+### **Version 1.9.0 (30.11.2020)** - CURRENT VERSION
+
+Added:
+
+* The first step for *FOREL* algorithm - work with points, but not with centers and etc.
+
+### **Version 1.8.0 (26.11.2020)**
 
 Added:
 

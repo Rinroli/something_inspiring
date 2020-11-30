@@ -93,7 +93,7 @@ bool Controller::showInfoField() {
          << field.numClouds() << "\tNumber of FindClusters: " << field.numFClusters() << endl;
     cout << "Clouds:" << endl;
     for (int cl = 0; cl < field.numClouds(); ++cl) {
-        field[cl].coutInfo();
+        field.getCloud(cl).coutInfo();
     }
     cout << "Number of binary matrixes " << field.numBinMatrix() << endl;
 
@@ -230,7 +230,7 @@ bool Controller::preHist(vector<string> args) {
             cout << "No cloud, no histogram." << endl;
             return false;
         }
-        return saveHist(field[first_arg]);
+        return saveHist(field.getCloud(first_arg));
     }
 }
 
@@ -470,6 +470,24 @@ bool Controller::eMAlgorithm(int n) {
     return true;
 }
 
+// Create clusteres by FOREL-algorithm.
+bool Controller::forelAlg(double R) {
+    writeLog("Begin FOREL");
+    if (not field.ifReadonly()) { field.enterAnalysis(); }
+    vector<int> point_id;
+    for (int ind = 0; ind < field.numPoints(); ind++) {
+        point_id.push_back(ind);
+    }
+    Forel new_forel(R, point_id, &field, field.logs_a, 0, 0);
+    vector<FindClusters> result = new_forel.mainAlgorithm();
+    for (FindClusters one_fc : result) {
+        field.addFC(one_fc);
+    }
+    writeLog("\tEnd FOREL");
+    cout << "DONE!" << endl;
+    return true;
+}
+
 // Print to the file all points and edges by binary matrix.
 bool Controller::displayGraph(int i) {
     writeLog("Begin displayPoints");
@@ -578,6 +596,11 @@ bool Interface::runCommand(string command)
         else if (com == "KERKMEANS") {
             if (args.size() == 0) { result = ctrl.kerKMeans(25, 5); }
             else { result = ctrl.kerKMeans(stod(args[0]), stod(args[1])); }
+        }
+
+        else if (com == "FOREL") {
+            if (args.size() == 0) { result = ctrl.forelAlg(0.05); }
+            else { result = ctrl.forelAlg(stod(args[0])); }
         }
 
         else if (com == "EM") {
@@ -734,6 +757,7 @@ void Configs::changeConfigs() {
         } else {result_string.push_back(".txt");}
 
         all_changes.push_back(result_string);
+        result_string.clear();
 
         cout << "\nOne more time? \nf/c/i/a or exit\n> ";
         getline(cin, command);
@@ -749,7 +773,7 @@ void Configs::writeConfigs(vector<vector<string>> all_changes) {
     vector<vector<string>> all_configs;
     string readline;
     int cur_line = 0;
-    while (cur_line < 4) {  // Standart split line, c++ style
+    while (cur_line < 4) {  // Standart split method, c++ style
         all_configs.push_back(vector <string>());
         getline(conf_input, readline);
         char* s = new char[readline.size() + 1];

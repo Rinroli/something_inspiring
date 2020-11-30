@@ -10,7 +10,7 @@
 
 using namespace std;
 
-#define EPS 0.0001
+#define EPS 0.001
 #define PI 3.14159265
 #define LIMIT 250
 
@@ -638,6 +638,140 @@ void EMAlgorithm::writeLog(const string& message) {
 }
 
 
+///// FOREL /////
+
+Forel::Forel(double RR, const vector<int>& pointss, Field* p_fieldd,
+        ofstream& logs_al, int gl_stepp = 0, int framee = 0)
+: points(pointss), logs_a(logs_al), R(RR), global_step(gl_stepp), frame(framee),
+    f_clusters(logs_al, "FOREL, step #" + to_string(gl_stepp)), p_field(p_fieldd)
+{
+    writeLog("INIT");
+}
+
+Forel::~Forel() {
+    points.clear();
+    for (vector<double> cent : centroids) {
+        cent.clear();
+    }
+    centroids.clear();
+}
+
+// Call algorithm.
+vector <FindClusters> Forel::mainAlgorithm() {
+    writeLog("Start mainAlgorithml");
+
+    while (points.size() != 0) {
+        f_clusters += oneNewCluster();
+        writeLog("New cluster #" + to_string(step) + " created");
+    }
+
+    cout << "Find " << f_clusters.numClusters() << " clusters" << endl;
+    
+    return  vector<FindClusters> {f_clusters};
+}
+
+// Getter for point by index in forel-points.
+Point& Forel::getPoint(int i) {
+    return (*p_field)[points[i]];
+}
+
+// Remove point from unclustered by id.
+void Forel::removePoint(int i) {
+    for (int ind_in_unclust = 0; ind_in_unclust < points.size(); ind_in_unclust++) {
+        if (i == points[ind_in_unclust]) {
+            points.erase(points.begin() + ind_in_unclust);
+            return;
+        }
+    }
+}
+
+// Find new Cluster and delete it from list.
+Cluster Forel::oneNewCluster() {
+    int new_center_id = randInt(points.size());
+    vector<double> center = getPoint(new_center_id).getCoord();
+    centroids.push_back(center);
+    newFrame();
+    Cluster neigh_cluster = findNeighbourhood(center);
+    vector<double> new_center = neigh_cluster.findAverage();
+    centroids.pop_back();
+    centroids.push_back(new_center);
+    newFrame();
+    while (distPoints(center, new_center) > EPS) {
+        center = new_center;
+        neigh_cluster = findNeighbourhood(center);
+        new_center = neigh_cluster.findAverage();
+        centroids.pop_back();
+        centroids.push_back(new_center);
+        newFrame();
+    }
+    for (int ind = 0; ind < neigh_cluster.numPoints(); ind++) {
+        removePoint(neigh_cluster[ind].id);
+    }
+    step++;
+    return neigh_cluster;
+}
+
+// Find all points in the R-neighbourhood of the point
+Cluster Forel::findNeighbourhood(const vector<double>& center) {
+    Cluster res(step, logs_a, p_field);
+    for (int other_point : points) {
+        if (distPoints((*p_field)[other_point], center) < R) {
+            res += other_point;
+        }
+    }
+    return res;
+}
+
+void Forel::saveAnimation() {
+    ifstream anim_templ("data/templates/forel_animate.template");
+    ofstream anim("data/gnu_forel_animate.plt");
+
+    string new_line;
+    while (!anim_templ.eof()) {
+        getline(anim_templ, new_line);
+        anim << new_line << endl;
+    }
+    anim << "do for [i=0:" << to_string(frame - 1) << "] {" << endl << "\tplot ";
+    for (int ind_k = 0; ind_k < step; ind_k++) {
+        anim << "\t\t'data/forel/clusters_'.i.'.plt' index " << to_string(ind_k) <<
+            " w p title \"#" << to_string(ind_k) << "\",\\" << endl;
+    }
+    anim << "\t\t'data/forel/circles_'.i.'.plt' using 1:2:3 with circles lc rgb \"red\" title \"circles\"\n}";
+}
+
+// Create new frame 'forel/clusters_i.plt' and 'forel/circles_i.plt'
+void Forel::newFrame() {
+    writeLog("New frame");
+    ofstream file_clu("data/forel/clusters_" + to_string(frame) + ".plt");
+    ofstream file_circ("data/forel/circles_" + to_string(frame) + ".plt");
+
+    for (int unclust_p : points) {
+        (*p_field)[unclust_p].print(file_clu);
+    }
+
+    file_clu << endl << endl;
+
+    for (int nu_clu = 0; nu_clu < f_clusters.numClusters(); nu_clu++) {
+        f_clusters[nu_clu].printGnu(file_clu);
+
+        file_clu << endl << endl;
+    }
+
+    for (vector<double> cent : centroids) {
+        file_circ << cent[0] << " " << cent[1] << " " << R << endl;
+    }
+
+    file_circ.close();
+    file_clu.close();
+    frame++;
+}
+
+// Write log-message with date-time note.
+void Forel::writeLog(const string& message) {
+    logs_a << timeLog() << "FOREL: " << message << endl;
+}
+
+
 ///// FUNCTIONS /////
 
 // Return determinant for 2d matrix.
@@ -653,7 +787,7 @@ vector<vector<double>> eigen(const vector<vector<double>>& sigma) {
     vector<double> eigenvalues = findEigenvalues(sigma);
     vector<vector<double>> result;
     if (eigenvalues.size() == 0) { return result; }
-    
+
     result.push_back(vector<double>{a - eigenvalues[0], c});
     result.push_back(vector<double>{a - eigenvalues[1], c});
     result.push_back(eigenvalues);
