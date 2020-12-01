@@ -14,7 +14,7 @@ List of commands can be found in [help.txt](../help.txt).
 Added:
 
 * Full *FOREL* algorithm! Works at three levels - points, centers and centers of clusters of centers.
-  Make gif-image with all levels. Also add 3 groups of clusters - 3 FindClusters - for each step.
+  Make *gif*-image with all levels. Also add 3 groups of clusters - 3 FindClusters - for each step.
 
 ### **Version 1.9.0 (30.11.2020)**
 
