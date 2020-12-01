@@ -119,10 +119,28 @@ Cluster::Cluster(int cur_id_cloud, ofstream& logs_field, Field* field)
     writeLog("INIT >> id(" + to_string(id) + ")");
 }
 
+Cluster::Cluster(int cur_id_cloud, ofstream& logs_field, Field* field, vector<Point>* p_field_pointss)
+    : logs_a{ logs_field }, p_field_points(p_field_pointss)
+{
+    p_field = field;
+    id = cur_id_cloud;
+    writeLog("INIT >> id(" + to_string(id) + ")");
+}
+
 Cluster::Cluster(int idd, const vector<int> &points, ofstream& logs_field, Field* field)
     : logs_a{ logs_field }, id_points(points)
 {
     p_field_points = &(field->points);
+    p_field = field;
+    id = idd;
+
+    writeLog("INIT >> id(" + to_string(id) + ")");
+}
+
+Cluster::Cluster(int idd, const vector<int>& points, ofstream& logs_field,
+    Field* field, vector<Point>* p_field_pointss)
+    : logs_a{ logs_field }, id_points(points), p_field_points(p_field_pointss)
+{
     p_field = field;
     id = idd;
 
@@ -271,7 +289,7 @@ void Cluster::coutInfo() {
 
 void Cluster::printGnu(ofstream& ofile) {
     for (int point_id : id_points) {
-        (*p_field).getPoint(point_id).print(ofile);
+        (*p_field_points)[point_id].print(ofile);
     }
 }
 
@@ -571,7 +589,7 @@ void Field::print(int i, ofstream& out_f)
     for (int ind_cl = 0; ind_cl < cur_fd.numClusters(); ind_cl++) {
         Cluster cur_cl = cur_fd[ind_cl];
         for (int ind_poi = 0; ind_poi < cur_cl.numPoints(); ind_poi++) {
-            points[cur_cl[ind_poi].id].print(out_f);
+            (*(cur_cl.p_field_points))[cur_cl[ind_poi].id].print(out_f);
         }
         out_f << endl
             << endl

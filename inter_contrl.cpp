@@ -474,11 +474,11 @@ bool Controller::eMAlgorithm(int n) {
 bool Controller::forelAlg(double R) {
     writeLog("Begin FOREL");
     if (not field.ifReadonly()) { field.enterAnalysis(); }
-    vector<int> point_id;
-    for (int ind = 0; ind < field.numPoints(); ind++) {
-        point_id.push_back(ind);
-    }
-    Forel new_forel(R, point_id, &field, field.logs_a, 0, 0);
+    // vector<int> point_id;
+    // for (int ind = 0; ind < field.numPoints(); ind++) {
+    //     point_id.push_back(ind);
+    // }
+    Forel new_forel(R, field.points, &field, field.logs_a, 0, 0, 0);
     vector<FindClusters> result = new_forel.mainAlgorithm();
     for (FindClusters one_fc : result) {
         field.addFC(one_fc);

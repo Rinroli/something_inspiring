@@ -640,19 +640,19 @@ void EMAlgorithm::writeLog(const string& message) {
 
 ///// FOREL /////
 
-Forel::Forel(double RR, const vector<int>& pointss, Field* p_fieldd,
-        ofstream& logs_al, int gl_stepp = 0, int framee = 0)
-: points(pointss), logs_a(logs_al), R(RR), global_step(gl_stepp), frame(framee),
-    f_clusters(logs_al, "FOREL, step #" + to_string(gl_stepp)), p_field(p_fieldd)
+Forel::Forel(double RR, const vector<Point>& real_pointss, Field* p_fieldd,
+        ofstream& logs_al, int gl_stepp = 0, int framee = 0, int max_clusterss = 0)
+: real_points(real_pointss), logs_a(logs_al), R(RR), global_step(gl_stepp), frame(framee),
+    f_clusters(logs_al, "FOREL, step #" + to_string(gl_stepp)), p_field(p_fieldd), max_clusters(max_clusterss)
 {
     writeLog("INIT");
+    for (int ind = 0; ind < real_points.size(); ind++) {
+        points.push_back(ind);
+    }
 }
 
 Forel::~Forel() {
     points.clear();
-    for (vector<double> cent : centroids) {
-        cent.clear();
-    }
     centroids.clear();
 }
 
@@ -661,18 +661,32 @@ vector <FindClusters> Forel::mainAlgorithm() {
     writeLog("Start mainAlgorithml");
 
     while (points.size() != 0) {
+        if (step > 500) {
+            cout << "To many clusters!" << endl;
+            break;
+        }
         f_clusters += oneNewCluster();
+        newFrame();
         writeLog("New cluster #" + to_string(step) + " created");
     }
 
     cout << "Find " << f_clusters.numClusters() << " clusters" << endl;
-    
-    return  vector<FindClusters> {f_clusters};
+
+    if (global_step == 2) {
+        saveAnimation();
+        return vector<FindClusters> {f_clusters};
+    }
+    if (step > max_clusters) { max_clusters = step; }
+    Forel next_level(R * 3, centroids, p_field, logs_a, global_step + 1, frame, max_clusters);
+    vector<FindClusters> result = next_level.mainAlgorithm();
+    result.push_back(f_clusters);
+
+    return result;
 }
 
 // Getter for point by index in forel-points.
 Point& Forel::getPoint(int i) {
-    return (*p_field)[points[i]];
+    return real_points[points[i]];
 }
 
 // Remove point from unclustered by id.
@@ -689,20 +703,27 @@ void Forel::removePoint(int i) {
 Cluster Forel::oneNewCluster() {
     int new_center_id = randInt(points.size());
     vector<double> center = getPoint(new_center_id).getCoord();
-    centroids.push_back(center);
+    centroids.push_back(Point(center, step, -1, logs_a));
     newFrame();
     Cluster neigh_cluster = findNeighbourhood(center);
     vector<double> new_center = neigh_cluster.findAverage();
     centroids.pop_back();
-    centroids.push_back(new_center);
+    centroids.push_back(Point(new_center, step, -1, logs_a));
     newFrame();
+    int tmp_counter = 0;
     while (distPoints(center, new_center) > EPS) {
+        if (tmp_counter > 100) {
+            cout << "unstable" << endl;
+            break;
+        }
         center = new_center;
+        Cluster tmp(neigh_cluster);
         neigh_cluster = findNeighbourhood(center);
         new_center = neigh_cluster.findAverage();
         centroids.pop_back();
-        centroids.push_back(new_center);
+        centroids.push_back(Point(new_center, step, -1, logs_a));
         newFrame();
+        tmp_counter++;
     }
     for (int ind = 0; ind < neigh_cluster.numPoints(); ind++) {
         removePoint(neigh_cluster[ind].id);
@@ -713,9 +734,9 @@ Cluster Forel::oneNewCluster() {
 
 // Find all points in the R-neighbourhood of the point
 Cluster Forel::findNeighbourhood(const vector<double>& center) {
-    Cluster res(step, logs_a, p_field);
+    Cluster res(step, logs_a, p_field, &real_points);
     for (int other_point : points) {
-        if (distPoints((*p_field)[other_point], center) < R) {
+        if (distPoints(real_points[other_point], center) < R) {
             res += other_point;
         }
     }
@@ -732,7 +753,7 @@ void Forel::saveAnimation() {
         anim << new_line << endl;
     }
     anim << "do for [i=0:" << to_string(frame - 1) << "] {" << endl << "\tplot ";
-    for (int ind_k = 0; ind_k < step; ind_k++) {
+    for (int ind_k = 0; ind_k < max_clusters; ind_k++) {
         anim << "\t\t'data/forel/clusters_'.i.'.plt' index " << to_string(ind_k) <<
             " w p title \"#" << to_string(ind_k) << "\",\\" << endl;
     }
@@ -746,7 +767,9 @@ void Forel::newFrame() {
     ofstream file_circ("data/forel/circles_" + to_string(frame) + ".plt");
 
     for (int unclust_p : points) {
-        (*p_field)[unclust_p].print(file_clu);
+        Point tmp = real_points[unclust_p];
+        file_clu << tmp.x << " " << tmp.y << endl;
+        // real_points[unclust_p].print(file_clu);
     }
 
     file_clu << endl << endl;
@@ -757,8 +780,8 @@ void Forel::newFrame() {
         file_clu << endl << endl;
     }
 
-    for (vector<double> cent : centroids) {
-        file_circ << cent[0] << " " << cent[1] << " " << R << endl;
+    for (Point cent : centroids) {
+        file_circ << cent.x << " " << cent.y << " " << R << endl;
     }
 
     file_circ.close();
@@ -768,7 +791,7 @@ void Forel::newFrame() {
 
 // Write log-message with date-time note.
 void Forel::writeLog(const string& message) {
-    logs_a << timeLog() << "FOREL: " << message << endl;
+    logs_a << timeLog() << "FOREL #" << global_step << " : " << message << endl;
 }
 
 
