@@ -53,7 +53,7 @@ Commands:
         Save steps in special folder /em/ and can be glued together into *gif*-image
             by bash script 'em_steps' or gnuplot 'gnu_em_anumate.plt' (with ellipses)
     
-    FOREL (radius) make clustering using FOREL algorithm.
+    FOREL (radius) make clustering using FOREL algorithm with 3 levels.
         radius is algorithm parameter - the radius of the neighborhood of the center,
             default is 0.05.
 

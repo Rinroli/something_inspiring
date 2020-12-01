@@ -674,15 +674,44 @@ vector <FindClusters> Forel::mainAlgorithm() {
 
     if (global_step == 2) {
         saveAnimation();
+        exported_points.push_back(f_clusters);
         return vector<FindClusters> {f_clusters};
     }
-    if (step > max_clusters) { max_clusters = step; }
-    Forel next_level(R * 3, centroids, p_field, logs_a, global_step + 1, frame, max_clusters);
-    vector<FindClusters> result = next_level.mainAlgorithm();
-    result.push_back(f_clusters);
 
-    return result;
+    if (step > max_clusters) { max_clusters = step; }
+    centroid_clustering = new Forel(R * 3, centroids, p_field,
+        logs_a, global_step + 1, frame, max_clusters);
+    exported_points = (*centroid_clustering).mainAlgorithm();
+
+    exportPoints();
+
+    return exported_points;
 }
+
+// Export points to field-points.
+// Remember what points was in the neighbourhoods.
+void Forel::exportPoints() {
+    if (global_step == 2) {
+        return;
+    }
+    vector<FindClusters> new_exp_poi;
+    for (int ind_exp = 0; ind_exp < exported_points.size(); ind_exp++) {
+        FindClusters new_fc(logs_a, "FOREL, exported, level #" + to_string(ind_exp));
+        for (Cluster old_clu : (exported_points[ind_exp]).clusters) {
+            Cluster new_clu(step, logs_a, p_field, &real_points);
+            for (int ind_point : old_clu.id_points) {
+                for (int new_point_ind : f_clusters[ind_point].id_points) {
+                    new_clu += new_point_ind;
+                }
+            }
+            new_fc += new_clu;
+        }
+        new_exp_poi.push_back(new_fc);
+    }
+    exported_points.swap(new_exp_poi);
+    exported_points.push_back(f_clusters);
+}
+
 
 // Getter for point by index in forel-points.
 Point& Forel::getPoint(int i) {
@@ -769,7 +798,6 @@ void Forel::newFrame() {
     for (int unclust_p : points) {
         Point tmp = real_points[unclust_p];
         file_clu << tmp.x << " " << tmp.y << endl;
-        // real_points[unclust_p].print(file_clu);
     }
 
     file_clu << endl << endl;

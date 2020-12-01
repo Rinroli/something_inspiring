@@ -474,13 +474,12 @@ bool Controller::eMAlgorithm(int n) {
 bool Controller::forelAlg(double R) {
     writeLog("Begin FOREL");
     if (not field.ifReadonly()) { field.enterAnalysis(); }
-    // vector<int> point_id;
-    // for (int ind = 0; ind < field.numPoints(); ind++) {
-    //     point_id.push_back(ind);
-    // }
     Forel new_forel(R, field.points, &field, field.logs_a, 0, 0, 0);
     vector<FindClusters> result = new_forel.mainAlgorithm();
     for (FindClusters one_fc : result) {
+        for (int clu_ind = 0; clu_ind < one_fc.numClusters(); clu_ind++) {
+            one_fc.clusters[clu_ind].p_field_points = &(field.points);
+        }
         field.addFC(one_fc);
     }
     writeLog("\tEnd FOREL");
@@ -678,7 +677,7 @@ bool Interface::runCommand(string command)
     }
     catch (...) {
         result = false;
-        cout << "Somethig wrong, sorry."
+        cout << "Somethig wrong, sorry. "
              << "Would you like to get some HELP?" << endl;
     }
     if (result) { writeLog("\tCorrect <" + command + ">"); } 

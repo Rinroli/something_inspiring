@@ -9,11 +9,18 @@ List of commands can be found in [help.txt](../help.txt).
 
 ## Changelog
 
-### **Version 1.9.0 (30.11.2020)** - CURRENT VERSION
+### **Version 1.9.1 (1.12.2020)** - CURRENT VERSION
 
 Added:
 
-* The first step for *FOREL* algorithm - work with points, but not with centers and etc.
+* Full *FOREL* algorithm! Works at three levels - points, centers and centers of clusters of centers.
+  Make gif-image with all levels. Also add 3 groups of clusters - 3 FindClusters - for each step.
+
+### **Version 1.9.0 (30.11.2020)**
+
+Added:
+
+* The first level for *FOREL* algorithm - work with points, but not with centers and etc.
 
 ### **Version 1.8.0 (26.11.2020)**
 

@@ -589,7 +589,8 @@ void Field::print(int i, ofstream& out_f)
     for (int ind_cl = 0; ind_cl < cur_fd.numClusters(); ind_cl++) {
         Cluster cur_cl = cur_fd[ind_cl];
         for (int ind_poi = 0; ind_poi < cur_cl.numPoints(); ind_poi++) {
-            (*(cur_cl.p_field_points))[cur_cl[ind_poi].id].print(out_f);
+            int tmp = cur_cl.id_points[ind_poi];
+            (*(cur_cl.p_field_points))[tmp].print(out_f);
         }
         out_f << endl
             << endl

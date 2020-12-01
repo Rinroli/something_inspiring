@@ -23,6 +23,7 @@ class Field;
 class Controller;
 class Tree;
 class Buffer;
+class Forel;
 
 #ifndef POINT
 #define POINT
@@ -92,8 +93,9 @@ public:
     friend Cluster& operator+=(Cluster& left, int i);
     friend Cluster& operator+=(Cluster& left, Point point);
     friend Buffer;
+    friend Forel;
 
-protected:
+// protected:
     vector<int> id_points;
     ofstream& logs_a;
     void writeLog(const string& message);
@@ -168,6 +170,8 @@ public:
     const string source;
     int id = 0;
     friend void operator+=(FindClusters& left, Cluster new_cl);
+    friend Forel;
+    friend Controller;
 
 private:
     vector<Cluster> clusters;
@@ -345,6 +349,7 @@ private:
     vector<Point> real_points;
     vector<Point> centroids;
     FindClusters f_clusters;
+    vector<FindClusters> exported_points;
     Forel* centroid_clustering = nullptr;
     int step = 0, frame, global_step, max_clusters;
     Field* p_field;
@@ -353,6 +358,7 @@ private:
     Cluster findNeighbourhood(const vector<double>& center);
     void removePoint(int i);
     Point& getPoint(int i);
+    void exportPoints();
     void saveAnimation();
     void newFrame();
     void writeLog(const string& message);
