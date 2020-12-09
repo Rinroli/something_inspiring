@@ -251,6 +251,14 @@ Cluster& operator+=(Cluster& left, int i)
     return left;
 }
 
+// Add point with absolut index i to the cluster.
+Cluster& operator+=(Cluster& left, Cluster& right)
+{
+    (left.id_points).insert((left.id_points).end(), (right.id_points).begin(),
+        (right.id_points).end());
+    return left;
+}
+
 Cluster& Cluster::operator=(const Cluster& new_cluster) {
     if (this == &new_cluster) {
         return *this;

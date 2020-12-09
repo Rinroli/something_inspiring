@@ -56,10 +56,14 @@ Commands:
     FOREL (radius) make clustering using FOREL algorithm with 3 levels.
         radius is algorithm parameter - the radius of the neighborhood of the center,
             default is 0.05.
+        Save steps in special folder /forel/ and can be glued together into *gif*-image
+            by bash script 'forel_steps' or gnuplot 'gnu_forel_anumate.plt'
 
     HIERARCH (number_of_clusters) >> make clustering using Hierarchical cluster analysis (or HCA).
         The linkage criterion is *Unweighted average linkage clustering* (or *UPGMA*).
         number_of_clusters is initial number of clusters, default 5.
+        Save steps in special folder /hierarch/ and can be glued together into *gif*-image
+            by bash script 'hie_steps' or gnuplot 'gnu_hierarch_anumate.plt'
 
     ADDB (index_of_the_cloud) >> add (copy) cloud to the buffer by index. Default index is the last one.
 

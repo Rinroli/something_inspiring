@@ -9,7 +9,13 @@ List of commands can be found in [help.txt](../help.txt).
 
 ## Changelog
 
-### **Version 1.10.0 (1.12.2020)** - CURRENT VERSION
+### **Version 1.10.1 (9.12.2020)** - CURRENT VERSION
+
+Added:
+
+* *Gif*-images for *hierarchial* algorithm.
+
+### **Version 1.10.0 (9.12.2020)**
 
 Added:
 

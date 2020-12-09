@@ -779,6 +779,7 @@ Cluster Forel::findNeighbourhood(const vector<double>& center) {
     return res;
 }
 
+// Save command file for animation for gnuplot.
 void Forel::saveAnimation() {
     ifstream anim_templ("data/templates/forel_animate.template");
     ofstream anim("data/gnu_forel_animate.plt");
@@ -837,9 +838,11 @@ Hierarch::Hierarch(int kk, Field* p_fieldd, ofstream& logs_a)
     writeLog("ININ");
     num_clusters = p_field->numPoints();
     for (int ind_poi = 0; ind_poi < num_clusters; ind_poi++) {
-        Tree* tmp = new Tree(p_field->getPoint(ind_poi), logs);
-        current_trees.push_back(tmp);
-        current_clusters.push_back(vector<int>{ind_poi});
+        Tree* tmp_tree = new Tree(p_field->getPoint(ind_poi), logs);
+        current_trees.push_back(tmp_tree);
+        
+        Cluster* tmp = new Cluster(ind_poi, vector<int> {ind_poi}, logs, p_field);
+        current_clusters.push_back(*tmp);
     }
     dist_matrix.resize(num_clusters);
     for (int ind = 0; ind < num_clusters; ind++) {
@@ -875,17 +878,17 @@ FindClusters Hierarch::mainAlgorithm() {
         current_trees.erase(current_trees.begin() + find_ind[1]);
         current_trees[find_ind[0]] = tmp_tree;
 
-        current_clusters[find_ind[0]].insert(current_clusters[find_ind[0]].end(), current_clusters[find_ind[1]].begin(),
-            current_clusters[find_ind[1]].end());
+        current_clusters[find_ind[0]] += current_clusters[find_ind[1]];
         current_clusters.erase(current_clusters.begin() + find_ind[1]);
         num_clusters--;
         step++;
+        newFrame();
     }
-    int ind_clu = 0;
-    for (vector<int> pre_cl : current_clusters) {
-        Cluster* tmp = new Cluster(ind_clu, pre_cl, logs, p_field); 
-        result += *tmp;
+    for (int ind_clu = 0; ind_clu < k; ind_clu++) {
+        result += current_clusters[ind_clu];
     }
+
+    saveAnimation();
     return result;
 }
 
@@ -908,12 +911,15 @@ vector<int> Hierarch::findMinDist() {
 // Find complicated distance between clusters
 double Hierarch::getDist(int ind, int sec_ind) {
     double sum_dist = 0;
-    for (int ind_poi : current_clusters[ind]) {
-        for (int ind_sec_poi : current_clusters[sec_ind]) {
-            sum_dist += p_field->getDist(ind_poi, ind_sec_poi);
+    int size_f = current_clusters[ind].numPoints();
+    int size_s = current_clusters[sec_ind].numPoints();
+    for (int in_f = 0; in_f < size_f; in_f++) {
+        for (int in_s = 0; in_s < size_s; in_s++) {
+            sum_dist += p_field->getDist(current_clusters[ind][in_f].id,
+                                         current_clusters[sec_ind][in_s].id);
         }
     }
-    sum_dist /= (current_clusters[ind].size() * current_clusters[sec_ind].size());
+    sum_dist /= (size_f * size_s);
     return sum_dist;
 }
 
@@ -922,8 +928,8 @@ vector<int> Hierarch::recountDistMatrix(const vector<int>& find_ind) {
     int min_i = (find_ind[0] < find_ind[1]) ? find_ind[0] : find_ind[1];
     int max_i = (find_ind[0] > find_ind[1]) ? find_ind[0] : find_ind[1];
 
-    int min_size = current_clusters[min_i].size();
-    int max_size = current_clusters[max_i].size();
+    int min_size = current_clusters[min_i].numPoints();
+    int max_size = current_clusters[max_i].numPoints();
 
     for (int ind_other = 0; ind_other < num_clusters; ind_other++) {
         if (ind_other != min_i && ind_other != max_i) {
@@ -943,6 +949,38 @@ vector<int> Hierarch::recountDistMatrix(const vector<int>& find_ind) {
     }
 
     return vector<int>{min_i, max_i};
+}
+
+// Save command file for animation for gnuplot.
+void Hierarch::saveAnimation() {
+    ifstream anim_templ("data/templates/hierarch_animate.template");
+    ofstream anim("data/gnu_hierarch_animate.plt");
+
+    string new_line;
+    while (!anim_templ.eof()) {
+        getline(anim_templ, new_line);
+        anim << new_line << endl;
+    }
+    anim << "do for [i=0:" << to_string(frame - 1) << "] {" << endl << "\tplot ";
+    for (int ind_k = 0; ind_k < p_field->numPoints(); ind_k++) {
+        anim << "\t\t'data/hierarch/frame_'.i.'.plt' index " << to_string(ind_k) <<
+            " w p title \"#" << to_string(ind_k) << "\",\\" << endl;
+    }
+    anim << "}" << endl;
+}
+
+// Create new frame at 'data/hierarch/frame_i.plt'
+void Hierarch::newFrame() {
+    writeLog("New frame");
+    ofstream file_clu("data/hierarch/frame_" + to_string(frame) + ".plt");
+
+    for (Cluster clu : current_clusters) {
+        clu.printGnu(file_clu);
+        file_clu << endl << endl;
+    }
+
+    file_clu.close();
+    frame++;
 }
 
 // Write log-message with date-time note.
