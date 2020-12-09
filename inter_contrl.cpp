@@ -487,6 +487,17 @@ bool Controller::forelAlg(double R) {
     return true;
 }
 
+// Create clusteres by Hierarch-algorithm.
+bool Controller::hierarchClustering(int k) {
+    writeLog("Begin HIERARCH");
+    if (not field.ifReadonly()) { field.enterAnalysis(); }
+    Hierarch new_hierarch(k, &field, field.logs_a);
+    field.addFC(new_hierarch.mainAlgorithm());
+    writeLog("\tEnd HIERARCH");
+    cout << "DONE!" << endl;
+    return true;
+}
+
 // Print to the file all points and edges by binary matrix.
 bool Controller::displayGraph(int i) {
     writeLog("Begin displayPoints");
@@ -600,6 +611,11 @@ bool Interface::runCommand(string command)
         else if (com == "FOREL") {
             if (args.size() == 0) { result = ctrl.forelAlg(0.05); }
             else { result = ctrl.forelAlg(stod(args[0])); }
+        }
+
+        else if (com == "HIERARCH") {
+            if (args.size() == 0) { result = ctrl.hierarchClustering(5); }
+            else { result = ctrl.hierarchClustering(stoi(args[0])); }
         }
 
         else if (com == "EM") {

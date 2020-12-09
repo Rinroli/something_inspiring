@@ -123,13 +123,20 @@ Tree::Tree(Point& pointt, ofstream& logs_al, double dist)
     writeLog("INIT (of point #" + to_string(point.id) + ")");
 }
 
+Tree::Tree(Point& pointt, Tree* f_tree, Tree* s_tree, ofstream& logs_al)
+: point(pointt), logs_a(logs_al) {
+    neighbors.push_back(f_tree);
+    neighbors.push_back(s_tree);
+    writeLog("INIT (binary tree, vertex)");
+}
+
 Tree::~Tree() {
     neighbors.clear();
 }
 
 // Add new vertex to the current Tree.
 void Tree::addVert(Point& new_point, double dist) {
-    Tree new_vert(new_point, logs_a, dist);
+    Tree* new_vert = new Tree(new_point, logs_a, dist);
     neighbors.push_back(new_vert);
 }
 
@@ -140,15 +147,15 @@ int Tree::numTrees() {
 
 //Getter for neighboring vertex.
 Tree Tree::operator[](int i) {
-    return neighbors[i];
+    return *(neighbors[i]);
 }
 
 // Find vertex with index.
 Tree* Tree::findIndex(int i) {
     for (int nei = 0; nei < neighbors.size(); nei++) {
-        if (neighbors[nei].point.id == i) { return &neighbors[nei]; }
+        if ((neighbors[nei])->point.id == i) { return neighbors[nei]; }
 
-        Tree* result = neighbors[nei].findIndex(i);
+        Tree* result = neighbors[nei]->findIndex(i);
         if (result != NULL) { return result; }
     }
     return NULL;
@@ -156,11 +163,11 @@ Tree* Tree::findIndex(int i) {
 
 // Print tree to the file.
 void Tree::displayTree(ofstream& out_f) {
-    for (Tree nei : neighbors) {
+    for (Tree* nei : neighbors) {
         point.print(out_f);
-        nei.point.print(out_f);
+        nei->point.print(out_f);
         out_f << endl << endl;
-        nei.displayTree(out_f);
+        nei->displayTree(out_f);
     }
 }
 
@@ -168,8 +175,8 @@ void Tree::displayTree(ofstream& out_f) {
 void Tree::print(int indent) {
     string cur_indent(indent, '\t');
     cout << cur_indent << point << endl;
-    for (Tree nei : neighbors) {
-        nei.print(indent + 1);
+    for (Tree* nei : neighbors) {
+        nei->print(indent + 1);
     }
 }
 
@@ -177,8 +184,8 @@ void Tree::print(int indent) {
 vector<double> Tree::allDist() {
     vector<double> all_dist;
     all_dist.push_back(dist_parent);
-    for (Tree nei : neighbors) {
-        vector<double> res = nei.allDist();
+    for (Tree* nei : neighbors) {
+        vector<double> res = nei->allDist();
         all_dist.insert(all_dist.end(), res.begin(), res.end());
     }
     return all_dist;
@@ -643,7 +650,7 @@ void EMAlgorithm::writeLog(const string& message) {
 Forel::Forel(double RR, const vector<Point>& real_pointss, Field* p_fieldd,
         ofstream& logs_al, int gl_stepp = 0, int framee = 0, int max_clusterss = 0)
 : real_points(real_pointss), logs_a(logs_al), R(RR), global_step(gl_stepp), frame(framee),
-    f_clusters(logs_al, "FOREL, step #" + to_string(gl_stepp)), p_field(p_fieldd), max_clusters(max_clusterss)
+    f_clusters(logs_al, "FOREL, step #" + to_string(2 - gl_stepp)), p_field(p_fieldd), max_clusters(max_clusterss)
 {
     writeLog("INIT");
     for (int ind = 0; ind < real_points.size(); ind++) {
@@ -822,6 +829,126 @@ void Forel::writeLog(const string& message) {
     logs_a << timeLog() << "FOREL #" << global_step << " : " << message << endl;
 }
 
+
+///// HIERARCH /////
+
+Hierarch::Hierarch(int kk, Field* p_fieldd, ofstream& logs_a) 
+: k(kk), logs(logs_a), p_field(p_fieldd) {
+    writeLog("ININ");
+    num_clusters = p_field->numPoints();
+    for (int ind_poi = 0; ind_poi < num_clusters; ind_poi++) {
+        Tree* tmp = new Tree(p_field->getPoint(ind_poi), logs);
+        current_trees.push_back(tmp);
+        current_clusters.push_back(vector<int>{ind_poi});
+    }
+    dist_matrix.resize(num_clusters);
+    for (int ind = 0; ind < num_clusters; ind++) {
+        dist_matrix[ind].resize(num_clusters);
+    }
+
+    // First distance matrix init
+    for (int ind_poi = 0; ind_poi < num_clusters; ind_poi++) {
+        for (int sec_poi = ind_poi; sec_poi < num_clusters; sec_poi++) {
+            double tmp_dist = p_field->getDist(ind_poi, sec_poi);
+
+            dist_matrix[ind_poi][sec_poi] = tmp_dist;
+            dist_matrix[sec_poi][ind_poi] = tmp_dist;
+        }
+    }
+    writeLog("Initialization done");
+}
+
+Hierarch::~Hierarch() {
+    current_trees.clear();
+}
+
+// Call algorithm.
+FindClusters Hierarch::mainAlgorithm() {
+    writeLog("Start algorithm");
+    FindClusters result(logs, "Hierarch");
+    while (num_clusters > k) {
+        writeLog("STEP #" + to_string(step));
+        vector<int> find_ind = recountDistMatrix(findMinDist());
+
+        Point tmp(logs);
+        Tree* tmp_tree = new Tree(tmp, current_trees[find_ind[0]], current_trees[find_ind[1]], logs);
+        current_trees.erase(current_trees.begin() + find_ind[1]);
+        current_trees[find_ind[0]] = tmp_tree;
+
+        current_clusters[find_ind[0]].insert(current_clusters[find_ind[0]].end(), current_clusters[find_ind[1]].begin(),
+            current_clusters[find_ind[1]].end());
+        current_clusters.erase(current_clusters.begin() + find_ind[1]);
+        num_clusters--;
+        step++;
+    }
+    int ind_clu = 0;
+    for (vector<int> pre_cl : current_clusters) {
+        Cluster* tmp = new Cluster(ind_clu, pre_cl, logs, p_field); 
+        result += *tmp;
+    }
+    return result;
+}
+
+// Find trees with min distance between
+vector<int> Hierarch::findMinDist() {
+    double min_dist = INF;
+    vector<int> min_ind{-1, -1};
+    for (int ind = 0; ind < num_clusters; ind++) {
+        for (int sec_ind = ind + 1; sec_ind < num_clusters; sec_ind++) {
+            double tmp_dist = getDist(ind, sec_ind);
+            if (tmp_dist < min_dist) {
+                min_dist = tmp_dist;
+                min_ind = vector<int>{ind, sec_ind};
+            }
+        }
+    }
+    return min_ind;
+}
+
+// Find complicated distance between clusters
+double Hierarch::getDist(int ind, int sec_ind) {
+    double sum_dist = 0;
+    for (int ind_poi : current_clusters[ind]) {
+        for (int ind_sec_poi : current_clusters[sec_ind]) {
+            sum_dist += p_field->getDist(ind_poi, ind_sec_poi);
+        }
+    }
+    sum_dist /= (current_clusters[ind].size() * current_clusters[sec_ind].size());
+    return sum_dist;
+}
+
+// Recount distance matrix.
+vector<int> Hierarch::recountDistMatrix(const vector<int>& find_ind) {
+    int min_i = (find_ind[0] < find_ind[1]) ? find_ind[0] : find_ind[1];
+    int max_i = (find_ind[0] > find_ind[1]) ? find_ind[0] : find_ind[1];
+
+    int min_size = current_clusters[min_i].size();
+    int max_size = current_clusters[max_i].size();
+
+    for (int ind_other = 0; ind_other < num_clusters; ind_other++) {
+        if (ind_other != min_i && ind_other != max_i) {
+            double tmp_dist = (dist_matrix[max_i][ind_other] / min_size);
+            
+            dist_matrix[min_i][ind_other] /= max_size;
+            dist_matrix[ind_other][min_i] /= max_size;
+
+            dist_matrix[min_i][ind_other] += tmp_dist;
+            dist_matrix[ind_other][min_i] += tmp_dist;
+        }
+    }
+
+    dist_matrix.erase(dist_matrix.begin() + max_i);
+    for (int ind = 0; ind < dist_matrix.size(); ind++) {
+        dist_matrix[ind].erase(dist_matrix[ind].begin() + max_i);
+    }
+
+    return vector<int>{min_i, max_i};
+}
+
+// Write log-message with date-time note.
+void Hierarch::writeLog(const string& message) {
+    logs << timeLog() << "HIERARCH: " << message << endl;
+}
 
 ///// FUNCTIONS /////
 

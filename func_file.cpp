@@ -35,6 +35,11 @@ Point::Point(const vector<double>& coords, int idd, int id_cloudd, ofstream& log
 {
 }
 
+Point::Point(ofstream& logss)
+: x(0), y(0), id(-1), id_cloud(-1), logs_f(logss)
+{
+}
+
 // Changes point to the given one.
 void Point::changeTo(Point point) {
     x = point.x;

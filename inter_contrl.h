@@ -31,6 +31,7 @@ public:
    bool kerKMeans(int k, int p);
    bool eMAlgorithm(int n);
    bool forelAlg(double R);
+   bool hierarchClustering(int k);
    bool enterAnalysis();
    bool minSpanTree();
    bool createIncMatrix(double delta);

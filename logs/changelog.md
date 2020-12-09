@@ -9,7 +9,13 @@ List of commands can be found in [help.txt](../help.txt).
 
 ## Changelog
 
-### **Version 1.9.1 (1.12.2020)** - CURRENT VERSION
+### **Version 1.10.0 (1.12.2020)** - CURRENT VERSION
+
+Added:
+
+* **Hierarchical clustering** algorithm! The linkage criterion is *Unweighted average linkage clustering* (or *UPGMA*). No *gif*-image generation yet.
+
+### **Version 1.9.1 (1.12.2020)**
 
 Added:
 

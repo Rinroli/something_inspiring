@@ -12,5 +12,6 @@ Currently, some clustering algorithms are implemented:
 * **K-means with kernels**
 * **EM-algorithm** - and produce *gif*-image with all steps
 * **FOREL** - 3 levels - points, centroids and centroids from centroids. Produce *gif*-image and 3 groups of clusters.
+* **Hierarchical** - the linkage criterion is *Unweighted average linkage clustering* (or *UPGMA*)
 
 Before data analysis, you can work with normally distributed clouds by generating and working with a **buffer** - *rotate*, *shift*, *scale*.

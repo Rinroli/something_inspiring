@@ -57,6 +57,10 @@ Commands:
         radius is algorithm parameter - the radius of the neighborhood of the center,
             default is 0.05.
 
+    HIERARCH (number_of_clusters) >> make clustering using Hierarchical cluster analysis (or HCA).
+        The linkage criterion is *Unweighted average linkage clustering* (or *UPGMA*).
+        number_of_clusters is initial number of clusters, default 5.
+
     ADDB (index_of_the_cloud) >> add (copy) cloud to the buffer by index. Default index is the last one.
 
     SHOWB >> print points from the buffer.

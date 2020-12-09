@@ -34,6 +34,7 @@ public:
     Point(double mX, double mY, double sX, double sY,
         int idd, ofstream& logs_field, int id_cloudd, int nu_points);
     Point(const vector<double>& coords, int idd, int id_cloud, ofstream& logs);
+    explicit Point(ofstream& logs);
     void changeTo(Point point);
     void setID(int id);
     void setCoords(double x, double y);
@@ -207,6 +208,7 @@ private:
 class Tree {
 public:
     Tree(Point& point, ofstream& logs_al, double dist = 0);
+    Tree(Point& point, Tree* f_tree, Tree* s_tree, ofstream& logs_al);
     ~Tree();
     void addVert(Point& point, double dist);
     void print(int indent = 0);
@@ -218,8 +220,8 @@ public:
 
 private:
     Point& point;
-    double dist_parent = 0;
-    vector<Tree> neighbors;
+    double dist_parent = -1;
+    vector<Tree*> neighbors;
     void writeLog(const string& message);
     ofstream& logs_a;
 };
@@ -365,6 +367,32 @@ private:
 };
 
 #endif // FOREL
+
+
+#if !defined(HIERARCH)
+#define HIERARCH
+
+class Hierarch
+{
+public:
+    Hierarch(int k, Field* p_field, ofstream& ofstream);
+    ~Hierarch();
+    FindClusters mainAlgorithm();
+private:
+    vector<Tree*> current_trees;
+    vector<vector<int>> current_clusters;
+    vector<vector<double>> dist_matrix;
+    int k, num_clusters, step = 0;
+    Field* p_field;
+    ofstream& logs;
+    vector<int> findMinDist();
+    vector<int> recountDistMatrix(const vector<int>& find_ind);
+    double getDist(int ind_1, int ind_2);
+    void writeLog(const string& message);
+};
+
+#endif // HIERARCH
+
 
 
 #ifndef FIELD
