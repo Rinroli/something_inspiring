@@ -392,7 +392,7 @@ bool Controller::printField(bool clouds = true, int i = 0)
     out_f.close();
 
     ofstream gnu("data/" + main_file_name);
-    gnu << "set title \"" << what << "\"\nplot ";
+    gnu << "set title \"" << what << "\"\nset size ratio -1\nplot ";
     for (int i = 0; i < nu_groups; ++i) {
         gnu << "'data/" << file_name << "' index " << i << " w p title \"" << i << "\"";
         if (i != nu_groups - 1) {

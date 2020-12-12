@@ -16,4 +16,4 @@
 /logs/*
 !/logs/changelog.md
 /screenshots/*
-/command_files/*
+!/command_files/*
