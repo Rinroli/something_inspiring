@@ -17,3 +17,7 @@
 /screenshots/*
 !/command_files/*
 !/data/templates
+!/data/em/.keepdir
+!/data/forel/.keepdir
+!/data/hierarch/.keepdir
+!/data/ker/.keepdir
