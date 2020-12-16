@@ -16,4 +16,4 @@ Currently, some clustering algorithms are implemented:
 
 Before data analysis, you can work with normally distributed clouds by generating and working with a **buffer** - *rotate*, *shift*, *scale*.
 
-Also you can see some [examples](data/examples).
+Also you can see some [examples](examples).
