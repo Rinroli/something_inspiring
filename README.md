@@ -15,3 +15,5 @@ Currently, some clustering algorithms are implemented:
 * **Hierarchical** - the linkage criterion is *Unweighted average linkage clustering* (or *UPGMA*)
 
 Before data analysis, you can work with normally distributed clouds by generating and working with a **buffer** - *rotate*, *shift*, *scale*.
+
+Also you can see some [examples](data/examples).

@@ -16,3 +16,4 @@
 !/logs/changelog.md
 /screenshots/*
 !/command_files/*
+!/data/templates

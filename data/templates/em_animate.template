@@ -1,0 +1,5 @@
+set term gif animate optimize delay 10 background "#ffeedf" \
+    font "Times-Roman,10" size 1280,960
+set output "screenshots/em_algorithm.gif"
+set size square
+set title "EM-algorithm"

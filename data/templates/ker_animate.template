@@ -1,0 +1,4 @@
+set term gif animate optimize delay 10 background "#ffeedf" \
+    font "Times-Roman,10"
+set output "screenshots/ker_algorithm.gif"
+set size square
