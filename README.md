@@ -14,6 +14,9 @@ Currently, some clustering algorithms are implemented:
 * **FOREL** - 3 levels - points, centroids and centroids from centroids. Produce *gif*-image and 3 groups of clusters.
 * **Hierarchical** - the linkage criterion is *Unweighted average linkage clustering* (or *UPGMA*)
 
+(**UPDATED**)
+Also **Delaunay triangulation** is implemented (algorithm "remove and build")!
+
 Before data analysis, you can work with normally distributed clouds by generating and working with a **buffer** - *rotate*, *shift*, *scale*.
 
 Also you can see some [examples](examples).

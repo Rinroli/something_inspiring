@@ -16,6 +16,9 @@ Commands:
                             sx = 1, sy = 1,
                             nu_points = 1000
 
+    DELAUNAY >> create Delaunay triangulation ("remove and build" algorithm). With gif-image generation.
+        For GNUplot -> use bash-script 'del_steps' from main directory.
+
     HIST or HIST(clo, id_cl) or HIST(clu, id_fc, id_cl) >> output for the gnuplot (data/gnu_hist.plt) histogram of x and y coords of points.
         By default use all points on the field. Can be called for cluster or cloud - by id (can be checked by command *INFO*)
 

@@ -34,6 +34,7 @@ public:
    bool hierarchClustering(int k);
    bool enterAnalysis();
    bool minSpanTree();
+   bool delaunayTriangulation();
    bool createIncMatrix(double delta);
    bool createDBMatrix(double delta, int k);
    bool preHist(vector<string> args);

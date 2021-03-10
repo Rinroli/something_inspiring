@@ -456,12 +456,12 @@ Field::Field(vector<bool> if_logs, vector<string> name_logs)
 
     if (if_logs[0]) {
         logs.open("logs/" + name_logs[0], ios_base::app);
-        logs << endl << "New session" << endl;
+        logs << endl << "New session " << endl;
         writeLog("INIT");
     }
     if (if_logs[3]) {
         logs_a.open("logs/" + name_logs[3], ios_base::app);
-        logs_a << endl << "New session" << timeLog() << endl;
+        logs_a << endl << "New session " << timeLog() << endl;
     }
 }
 
@@ -617,6 +617,11 @@ FindClusters& Field::getFCluster(int i) {
     return fclusters[i];
 }
 
+// Getter for cluster by index.
+vector<double> Field::getBox() {
+    return containing_box;
+}
+
 // Return number of clouds.
 int Field::numClouds() {
     return clouds.size();
@@ -642,6 +647,28 @@ double Field::getDist(Point point1, int ind2) {
     return matrix[point1.id][ind2];
 }
 
+// Calculate line through two points (by id).
+// Equation ax + b = 0.
+vector<double> Field::lineThroughPoints(int poi_1, int poi_2) {
+    vector<double> p_1 = getPoint(poi_1).getCoord();
+    vector<double> p_2 = getPoint(poi_2).getCoord();
+
+    double a = (p_1[1] - p_2[1]) / (p_1[0] - p_2[0]);
+    double b = p_1[1] - a * p_1[0];
+
+    return vector<double> {a, b};
+}
+
+// Same as function for two points by id - but for vector<double> and id.
+vector<double> Field::lineThroughPoints(vector<double> p_1, int poi_2) {
+    vector<double> p_2 = getPoint(poi_2).getCoord();
+
+    double a = (p_1[1] - p_2[1]) / (p_1[0] - p_2[0]);
+    double b = p_1[1] - a * p_1[0];
+
+    return vector<double> {a, b};
+}
+
 // Provide access to clouds by index.
 Point& Field::operator[](int i) {
     if (i == -1) { return points[numPoints() - 1]; }
@@ -664,6 +691,7 @@ bool Field::enterAnalysis()
     try {
         readonly = true;
         updateD();
+        findBox();
     }
     catch (...) {
         writeLog("\tSomething went wrong.");
@@ -694,6 +722,25 @@ void Field::updateD() {
         }
     }
     writeLog("MATRIX UPDATED");
+}
+
+// Find containing box and save it.
+void Field::findBox() {
+    vector<double> some_point = points[0].getCoord();
+
+    containing_box[0] = some_point[0];
+    containing_box[1] = some_point[0];
+    containing_box[2] = some_point[1];
+    containing_box[3] = some_point[1];
+
+    for (int i = 1; i < numPoints(); ++i) {
+        some_point = points[i].getCoord();
+        if (some_point[0] > containing_box[1]) { containing_box[1] = some_point[0]; }
+        if (some_point[0] < containing_box[0]) { containing_box[0] = some_point[0]; }
+        if (some_point[1] > containing_box[3]) { containing_box[3] = some_point[1]; }
+        if (some_point[1] < containing_box[2]) { containing_box[2] = some_point[1]; }
+    }
+    writeLog("BOX UPDATED");
 }
 
 // Add new FindClusters to the vector with them.
@@ -973,4 +1020,16 @@ double distVectors(const vector<double>& vector_1, const vector<double>& vector_
         tmp_sum += (vector_1[i] - vector_2[i]) * (vector_1[i] - vector_2[i]);
     }
     return sqrt(tmp_sum);
+}
+
+// Return determinant of 3D matrix.
+double findDeterminant3(vector<vector<double>> matrix) {
+    double result = 0;
+    result += matrix[0][0] * matrix[1][1] * matrix[2][2];
+    result += matrix[0][1] * matrix[1][2] * matrix[2][0];
+    result += matrix[0][2] * matrix[1][0] * matrix[2][1];
+    result -= matrix[0][2] * matrix[1][1] * matrix[2][0];
+    result -= matrix[0][1] * matrix[1][0] * matrix[2][2];
+    result -= matrix[0][0] * matrix[1][2] * matrix[2][1];
+    return result;
 }

@@ -1,0 +1,6 @@
+set terminal gif animate loop -1 optimize delay 15 background "#ffeedf" \
+    font "Times-Roman,10" size 1920,1080
+set output "screenshots/delaunay_algorithm.gif"
+set size ratio -1
+set nokey
+set title "Delaunay triangulation"

@@ -2,6 +2,7 @@
 
 #include "inter_contrl.h"
 #include "func_file.h"
+#include "neuron.h"
 #include <stdio.h>
 #include <unistd.h>
 #include "time.h"
@@ -516,6 +517,18 @@ bool Controller::minSpanTree() {
     return true;
 }
 
+// Create Delaunay triangulation for field.
+bool Controller::delaunayTriangulation() {
+    writeLog("Begin delaunayTriangulation");
+    if (not field.ifReadonly()) { field.enterAnalysis(); }
+    Delaunay delaunay(&field, field.logs_a);
+    field.p_triangulation = delaunay.mainAlgorithm();
+    cout << field.p_triangulation->size() << endl;
+    writeLog("\tEnd delaunayTriangulation - find " + to_string(field.p_triangulation->size()) + " triangles");
+    cout << "DONE!" << endl;
+    return true;
+}
+
 ///// INTERFACE /////
 
 Interface::Interface(vector<bool> if_logs, vector<string> name_logs)
@@ -660,6 +673,8 @@ bool Interface::runCommand(string command)
             result = ctrl.enterAnalysis();
         } else if (com == "STREE") {
             result = ctrl.minSpanTree();
+        } else if (com == "DELAUNAY") {
+            result = ctrl.delaunayTriangulation();
         } else if (com == "STRHIST") {
             result = ctrl.streeHist();
         } else if (com == "FINDR") {

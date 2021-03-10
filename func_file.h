@@ -9,6 +9,7 @@ using namespace std;
 #define INF 100000007
 
 double determinant(const vector<vector<double>>& sigma);
+double findDeterminant3(vector<vector<double>> matrix);
 vector<vector<double>> eigen(const vector<vector<double>>& sigma);
 vector<double> findEigenvalues(const vector<vector<double>>& sigma);
 
@@ -24,6 +25,7 @@ class Controller;
 class Tree;
 class Buffer;
 class Forel;
+class Triangulation;
 
 #ifndef POINT
 #define POINT
@@ -418,21 +420,27 @@ public:
     int numPoints();
     double getDist(int ind1, int ind2);
     double getDist(Point point1, int ind2);
+    vector<double> lineThroughPoints(int poi_1, int poi_2);
+    vector<double> lineThroughPoints(vector<double> vpoi_1, int poi_2);
     Point& operator[](int i);
     FindClusters& getFCluster(int i);
     BinMatrix& getBinMatrix(int i);
     Point& getPoint(int i);
     Cloud& getCloud(int i);
+    vector<double> getBox();
+
     bool addToBuffer(int i);
     bool putBuffer();
     bool emptyBuffer();
     bool rotateBuffer(double alpha);
     bool moveBuffer(double x, double y);
     bool zoomBuffer(double k);
+
     int numBinMatrix();
     bool ifReadonly();
     bool enterAnalysis();
     void minSpanTree();
+    void delaunayTriangulation();
     void binDBMatrix(double delta, int k);
     void binMatrix(double delta);
     void setAPoint(int i, int value);
@@ -448,11 +456,13 @@ private:
     vector<Cloud> clouds;
     Buffer buffer;
     void writeLog(const string& message);
-    
+    vector<double> containing_box{0, 0, 0, 0};  // {x_1, x_2, y_1, y_2}
     bool readonly;
     void updateD();
+    void findBox();
     vector<BinMatrix> bin_matrixes;
     Tree* p_tree = nullptr;
+    Triangulation* p_triangulation = nullptr;
 };
 
 #endif // FIELD

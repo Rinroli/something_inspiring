@@ -9,7 +9,13 @@ List of commands can be found in [help.txt](../help.txt).
 
 ## Changelog
 
-### **Version 1.10.1 (9.12.2020)** - CURRENT VERSION
+### **Version 2.0.0 (10.03.2021)** - CURRENT VERSION
+
+Added:
+
+* **Delaunay triangulation!** *"Remove and build"* algorithm. Make *gif*-image - many different styles, to switch them see comments in the code.
+
+### **Version 1.10.1 (9.12.2020)**
 
 Added:
 

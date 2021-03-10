@@ -4,6 +4,7 @@
 #include <queue>
 #include <cmath>
 #include <algorithm>
+#include <numeric>
 // #include <string>
 #include <vector>
 
@@ -239,16 +240,24 @@ FindClusters KMeans::mainAlgorithm(bool silent) {
     FindClusters result(logs_a, "KMeans algorithm");
     int ind = 0;
     for (vector<int> cluster : clusters) {
-        for (int a : cluster) {
-            if (a) {
-                vector<int> tmp_id_points;
-                for (int id_poi = 0; id_poi < number_poi; id_poi++) {
-                    if (cluster[id_poi]) { tmp_id_points.push_back(id_poi); }
-                }
-                result += Cluster(ind, tmp_id_points, logs_a, &field);
-                ind++;
-                break;
+        // for (int a : cluster) {
+        //     if (a) {
+        //         vector<int> tmp_id_points;
+        //         for (int id_poi = 0; id_poi < number_poi; id_poi++) {
+        //             if (cluster[id_poi]) { tmp_id_points.push_back(id_poi); }
+        //         }
+        //         result += Cluster(ind, tmp_id_points, logs_a, &field);
+        //         ind++;
+        //         break;
+        //     }
+        // }
+        if (any_of(cluster.begin(), cluster.end(), [](int a){return a;})) {
+            vector<int> tmp_id_points;
+            for (int id_poi = 0; id_poi < number_poi; id_poi++) {
+                if (cluster[id_poi]) { tmp_id_points.push_back(id_poi); }
             }
+            result += Cluster(ind, tmp_id_points, logs_a, &field);
+            ind++;
         }
     }
     writeLog("\tTurned out " + to_string(result.numClusters()) + " clusters in " + to_string(step) + " steps");
