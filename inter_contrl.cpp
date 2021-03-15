@@ -4,6 +4,7 @@
 #include "func_file.h"
 #include "neuron.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include "time.h"
 // #include <string>
@@ -41,6 +42,13 @@ Controller::~Controller()
 {
     logs.close();
     writeLog("DELETE");
+}
+
+// Begin test, change main work directories.
+void Controller::beginTest(const string& output_dir, const string& output_na) {
+    if_test = true;
+    output_directory = "tests/" + output_dir;
+    output_name = output_na;
 }
 
 // Show help for command HELP.
@@ -380,11 +388,20 @@ bool Controller::printField(bool clouds = true, int i = 0)
         what = "Clusters, " + cur_clu.source;
     }
     writeLog("Begin printField " + what);
-    string file_name = (clouds) ? "output.plt" : "clusters.plt";
-    string main_file_name = (clouds) ? "gnuplot.plt" : "clus_gnu.plt";
+    string gnu_file_name, data_output_name;
+    if (not if_test) {
+        data_output_name = (clouds) ? "output.plt" : "clusters.plt";
+        gnu_file_name = (clouds) ? "gnuplot.plt" : "clus_gnu.plt";
+    } else {
+        gnu_file_name = "gnu_" + output_name + ".plt";
+        data_output_name = "data_" + output_name + ".plt";
+    }
     int nu_groups = (clouds) ? field.numClouds() : field.getFCluster(i).numClusters();
 
-    ofstream out_f("data/" + file_name);
+    writeLog("Files: " + data_output_name + " " + gnu_file_name);
+    writeLog("Directory: " + output_directory);
+
+    ofstream out_f(output_directory + "/" + data_output_name);
     if (clouds) {
         field.print(out_f);
     } else {
@@ -392,10 +409,11 @@ bool Controller::printField(bool clouds = true, int i = 0)
     }
     out_f.close();
 
-    ofstream gnu("data/" + main_file_name);
+    ofstream gnu(output_directory + "/" + gnu_file_name);
     gnu << "set title \"" << what << "\"\nset size ratio -1\nplot ";
     for (int i = 0; i < nu_groups; ++i) {
-        gnu << "'data/" << file_name << "' index " << i << " w p title \"" << i << "\"";
+        gnu << "'" << output_directory << "/" << data_output_name << "' index " <<
+            i << " w p title \"" << i << "\"";
         if (i != nu_groups - 1) {
             gnu << ",\\";
         }
@@ -544,6 +562,61 @@ Interface::~Interface()
 {
     writeLog("DELETE");
     logs.close();
+}
+
+// Main loop for all program.
+bool Interface::mainLoop() {
+    ifstream fin;
+    string command;
+
+    cout << "Would you like to CLI or command file?" << endl <<
+        " > If CLI put cin, else put file or test name." <<
+        "\n > Command file should be in command_files directory. By default, command is 'test.txt'" <<
+        endl << " > If you want to run test enter 'test' then 'test_type' and 'test_name.txt'." <<
+        " Test should be in test directory and WITHOUT '.txt'!\n > The result will be generated in the same directory." <<
+        endl << "Your choice: ";
+    getline(cin, command);
+    if (command == "cin") {
+        writeLog("Command Line Interface");
+        do {
+            cout << "Command: ";
+            getline(cin, command);
+            runCommand(command);
+        } while (command != "EXIT");
+    }
+    else {
+        if (command == "") { command = "test.txt"; }
+
+        if (command == "test") {
+            writeLog("Test");
+            string test_directory, test_name;
+            cout << "Please enter test directory:\n > ";
+            cin >> test_directory;
+            cout << "And test name:\n > ";
+            cin >> test_name;
+            writeLog("\t" + test_directory + "/" + test_name + ".txt");
+
+            fin.open("tests/" + test_directory + "/" + test_name + ".txt");
+            output_directory = test_directory;
+            output_name = test_name;
+
+            ctrl.beginTest(test_directory, test_name);
+        }
+        else {
+            writeLog("From File");
+            fin.open("command_files/" + command);
+        }
+
+        if (!fin.is_open()) {
+            cout << "Wrong file! Exit..." << endl;
+            return 0;
+        }
+        getline(fin, command);
+        while (runCommand(command)) {
+            getline(fin, command);
+        }
+    }
+    return 1;
 }
 
 // Get command from the user and compile it.

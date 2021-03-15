@@ -1,5 +1,5 @@
 // Copyright (c) 2020 Rinroli
-// Version 1.20.1
+// Version 2.0.0
 
 
 #include <stdlib.h>
@@ -41,34 +41,9 @@ int main() {
         configs.writeConfigs(vector<vector<string>>());
     }
 
+    bool result;
     Interface interface(configs.if_logs, configs.name_logs);
+    result = interface.mainLoop();
 
-    ifstream fin;
-
-    cout << "Would you like to CLI or command file?" << endl << 
-        "If CLI put cin, else put file name." << 
-        "\n\tIt should be in command_files directory. By default, command is 'test.txt'" <<
-        endl << "Your choice: ";
-    getline(cin, command);
-    if (command == "cin") {
-        do {
-            cout << "Command: ";
-            getline(cin, command);
-            interface.runCommand(command);
-        } while (command != "EXIT");
-    }
-    else {
-        if (command == "") {command = "test.txt";}
-        fin.open("command_files/" + command);
-        if (!fin.is_open()) {
-            cout << "Wrong file! Exit..." << endl;
-            return 0;
-        }
-        getline(fin, command);
-        while (interface.runCommand(command)) {
-            getline(fin, command);
-        }
-    }
-
-    return 0;
+    return result;
 }

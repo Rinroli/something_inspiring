@@ -10,7 +10,7 @@ using namespace std;
 class Controller
 {
 public:
-   explicit Controller(vector<bool> if_logs, vector<string> name_logs);
+   Controller(vector<bool> if_logs, vector<string> name_logs);
    ~Controller();
    bool showHelp();
    bool showInfoField();
@@ -41,11 +41,15 @@ public:
    bool genCloud(double mX, double mY, double sX, double sY,  int nu_points);
    bool waveClusters(int i);
    bool displayGraph(int i);
+   void beginTest(const string& output_dir, const string& output_na);
    void writeLog(const string& message);
 
 private:
    Field field;
    ofstream logs;
+   bool if_test = false;
+   string output_directory = "data";
+   string output_name;
 };
 
 #endif // CONTROLLER
@@ -58,6 +62,7 @@ class Interface
 public:
    explicit Interface(vector<bool> if_logs, vector<string> name_logs);
    ~Interface();
+   bool mainLoop();
    bool runCommand(string command);
    void printConfigs();
    void changeConfigs();
@@ -67,6 +72,9 @@ public:
 private:
    ofstream logs;
    Controller ctrl;
+   bool if_test = false;
+   string output_directory = "data";
+   string output_name = "output.plt";
 };
 
 #endif // INTERFACE

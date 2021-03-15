@@ -215,6 +215,7 @@ Triangulation* Delaunay::mainAlgorithm() {
     // saveStep(p_field->numPoints() - 1, true);
     saveStep(p_field->numPoints() - 1);
 
+
     ifstream anim_templ("data/templates/delaunay_animate.template");
     ofstream anim("data/gnu_delaunay_animate.plt");
 
