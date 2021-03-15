@@ -594,13 +594,13 @@ bool Interface::mainLoop() {
             cin >> test_directory;
             cout << "And test name:\n > ";
             cin >> test_name;
-            writeLog("\t" + test_directory + "/" + test_name + ".txt");
+            writeLog("\t" + test_directory + "/" + test_name + "/" + test_name + ".txt");
 
-            fin.open("tests/" + test_directory + "/" + test_name + ".txt");
-            output_directory = test_directory;
+            fin.open("tests/" + test_directory + "/" + test_name + "/" + test_name + ".txt");
+            output_directory = test_directory + "/" + test_name;
             output_name = test_name;
 
-            ctrl.beginTest(test_directory, test_name);
+            ctrl.beginTest(output_directory, output_name);
         }
         else {
             writeLog("From File");

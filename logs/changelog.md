@@ -9,7 +9,13 @@ List of commands can be found in [help.txt](../help.txt).
 
 ## Changelog
 
-### **Version 2.0.0 (10.03.2021)** - CURRENT VERSION
+### **Version 2.0.0 (15.03.2021)** - CURRENT VERSION
+
+Added:
+
+* **New test system**. One test in directory, the tests are divided into topics.
+
+### **Version 2.0.0 (10.03.2021)**
 
 Added:
 
