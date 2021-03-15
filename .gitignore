@@ -21,3 +21,4 @@
 !/data/forel/.keepdir
 !/data/hierarch/.keepdir
 !/data/ker/.keepdir
+!/tests/*

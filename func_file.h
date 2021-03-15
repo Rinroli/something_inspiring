@@ -446,6 +446,7 @@ public:
     void setAPoint(int i, int value);
     void addFC(FindClusters new_fc);
     void drawBinGraph(int i);
+    void beginTest(const string& output_dir, const string& output_na);
     vector<Point> points;
     vector<vector<double>> matrix;
     ofstream logs, logs_a;
@@ -460,6 +461,9 @@ private:
     bool readonly;
     void updateD();
     void findBox();
+    bool if_test = false;
+    string output_name = "none";
+    string output_directory = "data";
     vector<BinMatrix> bin_matrixes;
     Tree* p_tree = nullptr;
     Triangulation* p_triangulation = nullptr;

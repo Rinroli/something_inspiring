@@ -9,7 +9,7 @@ List of commands can be found in [help.txt](../help.txt).
 
 ## Changelog
 
-### **Version 2.0.0 (15.03.2021)** - CURRENT VERSION
+### **Version 2.0.1 (15.03.2021)** - CURRENT VERSION
 
 Added:
 

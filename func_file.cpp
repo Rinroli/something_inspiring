@@ -837,10 +837,17 @@ void Field::binDBMatrix(double delta, int k) {
     writeLog("\tCREATE binary matrix with neighbors");
 }
 
+// Begin test.
+void Field::beginTest(const string& output_dir, const string& output_na) {
+    if_test = true;
+    output_name = output_na;
+    output_directory = output_dir;
+}
+
 // Print edges to the file graph_edges.plt.
 void Field::drawBinGraph(int i) {
-    ofstream graph_edges("data/graph_edges.plt");
-    ofstream graph_points("data/graph_points.plt");
+    ofstream graph_edges(output_directory + "/" + output_name + "_edges.plt");
+    ofstream graph_points(output_directory + "/" + output_name + "_points.plt");
 
     BinMatrix& matrix_inc = getBinMatrix(i);
     for (int poi = 0; poi < numPoints(); ++poi) {
@@ -902,7 +909,8 @@ void Field::minSpanTree() {
         already_taken[min_ind] = true;
     }
 
-    ofstream graph("data/tree_data.plt");
+    // ofstream graph("data/tree_data.plt");
+    ofstream graph(output_directory + "/" + output_name + "_data.plt");
     p_tree->displayTree(graph);
 }
 

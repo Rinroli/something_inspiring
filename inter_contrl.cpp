@@ -49,6 +49,7 @@ void Controller::beginTest(const string& output_dir, const string& output_na) {
     if_test = true;
     output_directory = "tests/" + output_dir;
     output_name = output_na;
+    field.beginTest(output_directory, output_name);
 }
 
 // Show help for command HELP.
@@ -338,7 +339,8 @@ bool Controller::streeHist() {
     }
 
     ofstream hist;
-    hist.open("data/tree_hist.plt");
+    // hist.open("data/tree_hist.plt");
+    hist.open(output_directory + "/" + output_name + "_hist.plt");
     for (int k = 0; k < N; ++k) {
         hist << k * step << "\t" << freq[k] << endl;
     }
