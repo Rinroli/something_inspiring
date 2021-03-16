@@ -1,0 +1,3 @@
+gnuplot tests/Algorithm/hierarch/gnu_hierarch_animate.plt
+rm -r tests/Algorithm/hierarch/hierarch/*
+echo 'Done! Result in hierarch_algorithm.gif'

@@ -1,0 +1,3 @@
+gnuplot tests/Algorithm/delaunay/gnu_delaunay_animate.plt
+rm -r tests/Algorithm/delaunay/delaunay/*
+echo 'Done! Result in delaunay_algorithm.gif'

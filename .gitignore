@@ -16,13 +16,13 @@
 !/logs/changelog.md
 /screenshots/*
 !/command_files/*
-!/data/templates
-!/data/em/.keepdir
-!/data/forel/.keepdir
-!/data/hierarch/.keepdir
-!/data/ker/.keepdir
-!/tests/Algorithm/ker_kmeans/.keepdir
-/tests/Algorithm/ker_kmeans/*.gif
+# !/data/templates
+# !/data/em/.keepdir
+# !/data/forel/.keepdir
+# !/data/hierarch/.keepdir
+# !/data/ker/.keepdir
+!/**/.keepdir
+/tests/**/*.gif
 
 !/tests/**/*.txt
 !/tests/**/gnu_*.plt

@@ -614,9 +614,10 @@ bool Interface::mainLoop() {
             return 0;
         }
         getline(fin, command);
-        while (runCommand(command)) {
+        while (!fin.eof() and (command == "" or runCommand(command))) {
             getline(fin, command);
         }
+        cout << "End of file reached. Bye!" << endl;
     }
     return 1;
 }

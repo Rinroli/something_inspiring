@@ -1,0 +1,3 @@
+gnuplot tests/Algorithm/em/gnu_em_animate.plt
+rm -r tests/Algorithm/em/em/*
+echo 'Done! Result in em_algorithm.gif'

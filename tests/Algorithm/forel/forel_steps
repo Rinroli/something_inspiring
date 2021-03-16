@@ -1,0 +1,3 @@
+gnuplot tests/Algorithm/forel/gnu_forel_animate.plt
+rm -r tests/Algorithm/forel/forel/*
+echo 'Done! Result in forel_algorithm.gif'

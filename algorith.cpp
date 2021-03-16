@@ -365,8 +365,7 @@ FindClusters KerKMeans::mainAlgorithm() {
     string cur_template = (field.if_test) ? "test_" : "";
     ifstream anim_templ("data/templates/" + cur_template + "ker_animate.template");
     string cur_name = (field.if_test) ? field.output_name : "ker";
-    ofstream anim(field.output_directory + "/" + "gnu_" + cur_name + "_animate.plt");
-    // ofstream anim("data/gnu_ker_animate.plt");
+    ofstream anim(field.output_directory + "/gnu_" + cur_name + "_animate.plt");
     anim.setf(ios::boolalpha);
 
     string new_line;
@@ -568,8 +567,8 @@ void EMAlgorithm::stepM() {
 // Save step to the files in directory data/em.
 void EMAlgorithm::saveStep() {
     writeLog("SAVE STEP");
-    ofstream points_step("data/em/points_" + to_string(step) + ".plt");
-    ofstream ellipses_step("data/em/ellipse_" + to_string(step) + ".plt");
+    ofstream points_step(field.output_directory + "/em/points_" + to_string(step) + ".plt");
+    ofstream ellipses_step(field.output_directory + "/em/ellipse_" + to_string(step) + ".plt");
     vector<vector<int>> clusters = findNearest();
     for (int j = 0; j < k; j++) {
         vector<int> cluster = clusters[j];
@@ -633,8 +632,9 @@ FindClusters EMAlgorithm::mainAlgorithm() {
     writeLog("\tTurned out " + to_string(result.numClusters()) + " clusters in " + to_string(step) + " steps");
     cout << "Turned out " << to_string(result.numClusters()) << " clusters in " << step << " steps\n";
 
-    ifstream anim_templ("data/templates/em_animate.template");
-    ofstream anim("data/gnu_em_animate.plt");
+    string cur_template = (field.if_test) ? "test_" : "";
+    ifstream anim_templ("data/templates/" + cur_template + "em_animate.template");
+    ofstream anim(field.output_directory + "/gnu_em_animate.plt");
 
     string new_line;
     while (!anim_templ.eof()) {
@@ -643,10 +643,10 @@ FindClusters EMAlgorithm::mainAlgorithm() {
     }
     anim << "do for [i=0:" << to_string(step - 1) << "] {" << endl << "\tplot ";
     for (int ind_k = 0; ind_k < k; ind_k++) {
-        anim << "\t\t'data/em/points_'.i.'.plt' index " << to_string(ind_k) <<
+        anim << "\t\t'" << field.output_directory << "/em/points_'.i.'.plt' index " << to_string(ind_k) <<
                 " w p title \"#" << to_string(ind_k) << "\",\\" << endl; 
     }
-    anim << "\t\t'data/em/ellipse_'.i.'.plt' using 1:2:3:4:5 with ellipses lc rgb \"red\" title \"ellipses\"\n}";
+    anim << "\t\t'" << field.output_directory << "/em/ellipse_'.i.'.plt' using 1:2:3:4:5 with ellipses lc rgb \"red\" title \"ellipses\"\n}";
 
     return result;
 }
@@ -793,8 +793,9 @@ Cluster Forel::findNeighbourhood(const vector<double>& center) {
 
 // Save command file for animation for gnuplot.
 void Forel::saveAnimation() {
-    ifstream anim_templ("data/templates/forel_animate.template");
-    ofstream anim("data/gnu_forel_animate.plt");
+    string cur_template = (p_field->if_test) ? "test_" : "";
+    ifstream anim_templ("data/templates/" + cur_template + "forel_animate.template");
+    ofstream anim(p_field->output_directory + "/gnu_forel_animate.plt");
 
     string new_line;
     while (!anim_templ.eof()) {
@@ -803,17 +804,18 @@ void Forel::saveAnimation() {
     }
     anim << "do for [i=0:" << to_string(frame - 1) << "] {" << endl << "\tplot ";
     for (int ind_k = 0; ind_k < max_clusters; ind_k++) {
-        anim << "\t\t'data/forel/clusters_'.i.'.plt' index " << to_string(ind_k) <<
-            " w p title \"#" << to_string(ind_k) << "\",\\" << endl;
+        anim << "\t\t'" << p_field->output_directory << "/forel/clusters_'.i.'.plt' index " <<
+            to_string(ind_k) << " w p title \"#" << to_string(ind_k) << "\",\\" << endl;
     }
-    anim << "\t\t'data/forel/circles_'.i.'.plt' using 1:2:3 with circles lc rgb \"red\" title \"circles\"\n}";
+    anim << "\t\t'" << p_field->output_directory << "/forel/circles_'.i.'.plt' using 1:2:3"
+        << "with circles lc rgb \"red\" title \"circles\"\n}";
 }
 
 // Create new frame 'forel/clusters_i.plt' and 'forel/circles_i.plt'
 void Forel::newFrame() {
     writeLog("New frame");
-    ofstream file_clu("data/forel/clusters_" + to_string(frame) + ".plt");
-    ofstream file_circ("data/forel/circles_" + to_string(frame) + ".plt");
+    ofstream file_clu(p_field->output_directory + "/forel/clusters_" + to_string(frame) + ".plt");
+    ofstream file_circ(p_field->output_directory + "/forel/circles_" + to_string(frame) + ".plt");
 
     for (int unclust_p : points) {
         Point tmp = real_points[unclust_p];
@@ -965,8 +967,9 @@ vector<int> Hierarch::recountDistMatrix(const vector<int>& find_ind) {
 
 // Save command file for animation for gnuplot.
 void Hierarch::saveAnimation() {
-    ifstream anim_templ("data/templates/hierarch_animate.template");
-    ofstream anim("data/gnu_hierarch_animate.plt");
+    string cur_template = (p_field->if_test) ? "test_" : "";
+    ifstream anim_templ("data/templates/" + cur_template + "hierarch_animate.template");
+    ofstream anim(p_field->output_directory + "/gnu_hierarch_animate.plt");
 
     string new_line;
     while (!anim_templ.eof()) {
@@ -975,7 +978,7 @@ void Hierarch::saveAnimation() {
     }
     anim << "do for [i=0:" << to_string(frame - 1) << "] {" << endl << "\tplot ";
     for (int ind_k = 0; ind_k < p_field->numPoints(); ind_k++) {
-        anim << "\t\t'data/hierarch/frame_'.i.'.plt' index " << to_string(ind_k) <<
+        anim << "\t\t'" << p_field->output_directory << "/hierarch/frame_'.i.'.plt' index " << to_string(ind_k) <<
             " w p title \"#" << to_string(ind_k) << "\",\\" << endl;
     }
     anim << "}" << endl;
@@ -984,7 +987,7 @@ void Hierarch::saveAnimation() {
 // Create new frame at 'data/hierarch/frame_i.plt'
 void Hierarch::newFrame() {
     writeLog("New frame");
-    ofstream file_clu("data/hierarch/frame_" + to_string(frame) + ".plt");
+    ofstream file_clu(p_field->output_directory + "/hierarch/frame_" + to_string(frame) + ".plt");
 
     for (Cluster clu : current_clusters) {
         clu.printGnu(file_clu);

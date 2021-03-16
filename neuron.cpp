@@ -47,7 +47,7 @@ Triangle::Triangle(vector<double> p_11, vector<double> p_22, vector<double> p_33
 }
 
 // Find center and radius of the circle.
-// Circle equationa (x^2 + y^2)*a - x*b + y*c - d = 0
+// Circle equation (x^2 + y^2)*a - x*b + y*c - d = 0
 void Triangle::findCircle() {
     double a = findA();
     double b = findB();
@@ -59,12 +59,12 @@ void Triangle::findCircle() {
     radius = distPoints(center, p_1);
 }
 
-// Retirn coords of the center.
+// Retern coords of the center.
 vector<double> Triangle::getCenter() {
     return center;
 }
 
-// Retirn coords of the center.
+// Retern coords of the radius.
 double Triangle::getRadius() {
     return radius;
 }
@@ -122,7 +122,7 @@ double Triangle::findC() {
 ///// Triangulation /////
 
 // Delete triangles that don't satisfy the Delaunay condition.
-// Return vector of pointsfor () of these triangles.
+// Return vector of points of these triangles.
 set<int> Triangulation::deleteTriangles(int ind_poi) {
     set<int> polygon_unsorted;
     for (int ind_tri = 0; ind_tri < nu_triangles; ind_tri++) {
@@ -215,9 +215,9 @@ Triangulation* Delaunay::mainAlgorithm() {
     // saveStep(p_field->numPoints() - 1, true);
     saveStep(p_field->numPoints() - 1);
 
-
-    ifstream anim_templ("data/templates/delaunay_animate.template");
-    ofstream anim("data/gnu_delaunay_animate.plt");
+    string cur_template = (p_field->if_test) ? "test_" : "";
+    ifstream anim_templ("data/templates/" + cur_template + "delaunay_animate.template");
+    ofstream anim(p_field->output_directory + "/gnu_delaunay_animate.plt");
 
     string new_line;
     while (!anim_templ.eof()) {
@@ -225,11 +225,11 @@ Triangulation* Delaunay::mainAlgorithm() {
         anim << new_line << endl;
     }
     anim << "do for [i=1:" << to_string(step - 1) << "] {" << endl << "\tplot ";
-    anim << "\t\t'data/delaunay/edges_'.i.'.plt' with lines lw 2 lc rgb \"black\" title \"triangles\",\\" << endl;
-    anim << "\t\t'data/delaunay/circles_'.i.'.plt' with lines lw 3 lc rgb \"red\" title \"last triangle\",\\" << endl;
-    anim << "\t\t'data/delaunay/points_'.i.'.plt' index 0 w p lt 5 lc rgb \"blue\" title \"points\",\\" << endl;
-    // anim << "\t\t'data/delaunay/circles_'.i.'.plt' using 1:2:3 with circles lc rgb \"red\" title \"circles\",\\" << endl;
-    anim << "\t\t'data/delaunay/points_'.i.'.plt' index 1 w p lt 7 lc rgb \"red\" title \"current\"\n}" << endl;
+    anim << "\t\t'" << p_field->output_directory << "/delaunay/edges_'.i.'.plt' with lines lw 2 lc rgb \"black\" title \"triangles\",\\" << endl;
+    anim << "\t\t'" << p_field->output_directory << "/delaunay/circles_'.i.'.plt' with lines lw 3 lc rgb \"red\" title \"last triangle\",\\" << endl;
+    anim << "\t\t'" << p_field->output_directory << "/delaunay/points_'.i.'.plt' index 0 w p lt 5 lc rgb \"blue\" title \"points\",\\" << endl;
+    // anim << "\t\t'" << p_field->output_directory << "/delaunay/circles_'.i.'.plt' using 1:2:3 with circles lc rgb \"red\" title \"circles\",\\" << endl;
+    anim << "\t\t'" << p_field->output_directory << "/delaunay/points_'.i.'.plt' index 1 w p lt 7 lc rgb \"red\" title \"current\"\n}" << endl;
     return triangulation;
 }
 
@@ -342,9 +342,9 @@ void Delaunay::createNewTriangles(vector<int> sorted, int ind_poi) {
 
 // Save one step of animation in data/delaunay
 void Delaunay::saveStep(int cur_point, bool all_circ) {
-    ofstream points_step("data/delaunay/points_" + to_string(step) + ".plt");
-    ofstream edges_step("data/delaunay/edges_" + to_string(step) + ".plt");
-    ofstream circles_step("data/delaunay/circles_" + to_string(step) + ".plt");
+    ofstream points_step(p_field->output_directory + "/delaunay/points_" + to_string(step) + ".plt");
+    ofstream edges_step(p_field->output_directory + "/delaunay/edges_" + to_string(step) + ".plt");
+    ofstream circles_step(p_field->output_directory + "/delaunay/circles_" + to_string(step) + ".plt");
 
     for (int ind_tri = 0; ind_tri < triangulation->size(); ind_tri++) {
         triangulation->printTriangle(ind_tri, edges_step, circles_step, all_circ);
