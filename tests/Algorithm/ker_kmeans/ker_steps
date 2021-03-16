@@ -1,0 +1,3 @@
+gnuplot tests/Algorithm/ker_kmeans/gnu_ker_kmeans_animate.plt
+rm -r tests/Algorithm/ker_kmeans/ker/*
+echo 'Done! Result in ker_algorithm.gif'

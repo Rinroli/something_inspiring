@@ -451,6 +451,9 @@ public:
     vector<vector<double>> matrix;
     ofstream logs, logs_a;
     bool incMatrix(int k = 1);
+    bool if_test = false;
+    string output_name = "none";
+    string output_directory = "data";
     friend Controller;
 private:
     vector<FindClusters> fclusters;
@@ -461,9 +464,6 @@ private:
     bool readonly;
     void updateD();
     void findBox();
-    bool if_test = false;
-    string output_name = "none";
-    string output_directory = "data";
     vector<BinMatrix> bin_matrixes;
     Tree* p_tree = nullptr;
     Triangulation* p_triangulation = nullptr;

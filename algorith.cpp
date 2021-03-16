@@ -362,8 +362,11 @@ FindClusters KerKMeans::mainAlgorithm() {
         result += Cluster(ind, cluster, logs_a, &field);
         ind++;
     }
-    ifstream anim_templ("data/templates/ker_animate.template");
-    ofstream anim("data/gnu_ker_animate.plt");
+    string cur_template = (field.if_test) ? "test_" : "";
+    ifstream anim_templ("data/templates/" + cur_template + "ker_animate.template");
+    string cur_name = (field.if_test) ? field.output_name : "ker";
+    ofstream anim(field.output_directory + "/" + "gnu_" + cur_name + "_animate.plt");
+    // ofstream anim("data/gnu_ker_animate.plt");
     anim.setf(ios::boolalpha);
 
     string new_line;
@@ -375,10 +378,10 @@ FindClusters KerKMeans::mainAlgorithm() {
             is_stable << ", steps " << step << ")" << endl;
     anim << "do for [i=0:" << to_string(step) << "] {" << endl << "\tplot ";
     for (int ind_k = 0; ind_k < k; ind_k++) {
-        anim << "\t\t'data/ker/points_'.i.'.plt' index " << to_string(ind_k) <<
+        anim << "\t\t'" << field.output_directory << "/ker/points_'.i.'.plt' index " << to_string(ind_k) <<
             " w p title \"#" << to_string(ind_k) << "\",\\" << endl;
     }
-    anim << "\t\t'data/ker/kernel_'.i.'.plt' w p lc rgb \"red\" title \"kernels\"" <<
+    anim << "\t\t'" << field.output_directory << "/ker/kernel_'.i.'.plt' w p lc rgb \"red\" title \"kernels\"" <<
             endl << "}" << endl;
     writeLog("\tTurned out " + to_string(result.numClusters()) + " clusters in " + to_string(step) + " steps");
     cout << "Turned out " << to_string(result.numClusters()) << " clusters in " << step << " steps\n";
@@ -432,8 +435,8 @@ void KerKMeans::newKernels() {
 // Save step to the files in directory data/em.
 void KerKMeans::saveStep() {
     writeLog("SAVE STEP");
-    ofstream points_step("data/ker/points_" + to_string(step) + ".plt");
-    ofstream kernels_step("data/ker/kernel_" + to_string(step) + ".plt");
+    ofstream points_step(field.output_directory + "/ker/points_" + to_string(step) + ".plt");
+    ofstream kernels_step(field.output_directory + "/ker/kernel_" + to_string(step) + ".plt");
     for (int j = 0; j < k; j++) {
         for (int point_id : clusters[j]) {
             field.getPoint(point_id).print(points_step);
