@@ -1,4 +1,5 @@
 .vscode/*
+include_guard/*
 *.o
 *.exe
 *.out

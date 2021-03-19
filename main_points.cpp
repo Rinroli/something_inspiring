@@ -12,12 +12,10 @@
 #include <iomanip>
 #include <queue>
 
-#include "func_file.h"
+#include "Interface.h"
+#include "Configs.h"
 
 using namespace std;
-
-#include "func_file.h"
-#include "inter_contrl.h"
 
 
 int main() {
