@@ -1,0 +1,12 @@
+read gen_file
+all_input='
+test
+Algorithm
+em
+'
+all_input+="${gen_file}"
+{
+echo "$all_input" | ./points.exe
+./tests/Algorithm/em/em_steps
+gnuplot 'tests/Algorithm/em/gnu_em.plt'
+} &> /dev/null

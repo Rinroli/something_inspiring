@@ -1,0 +1,12 @@
+read gen_file
+all_input='
+test
+Algorithm
+dbscan
+'
+all_input+="${gen_file}"
+{
+echo "$all_input" | ./points.exe
+gnuplot 'tests/Algorithm/dbscan/gnu_dbscan.plt'
+gnuplot 'tests/Algorithm/dbscan/gnu_graph.plt'
+} &> /dev/null

@@ -5,7 +5,7 @@
 #include <vector>
 #include <iostream>
 
-#include "Field.h" // WARNING
+#include "Field.h"
 #include "FindClusters.h"
 #include "my_functions.h"
 

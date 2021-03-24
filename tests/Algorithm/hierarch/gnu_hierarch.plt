@@ -1,3 +1,6 @@
+set terminal png size 900,800 enhanced font "Helvetica,20"
+set nokey
+set output "tests/Generation/five_ellipses/hierarch.png"
 set title "Clusters, Hierarch"
 set size ratio -1
 plot 'tests/Algorithm/hierarch/data_hierarch.plt' index 0 w p title "0",\
@@ -10,5 +13,3 @@ plot 'tests/Algorithm/hierarch/data_hierarch.plt' index 0 w p title "0",\
 'tests/Algorithm/hierarch/data_hierarch.plt' index 7 w p title "7",\
 'tests/Algorithm/hierarch/data_hierarch.plt' index 8 w p title "8",\
 'tests/Algorithm/hierarch/data_hierarch.plt' index 9 w p title "9"
-pause -1
-

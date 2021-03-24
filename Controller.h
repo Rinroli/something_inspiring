@@ -58,7 +58,8 @@ public:
     bool genCloud(double mX, double mY, double sX, double sY, int nu_points);
     bool waveClusters(int i);
     bool displayGraph(int i);
-    void beginTest(const string& output_dir, const string& output_na);
+    void beginTest(const string& output_dir, const string& output_na,
+        const string& gen_f = "none");
     void writeLog(const string& message);
 
 private:
@@ -67,6 +68,7 @@ private:
     bool if_test = false;
     string output_directory = "data";
     string output_name;
+    string gen_file;
 };
 
 #endif // CONTROLLER

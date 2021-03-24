@@ -22,15 +22,22 @@ void Controller::writeLog(const string& message) {
 
 Controller::~Controller()
 {
-    logs.close();
     writeLog("DELETE");
+    logs.close();
+    delete field;
 }
 
 // Begin test, change main work directories.
-void Controller::beginTest(const string& output_dir, const string& output_na) {
+void Controller::beginTest(const string& output_dir, const string& output_na,
+    const string& gen_f) {
     if_test = true;
     output_directory = "tests/" + output_dir;
     output_name = output_na;
+    if (gen_f == "none") {
+        gen_file = output_directory;
+    } else {
+        gen_file = gen_f;
+    }
     field->beginTest(output_directory, output_name);
 }
 
@@ -279,6 +286,7 @@ bool Controller::saveHist(Cluster cluster) {
         hist << n * step_y + min_y << "\t" << fr_y[n] << endl;
     }
     hist.close();
+
     cout << "DONE!" << endl;
     writeLog("\tEnd saveHist");
     return true;
@@ -326,6 +334,14 @@ bool Controller::streeHist() {
     hist.open(output_directory + "/" + output_name + "_hist.plt");
     for (int k = 0; k < N; ++k) {
         hist << k * step << "\t" << freq[k] << endl;
+    }
+    ofstream gnu(output_directory + "/gnu_tree_hist.plt");
+    if (if_test) {
+        gnu << "set terminal png size 900, 800 enhanced font \"Helvetica,20\"" << endl
+            << "set output \"" << gen_file << "/" << output_name << "_hist.png\"" << endl
+            << "set title \"HISTOGRAM\"" << endl << "set style fill transparent solid 0.5" << endl
+            << "plot 'tests/Algorithm/spanning_tree/spanning_tree_hist.plt'"
+            << " index 0 title \"distances\" w boxes" << endl;
     }
     writeLog("\tEnd streeHist");
     cout << "DONE!" << endl;
@@ -398,6 +414,12 @@ bool Controller::printField(bool clouds, int i)
     out_f.close();
 
     ofstream gnu(output_directory + "/" + gnu_file_name);
+    if (if_test) {
+        gnu << "set terminal png size 900,800 enhanced font \"Helvetica,20\"" << endl;
+        gnu << "set nokey" << endl;
+        gnu << "set output \"" << gen_file << "/"
+            << output_name << ".png\"" << endl;
+    }
     gnu << "set title \"" << what << "\"\nset size ratio -1\nplot ";
     for (int i = 0; i < nu_groups; ++i) {
         gnu << "'" << output_directory << "/" << data_output_name << "' index " <<
@@ -407,8 +429,9 @@ bool Controller::printField(bool clouds, int i)
         }
         gnu << endl;
     }
-    gnu << "pause -1\n"
-        << endl;
+    if (not if_test) {
+        gnu << "pause -1\n" << endl;
+    }
     gnu.close();
     writeLog("\tEnd printField");
     cout << "DONE!" << endl;
@@ -508,9 +531,26 @@ bool Controller::hierarchClustering(int k) {
 
 // Print to the file all points and edges by binary matrix.
 bool Controller::displayGraph(int i) {
-    writeLog("Begin displayPoints");
+    writeLog("Begin displayGraph");
     if (field->numBinMatrix() <= i) { return false; }
     field->drawBinGraph(i);
+    ifstream graph_template("data/templates/" + output_name + "_graph.template");
+    ofstream gnu(output_directory + "/gnu_graph.plt");
+    if (if_test) {
+        gnu << "set terminal png size 900, 800 enhanced font \"Helvetica,20\"" << endl
+            << "set output \"" << gen_file << "/" << output_name << "_graph.png\"" << endl;
+    }
+    gnu << "set title \"" << output_name << " graph" << "\"\nset size ratio -1\n";
+    string new_line;
+    while (!graph_template.eof()) {
+        getline(graph_template, new_line);
+        gnu << new_line << endl;
+    }
+    if (not if_test) {
+        gnu << "pause -1\n" << endl;
+    }
+    gnu.close();
+    writeLog("\tEnd dispayGraph");
     cout << "DONE! Saved!" << endl;
     return true;
 }
@@ -520,18 +560,25 @@ bool Controller::minSpanTree() {
     writeLog("Begin minSpanTree");
     if (not field->ifReadonly()) { field->enterAnalysis(); }
     field->minSpanTree();
+    ofstream gnu(output_directory + "/gnu_tree.plt");
+    if (if_test) {
+        gnu << "set terminal png size 900,800 enhanced font \"Helvetica,20\"" << endl
+            << "set output \"" << gen_file << "/" << output_name << ".png\"" << endl
+            << "set size ratio -1" << endl
+            << "plot 'tests/Algorithm/spanning_tree/spanning_tree_data.plt' with lines lc rgb \"black\" notitle" << endl;
+    }
     cout << "DONE!" << endl;
     return true;
 }
 
-// Create Delaunay triangulation for field->
+// Create Delaunay triangulation for field
 bool Controller::delaunayTriangulation() {
     writeLog("Begin delaunayTriangulation");
     if (not field->ifReadonly()) { field->enterAnalysis(); }
     Delaunay delaunay(field, field->logs_a);
     field->p_triangulation = delaunay.mainAlgorithm();
-    cout << field->p_triangulation->size() << endl;
-    writeLog("\tEnd delaunayTriangulation - find " + to_string(field->p_triangulation->size()) + " triangles");
+    writeLog("\tEnd delaunayTriangulation - find " +
+        to_string(field->p_triangulation->size()) + " triangles");
     cout << "DONE!" << endl;
     return true;
 }

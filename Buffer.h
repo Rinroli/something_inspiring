@@ -5,7 +5,6 @@
 #include <iostream>
 
 #include "Point.h"
-// #include "Cluster.h"
 #include "Field.h"
 #include "my_functions.h"
 

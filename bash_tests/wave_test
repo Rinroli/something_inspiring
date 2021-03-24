@@ -1,0 +1,12 @@
+read gen_file
+all_input='
+test
+Algorithm
+wave
+'
+all_input+="${gen_file}"
+{
+echo "$all_input" | ./points.exe
+gnuplot 'tests/Algorithm/wave/gnu_wave.plt'
+gnuplot 'tests/Algorithm/wave/gnu_graph.plt'
+} &> /dev/null

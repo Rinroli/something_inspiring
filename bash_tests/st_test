@@ -1,0 +1,12 @@
+read gen_file
+all_input='
+test
+Algorithm
+spanning_tree
+'
+all_input+="${gen_file}"
+{
+echo "$all_input" | ./points.exe
+gnuplot 'tests/Algorithm/spanning_tree/gnu_tree_hist.plt'
+gnuplot 'tests/Algorithm/spanning_tree/gnu_tree.plt'
+} &> /dev/null

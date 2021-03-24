@@ -1,0 +1,6 @@
+set terminal gif animate loop -1 optimize delay 7 background "#ffeedf" \
+    font "Times-Roman,10" size 1280,960
+set output "tests/Algorithm/hierarch/hierarch_algorithm.gif"
+set size ratio -1
+set nokey
+set title "Hierarch-algorithm"

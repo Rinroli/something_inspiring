@@ -1,0 +1,11 @@
+read gen_file
+all_input='
+test
+Algorithm
+kmeans
+'
+all_input+="${gen_file}"
+{
+echo "$all_input" | ./points.exe
+gnuplot 'tests/Algorithm/kmeans/gnu_kmeans.plt'
+} &> /dev/null

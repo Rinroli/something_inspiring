@@ -1,0 +1,21 @@
+echo 'Begin global algorithm testing
+'
+for gen_file in circle two_ellipses five_ellipses
+do
+echo $gen_file | ./bash_tests/wave_test
+echo 'Done WAVE'
+echo $gen_file | ./bash_tests/st_test
+echo 'Done ST'
+echo $gen_file | ./bash_tests/kmeans_test
+echo 'Done KMEANS'
+echo $gen_file | ./bash_tests/ker_kmeans_test
+echo 'Done KER_KMEANS'
+echo $gen_file | ./bash_tests/hierarch_test
+echo 'Done HIERARCH'
+echo $gen_file | ./bash_tests/forel_test
+echo 'Done FOREL'
+echo $gen_file | ./bash_tests/em_test
+echo 'Done EM'
+echo $gen_file | ./bash_tests/dbscan_test
+echo 'Done DBSCAN'
+done

@@ -4,6 +4,7 @@
 
 Field::Field(vector<bool> if_logs, vector<string> name_logs) {
     readonly = false;
+    buffer = new Buffer(this);
 
     if (if_logs[0]) {
         logs.open("logs/" + name_logs[0], ios_base::app);
@@ -22,6 +23,7 @@ Field::~Field()
     fclusters.clear();
     points.clear();
     logs.close();
+    delete buffer;
     if (logs_a) { logs_a.close(); }
     writeLog("DELETE");
 }

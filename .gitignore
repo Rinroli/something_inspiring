@@ -13,6 +13,7 @@ include_guard/*
 !/help.txt
 !/config.txt
 /data/*
+!/data/templates/
 /logs/*
 !/logs/changelog.md
 /screenshots/*
@@ -24,6 +25,9 @@ include_guard/*
 # !/data/ker/.keepdir
 !/**/.keepdir
 /tests/**/*.gif
-
+/tests/**/*.png
 !/tests/**/*.txt
 !/tests/**/gnu_*.plt
+
+/**/beamer/*
+/tests/**/*.pdf

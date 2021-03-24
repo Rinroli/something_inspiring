@@ -1,3 +1,6 @@
+set terminal png size 900,800 enhanced font "Helvetica,20"
+set nokey
+set output "tests/Generation/five_ellipses/kmeans.png"
 set title "Clusters, KMeans algorithm"
 set size ratio -1
 plot 'tests/Algorithm/kmeans/data_kmeans.plt' index 0 w p title "0",\
@@ -20,5 +23,3 @@ plot 'tests/Algorithm/kmeans/data_kmeans.plt' index 0 w p title "0",\
 'tests/Algorithm/kmeans/data_kmeans.plt' index 17 w p title "17",\
 'tests/Algorithm/kmeans/data_kmeans.plt' index 18 w p title "18",\
 'tests/Algorithm/kmeans/data_kmeans.plt' index 19 w p title "19"
-pause -1
-

@@ -9,6 +9,8 @@
 #include "Controller.h" // WARNING
 #include "my_functions.h"
 
+class Controller;
+
 using namespace std;
 
 #ifndef INTERFACE
@@ -28,10 +30,13 @@ public:
 
 private:
     ofstream logs;
-    Controller ctrl;
+    Controller *ctrl;
     bool if_test = false;
     string output_directory = "data";
     string output_name = "output.plt";
+    string gen_file = "none";
+    vector<bool> if_logs;
+    vector<string> name_logs;
 };
 
 #endif // INTERFACE

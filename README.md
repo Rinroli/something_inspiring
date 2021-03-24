@@ -19,4 +19,11 @@ Also **Delaunay triangulation** is implemented (algorithm "remove and build")!
 
 Before data analysis, you can work with normally distributed clouds by generating and working with a **buffer** - *rotate*, *shift*, *scale*.
 
-Also you can see some [examples](examples).
+**Include test system.** You can run tests from *CLI* interface or from *bash-scripts*:
+
+* For *CLI* enter *'test'* and then choose test type, test name and generation file (for *Algorithm*). All can be find at [tests](tests), generation files are in [Generation](tests/Generation)
+* For *bash-scripts* run the script you want from [bash_tests](bash_tests)
+
+All result data and GNUplot files will be at main test directory, result pictures will be in in the directory of the generation file.
+
+Gnuplot run in 'silent' mode - only picture generation.

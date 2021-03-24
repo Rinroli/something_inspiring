@@ -1,0 +1,12 @@
+read gen_file
+all_input='
+test
+Algorithm
+forel
+'
+all_input+="${gen_file}"
+{
+echo "$all_input" | ./points.exe
+./tests/Algorithm/forel/forel_steps
+gnuplot 'tests/Algorithm/forel/gnu_forel.plt'
+} &> /dev/null

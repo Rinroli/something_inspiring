@@ -26,7 +26,6 @@ public:
     FindClusters mainAlgorithm();
 private:
     vector<Tree*> current_trees;
-    // vector<vector<int>> current_clusters;
     vector<Cluster> current_clusters;
     vector<vector<double>> dist_matrix;
     int k, num_clusters, step = 0, frame = 0;

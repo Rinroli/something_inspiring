@@ -9,7 +9,21 @@ List of commands can be found in [help.txt](../help.txt).
 
 ## Changelog
 
-### **Version 2.0.1 (15.03.2021)** - CURRENT VERSION
+### **Version 2.1.0 (24.03.2021)** - CURRENT VERSION
+
+Added:
+
+* Massive **Test System** update! Now you can run tests from *bash-scripts* - all at once or one at a time. With different generation file. Can be find [here](../bash_tests).
+
+* Some more examples - now in three *pdf-files* with different generation files.
+
+### **Version 2.0.2 (19.03.2021)**
+
+Refactored:
+
+* **Global refactoring** Each class in its file.
+
+### **Version 2.0.1 (15.03.2021)**
 
 Added:
 

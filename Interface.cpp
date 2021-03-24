@@ -6,8 +6,9 @@ using namespace std;
 #define DELTA 0.1
 #define K 10
 
-Interface::Interface(vector<bool> if_logs, vector<string> name_logs)
-    : ctrl(if_logs, name_logs) {
+Interface::Interface(vector<bool> if_logss, vector<string> name_logss)
+: if_logs(if_logss), name_logs(name_logss) {
+    ctrl = new Controller(if_logss, name_logss);
     if (if_logs[2]) {
         logs.open("logs/" + name_logs[2], ios_base::app);
         logs << endl << "New session" << endl;
@@ -23,7 +24,7 @@ Interface::~Interface()
 
 // Main loop for all program.
 bool Interface::mainLoop() {
-    ifstream fin;
+    ifstream fin, gen_fin;
     string command;
 
     cout << "Would you like to CLI or command file?" << endl <<
@@ -46,18 +47,32 @@ bool Interface::mainLoop() {
 
         if (command == "test") {
             writeLog("Test");
-            string test_directory, test_name;
+            string test_directory, test_name, cur_gen;
             cout << "Please enter test directory:\n > ";
             cin >> test_directory;
             cout << "And test name:\n > ";
             cin >> test_name;
             writeLog("\t" + test_directory + "/" + test_name + "/" + test_name + ".txt");
 
-            fin.open("tests/" + test_directory + "/" + test_name + "/" + test_name + ".txt");
             output_directory = test_directory + "/" + test_name;
             output_name = test_name;
+    
+            fin.open("tests/" + test_directory + "/" + test_name + "/" + test_name + ".txt");
+            if (test_directory == "Algorithm") {
+                cout << "At last - generation file:\n > ";
+                cin >> cur_gen;
+                gen_file = "tests/Generation/" + cur_gen;
+                ctrl->beginTest(output_directory, output_name, gen_file);
+                writeLog("\tGen file >> " + gen_file + "/" + cur_gen + ".txt");
+                gen_fin.open(gen_file + "/" + cur_gen + ".txt");
 
-            ctrl.beginTest(output_directory, output_name);
+                if (!gen_fin.is_open()) {
+                    cout << "Wrong generation file! Exit..." << endl;
+                    return 0;
+                }
+            } else {
+                ctrl->beginTest(output_directory, output_name);
+            }
         }
         else {
             writeLog("From File");
@@ -68,9 +83,22 @@ bool Interface::mainLoop() {
             cout << "Wrong file! Exit..." << endl;
             return 0;
         }
-        getline(fin, command);
-        while (!fin.eof() and (command == "" or runCommand(command))) {
+        if (command == "test") {
+                getline(gen_fin, command);
+                while (!gen_fin.eof() and (command == "" or runCommand(command))) {
+                    getline(gen_fin, command);
+                }
+                gen_fin.close();
+                writeLog("RETURN to test file");
+                getline(fin, command);
+                while (!fin.eof() and (command == "" or runCommand(command))) {
+                    getline(fin, command);
+                }
+        } else {
             getline(fin, command);
+            while (!fin.eof() and (command == "" or runCommand(command))) {
+                getline(fin, command);
+            }
         }
         cout << "End of file reached. Bye!" << endl;
     }
@@ -98,99 +126,99 @@ bool Interface::runCommand(string command)
             args.push_back(pch);
         }
         if (command == "HELP") {
-            result = ctrl.showHelp();
+            result = ctrl->showHelp();
         }
 
         else if ((com == "GEN_CLOUD") | (com == "GC")) {
-            if (args.size() == 0) { result = ctrl.genCloud(0, 0, 1, 1, N); }
+            if (args.size() == 0) { result = ctrl->genCloud(0, 0, 1, 1, N); }
             else if (args.size() < 4) { throw - 1; }
             else if (args.size() == 4) {
-                result = ctrl.genCloud(stod(args[0]), stod(args[1]),
+                result = ctrl->genCloud(stod(args[0]), stod(args[1]),
                     stod(args[2]), stod(args[3]), N);
             }
             else {
-                result = ctrl.genCloud(stod(args[0]), stod(args[1]),
+                result = ctrl->genCloud(stod(args[0]), stod(args[1]),
                     stod(args[2]), stod(args[3]), stod(args[4]));
             }
         }
 
         else if (com == "BINARY") {
-            if (args.size() == 0) { result = ctrl.createIncMatrix(DELTA); }
-            else { result = ctrl.createIncMatrix(stod(args[0])); }
+            if (args.size() == 0) { result = ctrl->createIncMatrix(DELTA); }
+            else { result = ctrl->createIncMatrix(stod(args[0])); }
         }
 
         else if (com == "DBSCAN") {
-            if (args.size() == 0) { result = ctrl.createDBMatrix(DELTA, K); }
+            if (args.size() == 0) { result = ctrl->createDBMatrix(DELTA, K); }
             else if (args.size() < 2) { throw - 1; }
-            else { result = ctrl.createDBMatrix(stod(args[0]), stod(args[1])); }
+            else { result = ctrl->createDBMatrix(stod(args[0]), stod(args[1])); }
         }
 
         else if ((com == "WAVE") | (com == "DBWAVE")) {
-            if (args.size() == 0) { result = ctrl.waveClusters(-1); }
-            else { result = ctrl.waveClusters(stod(args[0])); }
+            if (args.size() == 0) { result = ctrl->waveClusters(-1); }
+            else { result = ctrl->waveClusters(stod(args[0])); }
         }
 
         else if ((com == "DIBINARY") | (com == "DIDBSCAN") | (com == "DIB") | (com == "DID")) {
-            if (args.size() == 0) { result = ctrl.displayGraph(-1); }
-            else { result = ctrl.displayGraph(stod(args[0])); }
+            if (args.size() == 0) { result = ctrl->displayGraph(-1); }
+            else { result = ctrl->displayGraph(stod(args[0])); }
         }
 
         else if (com == "HIST") {
             if (args.size() == 0) {
-                result = ctrl.saveHist();
+                result = ctrl->saveHist();
             }
             else if (args.size() == 1) { throw - 1; }
-            else { result = ctrl.preHist(args); }
+            else { result = ctrl->preHist(args); }
         }
 
         else if (com == "KMEANS") {
-            if (args.size() == 0) { result = ctrl.kMeans(25); }
-            else { result = ctrl.kMeans(stod(args[0])); }
+            if (args.size() == 0) { result = ctrl->kMeans(25); }
+            else { result = ctrl->kMeans(stod(args[0])); }
         }
 
         else if (com == "KERKMEANS") {
-            if (args.size() == 0) { result = ctrl.kerKMeans(25, 5); }
-            else { result = ctrl.kerKMeans(stod(args[0]), stod(args[1])); }
+            if (args.size() == 0) { result = ctrl->kerKMeans(25, 5); }
+            else { result = ctrl->kerKMeans(stod(args[0]), stod(args[1])); }
         }
 
         else if (com == "FOREL") {
-            if (args.size() == 0) { result = ctrl.forelAlg(0.05); }
-            else { result = ctrl.forelAlg(stod(args[0])); }
+            if (args.size() == 0) { result = ctrl->forelAlg(0.05); }
+            else { result = ctrl->forelAlg(stod(args[0])); }
         }
 
         else if (com == "HIERARCH") {
-            if (args.size() == 0) { result = ctrl.hierarchClustering(5); }
-            else { result = ctrl.hierarchClustering(stoi(args[0])); }
+            if (args.size() == 0) { result = ctrl->hierarchClustering(5); }
+            else { result = ctrl->hierarchClustering(stoi(args[0])); }
         }
 
         else if (com == "EM") {
-            if (args.size() == 0) { result = ctrl.eMAlgorithm(25); }
-            else { result = ctrl.eMAlgorithm(stod(args[0])); }
+            if (args.size() == 0) { result = ctrl->eMAlgorithm(25); }
+            else { result = ctrl->eMAlgorithm(stod(args[0])); }
         }
 
         else if (com == "SAVE") {
-            if (args.size() == 0) { result = ctrl.printField(); }
-            else { result = ctrl.printField(false, stod(args[0])); }
+            if (args.size() == 0) { result = ctrl->printField(); }
+            else { result = ctrl->printField(false, stod(args[0])); }
         }
 
         else if (com == "ADDB") {
-            if (args.size() == 0) { result = ctrl.addToBuffer(-1); }
-            else { result = ctrl.addToBuffer(stod(args[0])); }
+            if (args.size() == 0) { result = ctrl->addToBuffer(-1); }
+            else { result = ctrl->addToBuffer(stod(args[0])); }
         }
 
         else if (com == "ROTB") {
             if (args.size() < 1) { throw - 1; }
-            result = ctrl.rotateBuffer(stod(args[0]));
+            result = ctrl->rotateBuffer(stod(args[0]));
         }
 
         else if (com == "MOVEB") {
             if (args.size() < 2) { throw - 1; }
-            result = ctrl.moveBuffer(stod(args[0]), stod(args[1]));
+            result = ctrl->moveBuffer(stod(args[0]), stod(args[1]));
         }
 
         else if (com == "ZOOMB") {
             if (args.size() < 1) { throw - 1; }
-            result = ctrl.zoomBuffer(stod(args[0]));
+            result = ctrl->zoomBuffer(stod(args[0]));
         }
 
         else if (com == "EXIT") {
@@ -199,34 +227,34 @@ bool Interface::runCommand(string command)
             return false;
         }
         else if (com == "INFO") {
-            result = ctrl.showInfoField();
+            result = ctrl->showInfoField();
         }
         else if (com == "INFOFC") {
-            result = ctrl.showInfoFClusters();
+            result = ctrl->showInfoFClusters();
         }
         else if ((com == "MATRIX") | (com == "ANALYSIS")) {
-            result = ctrl.enterAnalysis();
+            result = ctrl->enterAnalysis();
         }
         else if (com == "STREE") {
-            result = ctrl.minSpanTree();
+            result = ctrl->minSpanTree();
         }
         else if (com == "DELAUNAY") {
-            result = ctrl.delaunayTriangulation();
+            result = ctrl->delaunayTriangulation();
         }
         else if (com == "STRHIST") {
-            result = ctrl.streeHist();
+            result = ctrl->streeHist();
         }
         else if (com == "FINDR") {
-            result = ctrl.findR();
+            result = ctrl->findR();
         }
         else if (com == "SHOWB") {
-            result = ctrl.showBuffer();
+            result = ctrl->showBuffer();
         }
         else if (com == "PUTB") {
-            result = ctrl.putBuffer();
+            result = ctrl->putBuffer();
         }
         else if (com == "EMPTYB") {
-            result = ctrl.emptyBuffer();
+            result = ctrl->emptyBuffer();
         }
 
         else {
