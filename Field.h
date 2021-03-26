@@ -82,6 +82,7 @@ private:
     vector<FindClusters> fclusters;
     vector<Cloud> clouds;
     Buffer* buffer;
+    void resizeAllClouds();
     void writeLog(const string& message);
     vector<double> containing_box{ 0, 0, 0, 0 };  // {x_1, x_2, y_1, y_2}
     bool readonly;

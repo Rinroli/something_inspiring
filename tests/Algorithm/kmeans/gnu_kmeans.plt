@@ -21,5 +21,4 @@ plot 'tests/Algorithm/kmeans/data_kmeans.plt' index 0 w p title "0",\
 'tests/Algorithm/kmeans/data_kmeans.plt' index 15 w p title "15",\
 'tests/Algorithm/kmeans/data_kmeans.plt' index 16 w p title "16",\
 'tests/Algorithm/kmeans/data_kmeans.plt' index 17 w p title "17",\
-'tests/Algorithm/kmeans/data_kmeans.plt' index 18 w p title "18",\
-'tests/Algorithm/kmeans/data_kmeans.plt' index 19 w p title "19"
+'tests/Algorithm/kmeans/data_kmeans.plt' index 18 w p title "18"

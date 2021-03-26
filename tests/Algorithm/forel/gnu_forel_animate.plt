@@ -4,7 +4,7 @@ set output "tests/Algorithm/forel/forel_algorithm.gif"
 set size ratio -1
 set nokey
 set title "FOREL-algorithm"
-do for [i=0:1177] {
+do for [i=0:861] {
 	plot 		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 0 w p title "#0",\
 		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 1 w p title "#1",\
 		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 2 w p title "#2",\
@@ -178,64 +178,5 @@ do for [i=0:1177] {
 		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 170 w p title "#170",\
 		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 171 w p title "#171",\
 		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 172 w p title "#172",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 173 w p title "#173",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 174 w p title "#174",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 175 w p title "#175",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 176 w p title "#176",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 177 w p title "#177",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 178 w p title "#178",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 179 w p title "#179",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 180 w p title "#180",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 181 w p title "#181",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 182 w p title "#182",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 183 w p title "#183",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 184 w p title "#184",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 185 w p title "#185",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 186 w p title "#186",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 187 w p title "#187",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 188 w p title "#188",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 189 w p title "#189",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 190 w p title "#190",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 191 w p title "#191",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 192 w p title "#192",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 193 w p title "#193",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 194 w p title "#194",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 195 w p title "#195",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 196 w p title "#196",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 197 w p title "#197",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 198 w p title "#198",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 199 w p title "#199",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 200 w p title "#200",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 201 w p title "#201",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 202 w p title "#202",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 203 w p title "#203",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 204 w p title "#204",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 205 w p title "#205",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 206 w p title "#206",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 207 w p title "#207",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 208 w p title "#208",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 209 w p title "#209",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 210 w p title "#210",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 211 w p title "#211",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 212 w p title "#212",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 213 w p title "#213",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 214 w p title "#214",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 215 w p title "#215",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 216 w p title "#216",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 217 w p title "#217",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 218 w p title "#218",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 219 w p title "#219",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 220 w p title "#220",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 221 w p title "#221",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 222 w p title "#222",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 223 w p title "#223",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 224 w p title "#224",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 225 w p title "#225",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 226 w p title "#226",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 227 w p title "#227",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 228 w p title "#228",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 229 w p title "#229",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 230 w p title "#230",\
-		'tests/Algorithm/forel/forel/clusters_'.i.'.plt' index 231 w p title "#231",\
 		'tests/Algorithm/forel/forel/circles_'.i.'.plt' using 1:2:3with circles lc rgb "red" title "circles"
 }

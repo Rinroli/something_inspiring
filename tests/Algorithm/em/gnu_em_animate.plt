@@ -3,7 +3,7 @@ set term gif animate optimize delay 10 background "#ffeedf" \
 set output "tests/Algorithm/em/em_algorithm.gif"
 set size square
 set title "EM-algorithm"
-do for [i=0:362] {
+do for [i=0:263] {
 	plot 		'tests/Algorithm/em/em/points_'.i.'.plt' index 0 w p title "#0",\
 		'tests/Algorithm/em/em/points_'.i.'.plt' index 1 w p title "#1",\
 		'tests/Algorithm/em/em/points_'.i.'.plt' index 2 w p title "#2",\

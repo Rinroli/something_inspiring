@@ -7,6 +7,7 @@ Cluster::Cluster(int cur_id_cloud, ofstream& logs_field, Field* field)
 {
     p_field_points = &(field->points);
     p_field = field;
+    indicator_points.resize(p_field->numPoints());
     id = cur_id_cloud;
     writeLog("INIT >> id(" + to_string(id) + ")");
 }
@@ -15,15 +16,34 @@ Cluster::Cluster(int cur_id_cloud, ofstream& logs_field, Field* field, vector<Po
     : logs_a{ logs_field }, p_field_points(p_field_pointss)
 {
     p_field = field;
+    indicator_points.resize(p_field->numPoints());
     id = cur_id_cloud;
     writeLog("INIT >> id(" + to_string(id) + ")");
 }
 
 Cluster::Cluster(int idd, const vector<int>& points, ofstream& logs_field, Field* field)
-    : logs_a{ logs_field }, id_points(points)
+    : logs_a{ logs_field }//, id_points(points)
 {
     p_field_points = &(field->points);
     p_field = field;
+    indicator_points.resize(p_field->numPoints());
+    for (int point : points) {
+        indicator_points[point] = 1;
+    }
+    id = idd;
+
+    writeLog("INIT >> id(" + to_string(id) + ")");
+}
+
+Cluster::Cluster(int idd, const vector<double>& points_prob, ofstream& logs_field, Field* field)
+    : logs_a{ logs_field }//, id_points(points)
+{
+    p_field_points = &(field->points);
+    p_field = field;
+    indicator_points.resize(p_field->numPoints());
+    for (int id_point = 0; id_point < p_field->numPoints(); id_point++) {
+        indicator_points[id_point] = points_prob[id_point];
+    }
     id = idd;
 
     writeLog("INIT >> id(" + to_string(id) + ")");
@@ -31,9 +51,13 @@ Cluster::Cluster(int idd, const vector<int>& points, ofstream& logs_field, Field
 
 Cluster::Cluster(int idd, const vector<int>& points, ofstream& logs_field,
     Field* field, vector<Point>* p_field_pointss)
-    : logs_a{ logs_field }, id_points(points), p_field_points(p_field_pointss)
+    : logs_a{ logs_field }, p_field_points(p_field_pointss)//, id_points(points),
 {
     p_field = field;
+    indicator_points.resize(p_field->numPoints());
+    for (int point : points) {
+        indicator_points[point] = 1;
+    }
     id = idd;
 
     writeLog("INIT >> id(" + to_string(id) + ")");
@@ -41,13 +65,57 @@ Cluster::Cluster(int idd, const vector<int>& points, ofstream& logs_field,
 
 Cluster::~Cluster()
 {
-    id_points.clear();
+    indicator_points.clear();
     writeLog("DELETE");
 }
 
-// Return number of points in the cloud.
+// Resize indicator vector if field has new points
+void Cluster::resizeIndicator() {
+    indicator_points.resize(p_field->numPoints());
+}
+
+// Return APPROXIMATE number of points in the cloud.
+// Badly work for EM-clustering
+int Cluster::apprNumPoints(double bound) {
+    int count = 0;
+    for (double ind_poi : indicator_points) {
+        if (abs(ind_poi - bound) < EPS) {
+            count++;
+        }
+    }
+    return count;
+}
+
+// Return EXACT number of points in the cloud.
+// Badly work for EM-clustering
 int Cluster::numPoints() {
-    return id_points.size();
+    return apprNumPoints(1);
+}
+
+// Return id of points that have indicator > bound
+vector<int> Cluster::getPoints(double bound) {
+    vector<int> res;
+    for (int id_point = 0; id_point < p_field->numPoints(); id_point++) {
+        if (indicator_points[id_point] - EPS > bound) {
+            res.push_back(id_point);
+        }
+    }
+    return res;
+}
+
+// Return one point id
+int Cluster::getOnePoint(double bound) {
+    for (int id_point : getPoints()) {
+        if (indicator_points[id_point] - EPS > bound) {
+            return id_point;
+        }
+    }
+    return -1;
+}
+
+// Return one point coords
+vector<double> Cluster::getOnePointCoords(double bound) {
+    return p_field->getPoint(getOnePoint(bound)).getCoord();
 }
 
 // Update Radius, Diameter and etc. of the Cluster(Cloud). 
@@ -56,9 +124,9 @@ void Cluster::updateProp() {
 
     double tmp_dist;
     center.clear();
-    for (int first : id_points) {
+    for (int first : getPoints()) {
         double dist_f = 0;
-        for (int second : id_points) {
+        for (int second : getPoints()) {
             tmp_dist = p_field->getDist(first, second);
             if (tmp_dist > dist_f) { dist_f = tmp_dist; }
         }
@@ -72,15 +140,15 @@ void Cluster::updateProp() {
     }
 
     if (numPoints() > 0) {   // Box
-        vector<double> some_point = (*p_field_points)[id_points[0]].getCoord();
+        vector<double> some_point(getOnePointCoords());
 
         box[0] = some_point[0];
         box[1] = some_point[0];
         box[2] = some_point[1];
         box[3] = some_point[1];
 
-        for (int i = 0; i < numPoints(); ++i) {
-            some_point = (*p_field_points)[id_points[i]].getCoord();
+        for (int i : getPoints()) {
+            some_point = p_field->getPoint(i).getCoord();
             if (some_point[0] > box[1]) { box[1] = some_point[0]; }
             if (some_point[0] < box[0]) { box[0] = some_point[0]; }
             if (some_point[1] > box[3]) { box[3] = some_point[1]; }
@@ -92,7 +160,7 @@ void Cluster::updateProp() {
 // Find average of coords.
 vector<double> Cluster::findAverage() {
     vector<double> aver(2);
-    for (int id_point : id_points) {
+    for (int id_point : getPoints()) {
         vector<double> coords = (*p_field_points)[id_point].getCoord();
         aver[0] += coords[0];
         aver[1] += coords[1];
@@ -126,23 +194,36 @@ vector<int> Cluster::getCenter() {
     return center;
 }
 
-// Getter for point by its index.
-Point& Cluster::operator[](int i) {
-    return (*p_field_points)[id_points[i]];
-}
+// // Getter for point by its index.
+// Point& Cluster::operator[](int i) {
+//     return (*p_field_points)[id_points[i]];
+// }
+
+// int Cluster::getIdPoint(int i) {
+//     return id_points[i];
+// }
 
 // Add point with absolut index i to the cluster.
 Cluster& operator+=(Cluster& left, int i)
 {
-    left.id_points.push_back(i);
+    left.resizeIndicator();
+    left.indicator_points[i] = 1;
     return left;
 }
 
-// Add point with absolut index i to the cluster.
+// Concatenate two clusters
 Cluster& operator+=(Cluster& left, Cluster& right)
 {
-    (left.id_points).insert((left.id_points).end(), (right.id_points).begin(),
-        (right.id_points).end());
+    // (left.id_points).insert((left.id_points).end(), (right.id_points).begin(),
+    //     (right.id_points).end());
+    left.resizeIndicator();
+    for (int id_point = 0; id_point < right.p_field->numPoints(); id_point++) {
+        left.indicator_points[id_point] += right.indicator_points[id_point];
+        if (left.indicator_points[id_point] > 1) {
+            left.indicator_points[id_point] = 0;
+            left.writeLog("IS THAT HAPPENED?");
+        }
+    }
     return left;
 }
 
@@ -151,7 +232,7 @@ Cluster& Cluster::operator=(const Cluster& new_cluster) {
         return *this;
     }
     id = new_cluster.id;
-    id_points = new_cluster.id_points;
+    indicator_points = new_cluster.indicator_points;
     updated = new_cluster.updated;
     R = new_cluster.R; D = new_cluster.D;
     center = new_cluster.center;
@@ -164,13 +245,16 @@ Cluster& Cluster::operator=(const Cluster& new_cluster) {
 // Add point to the cluster.
 Cluster& operator+=(Cluster& left, Point point)
 {
-    left.id_points.push_back(point.id);
+    // left.id_points.push_back(point.id);
+    left.indicator_points[point.id] = 1;
     return left;
 }
 
 // Clear vector of points' id.
 void Cluster::clear() {
-    id_points.clear();
+    indicator_points.clear();
+    indicator_points.resize(p_field->numPoints());
+    // id_points.clear();
 }
 
 // Print info abput cluster.
@@ -190,8 +274,8 @@ void Cluster::coutInfo() {
 }
 
 void Cluster::printGnu(ofstream& ofile) {
-    for (int point_id : id_points) {
-        (*p_field_points)[point_id].print(ofile);
+    for (int point_id : getPoints()) {
+        p_field->getPoint(point_id).print(ofile);
     }
 }
 

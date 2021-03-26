@@ -33,7 +33,8 @@ FindClusters KerKMeans::mainAlgorithm() {
         newKernels();
     }
 
-    FindClusters result(logs_a, "KerKMeans algorithm (" + to_string(is_stable) + ")");
+    FindClusters result(logs_a,
+        "KerKMeans algorithm (" + to_string(is_stable) + ")", field.numPoints());
     int ind = 0;
     for (vector<int> cluster : clusters) {
         result += Cluster(ind, cluster, logs_a, &field);

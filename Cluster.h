@@ -8,8 +8,6 @@
 #include <fstream>
 
 #include "Point.h"
-// #include "Buffer.h"
-// #include "Forel.h"
 #include "Field.h"
 
 #ifndef CLUSTER
@@ -29,18 +27,25 @@ public:
     Cluster(int cur_id_cloud, ofstream& logs_field,
         Field* field, vector<Point>* p_field_points);
     Cluster(int id, const vector<int>& points, ofstream& logs_field, Field* field);
+    Cluster(int id, const vector<double>& points, ofstream& logs_field, Field* field);
     Cluster(int id, const vector<int>& points, ofstream& logs_field,
         Field* field, vector<Point>* p_field_points);
     ~Cluster();
+    void resizeIndicator();
     int numPoints();
+    int apprNumPoints(double bound=0.5);
+    vector<int> getPoints(double bound=0.5);
     int id;
     double getR();
     double getD();
     vector<double> getBox();
     vector<int> getCenter();
+    int getOnePoint(double bound=0.5);
+    vector<double> getOnePointCoords(double bound=0.5);
     void coutInfo();
     void printGnu(ofstream& file_out);
-    Point& operator[](int i);
+    // Point& operator[](int i);
+    // int getIdPoint(int i);
     Cluster& operator=(const Cluster& new_cluster);
     void clear();
     vector<double> findAverage();
@@ -51,8 +56,9 @@ public:
     friend class Buffer;
     friend class Forel;
 
-    // protected:
-    vector<int> id_points;
+protected:
+    // vector<int> id_points;
+    vector<double> indicator_points;
     ofstream& logs_a;
     void writeLog(const string& message);
     bool updated = false;

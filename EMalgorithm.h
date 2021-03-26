@@ -36,6 +36,7 @@ private:
     ofstream& logs_a;
     double findPointProb(int p_j, int x_i);
     vector<vector<int>> findNearest();
+    vector<Cluster> toClusters();
     bool stepE();
     void stepM();
     double distMahalanobis(int p_j, int x_i);

@@ -2,9 +2,10 @@
 
 #include "FindClusters.h"
 
-FindClusters::FindClusters(ofstream& logs_al, const string sourcee)
-    : logs_a(logs_al), source(sourcee)
+FindClusters::FindClusters(ofstream& logs_al, const string sourcee, int nu_pointss)
+    : logs_a(logs_al), source(sourcee), nu_points(nu_pointss)
 {
+    dust_points.resize(nu_points);
     writeLog("INIT");
 }
 
@@ -31,6 +32,11 @@ void FindClusters::coutInfo() {
     for (Cluster cl : clusters) {
         cl.coutInfo();
     }
+}
+
+// Add point by id to dust vector
+void FindClusters::addDust(int id_point, double indicator) {
+    dust_points[id_point] = indicator;
 }
 
 // Simple addition of new cluster to FindClusters

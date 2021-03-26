@@ -20,11 +20,12 @@ using namespace std;
 class FindClusters
 {
 public:
-    FindClusters(ofstream& logs_al, string source);
+    FindClusters(ofstream& logs_al, string source, int nu_points);
     ~FindClusters();
     Cluster& operator[](int i);
     void coutInfo();
     int numClusters();
+    void addDust(int id_point, double indicator=1);
     void setID(int i);
     const string source;
     int id = 0;
@@ -34,6 +35,8 @@ public:
 
 private:
     vector<Cluster> clusters;
+    vector<double> dust_points;
+    int nu_points;
     void writeLog(const string& message);
     ofstream& logs_a;
 };

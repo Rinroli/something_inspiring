@@ -37,7 +37,7 @@ Hierarch::~Hierarch() {
 // Call algorithm.
 FindClusters Hierarch::mainAlgorithm() {
     writeLog("Start algorithm");
-    FindClusters result(logs, "Hierarch");
+    FindClusters result(logs, "Hierarch", p_field->numPoints());
     while (num_clusters > k) {
         writeLog("STEP #" + to_string(step));
         vector<int> find_ind = recountDistMatrix(findMinDist());
@@ -46,7 +46,7 @@ FindClusters Hierarch::mainAlgorithm() {
         Tree* tmp_tree = new Tree(tmp, current_trees[find_ind[0]], current_trees[find_ind[1]], logs);
         current_trees.erase(current_trees.begin() + find_ind[1]);
         current_trees[find_ind[0]] = tmp_tree;
-
+    
         current_clusters[find_ind[0]] += current_clusters[find_ind[1]];
         current_clusters.erase(current_clusters.begin() + find_ind[1]);
         num_clusters--;
@@ -63,6 +63,7 @@ FindClusters Hierarch::mainAlgorithm() {
 
 // Find trees with min distance between
 vector<int> Hierarch::findMinDist() {
+    writeLog("FINDMINDIST");
     double min_dist = INF;
     vector<int> min_ind{ -1, -1 };
     for (int ind = 0; ind < num_clusters; ind++) {
@@ -80,20 +81,18 @@ vector<int> Hierarch::findMinDist() {
 // Find complicated distance between clusters
 double Hierarch::getDist(int ind, int sec_ind) {
     double sum_dist = 0;
-    int size_f = current_clusters[ind].numPoints();
-    int size_s = current_clusters[sec_ind].numPoints();
-    for (int in_f = 0; in_f < size_f; in_f++) {
-        for (int in_s = 0; in_s < size_s; in_s++) {
-            sum_dist += p_field->getDist(current_clusters[ind][in_f].id,
-                current_clusters[sec_ind][in_s].id);
+    for (int id_f : current_clusters[ind].getPoints()) {
+        for (int id_s : current_clusters[sec_ind].getPoints()) {
+            sum_dist += p_field->getDist(id_f, id_s);
         }
     }
-    sum_dist /= (size_f * size_s);
+    sum_dist /= (current_clusters[ind].numPoints() * current_clusters[sec_ind].numPoints());
     return sum_dist;
 }
 
 // Recount distance matrix.
 vector<int> Hierarch::recountDistMatrix(const vector<int>& find_ind) {
+    writeLog("RECOUNT");
     int min_i = (find_ind[0] < find_ind[1]) ? find_ind[0] : find_ind[1];
     int max_i = (find_ind[0] > find_ind[1]) ? find_ind[0] : find_ind[1];
 
@@ -144,9 +143,9 @@ void Hierarch::newFrame() {
     writeLog("New frame");
     ofstream file_clu(p_field->output_directory + "/hierarch/frame_" + to_string(frame) + ".plt");
 
-    for (Cluster clu : current_clusters) {
-        clu.printGnu(file_clu);
-        file_clu << endl << endl;
+    for (int ind_clu = 0; ind_clu < current_clusters.size(); ind_clu++) {
+            current_clusters[ind_clu].printGnu(file_clu);
+            file_clu << endl << endl;
     }
 
     file_clu.close();

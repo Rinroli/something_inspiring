@@ -28,6 +28,13 @@ Field::~Field()
     writeLog("DELETE");
 }
 
+// Update size of field in all clusters
+void Field::resizeAllClouds() {
+    for (Cluster cl : clouds) {
+        cl.resizeIndicator();
+    }
+}
+
 // Create new normally distributed cloud of points.
 bool Field::createCloud(double mX, double mY,
     double sX, double sY, int nu_points) {
@@ -40,6 +47,7 @@ bool Field::createCloud(double mX, double mY,
             new_cloud += point.id;
         }
         clouds.push_back(new_cloud);
+        resizeAllClouds();
         return true;
     }
     writeLog("Access denied");
@@ -57,6 +65,7 @@ bool Field::createCloud(vector<Point> new_points) {
             new_cloud += point.id;
         }
         clouds.push_back(new_cloud);
+        resizeAllClouds();
         return true;
     }
     writeLog("Access denied");
@@ -68,12 +77,13 @@ void Field::print(ofstream& out_f)
 {
     for (int ind_cl = 0; ind_cl < clouds.size(); ind_cl++) {
         Cloud cur_cl = clouds[ind_cl];
-        for (int ind_poi = 0; ind_poi < cur_cl.numPoints(); ind_poi++) {
-            points[cur_cl[ind_poi].id].print(out_f);
+        // for (int ind_poi = 0; ind_poi < cur_cl.numPoints(); ind_poi++) {
+        //     points[cur_cl[ind_poi].id].print(out_f);
+        // }
+        for (int id_poi : cur_cl.getPoints()) {
+            cur_cl.printGnu(out_f);
         }
-        out_f << endl
-            << endl
-            << endl;
+        out_f << endl << endl << endl;
     }
     writeLog("SAVE (clouds)");
 }
@@ -154,13 +164,15 @@ void Field::print(int i, ofstream& out_f)
     FindClusters& cur_fd = getFCluster(i);
     for (int ind_cl = 0; ind_cl < cur_fd.numClusters(); ind_cl++) {
         Cluster cur_cl = cur_fd[ind_cl];
-        for (int ind_poi = 0; ind_poi < cur_cl.numPoints(); ind_poi++) {
-            int tmp = cur_cl.id_points[ind_poi];
-            (*(cur_cl.p_field_points))[tmp].print(out_f);
+        vector<int> tmp = cur_cl.getPoints();
+        for (int id_poi : cur_cl.getPoints()) {
+            cur_cl.printGnu(out_f);
         }
-        out_f << endl
-            << endl
-            << endl;
+        // for (int ind_poi = 0; ind_poi < cur_cl.numPoints(); ind_poi++) {
+        //     int tmp = cur_cl.getIdPoint(ind_poi);
+        //     (*(cur_cl.p_field_points))[tmp].print(out_f);
+        // }
+        out_f << endl << endl << endl;
     }
     writeLog("SAVE (clusters, FD #" + to_string(cur_fd.id) + ")");
 }
@@ -243,6 +255,7 @@ bool Field::enterAnalysis()
     }
     try {
         readonly = true;
+        resizeAllClouds();
         updateD();
         findBox();
     }

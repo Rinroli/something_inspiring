@@ -65,15 +65,14 @@ FindClusters WaveClusters::mainAlgorithm()
 {
     writeLog("BEGIN CLUSTERING");
     string name_wave = "Wave clustering (delta = " + to_string(matrix_inc.delta) + ")";
-    string name_dbscan = "DBSCAN (k=" + to_string(matrix_inc.k) + ", delta = " + to_string(matrix_inc.delta) + ")";
-    FindClusters result_vector(logs_a, (matrix_inc.k == 1) ? name_wave : name_dbscan);
+    string name_dbscan = "DBSCAN (k=" + to_string(matrix_inc.k) + 
+        ", delta = " + to_string(matrix_inc.delta) + ")";
+    FindClusters result_vector(logs_a, (matrix_inc.k == 1) ? name_wave : name_dbscan,
+        p_field->numPoints());
     int ind = 0;
     for (int dust_p = 0; dust_p < marks.size(); dust_p++) {
         if (marks[dust_p] == -1) {
-            Cluster new_cluster(ind, logs_a, p_field);
-            new_cluster += dust_p;
-            ind++;
-            result_vector += new_cluster;
+            result_vector.addDust(dust_p);
         }
     }
     while (findNextBegin()) {

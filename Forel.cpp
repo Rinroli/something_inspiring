@@ -7,7 +7,7 @@ Forel::Forel(double RR, const vector<Point>& real_pointss, Field* p_fieldd,
     : real_points(real_pointss), logs_a(logs_al), R(RR), global_step(gl_stepp), frame(framee),
     p_field(p_fieldd), max_clusters(max_clusterss)
 {
-    f_clusters = new FindClusters(logs_al, "FOREL, step #" + to_string(2 - gl_stepp));
+    f_clusters = new FindClusters(logs_al, "FOREL, step #" + to_string(2 - gl_stepp), p_field->numPoints());
     writeLog("INIT");
     for (int ind = 0; ind < real_points.size(); ind++) {
         points.push_back(ind);
@@ -59,11 +59,11 @@ void Forel::exportPoints() {
     }
     vector<FindClusters> new_exp_poi;
     for (int ind_exp = 0; ind_exp < exported_points.size(); ind_exp++) {
-        FindClusters new_fc(logs_a, "FOREL, exported, level #" + to_string(ind_exp));
+        FindClusters new_fc(logs_a, "FOREL, exported, level #" + to_string(ind_exp), p_field->numPoints());
         for (Cluster old_clu : (exported_points[ind_exp]).clusters) {
             Cluster new_clu(step, logs_a, p_field, &real_points);
-            for (int ind_point : old_clu.id_points) {
-                for (int new_point_ind : (*f_clusters)[ind_point].id_points) {
+            for (int ind_point : old_clu.getPoints()) {
+                for (int new_point_ind : (*f_clusters)[ind_point].getPoints()) {
                     new_clu += new_point_ind;
                 }
             }
@@ -117,8 +117,8 @@ Cluster Forel::oneNewCluster() {
         newFrame();
         tmp_counter++;
     }
-    for (int ind = 0; ind < neigh_cluster.numPoints(); ind++) {
-        removePoint(neigh_cluster[ind].id);
+    for (int id : neigh_cluster.getPoints()) {
+        removePoint(id);
     }
     step++;
     return neigh_cluster;

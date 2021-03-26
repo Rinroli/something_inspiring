@@ -251,15 +251,15 @@ bool Controller::saveHist(Cluster cluster) {
         return false;
     }
 
-    vector<double> some_point = cluster[0].getCoord();
+    vector<double> some_point = cluster.getOnePointCoords();
 
     max_x = some_point[0];
     max_y = some_point[1];
     min_x = some_point[0];
     min_y = some_point[1];
 
-    for (int i = 0; i < cluster.numPoints(); ++i) {
-        some_point = cluster[i].getCoord();
+    for (int i : cluster.getPoints()) {
+        some_point = field->getPoint(i).getCoord();
         if (some_point[0] > max_x) { max_x = some_point[0]; }
         if (some_point[0] < min_x) { min_x = some_point[0]; }
         if (some_point[1] > max_y) { max_y = some_point[1]; }
@@ -269,8 +269,8 @@ bool Controller::saveHist(Cluster cluster) {
     step_x = (max_x - min_x) / N;
     step_y = (max_y - min_y) / N;
 
-    for (int i = 0; i < cluster.numPoints(); ++i) {
-        some_point = cluster[i].getCoord();
+    for (int i : cluster.getPoints()) {
+        some_point = field->getPoint(i).getCoord();
         fr_x[int((some_point[0] - min_x) / (step_x))]++;
         fr_y[int((some_point[1] - min_y) / (step_y))]++;
     }

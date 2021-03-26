@@ -24,7 +24,7 @@ Cloud::Cloud(int idd, const vector<int>& points, ofstream& logs_field, Field* fi
 
 Cloud::~Cloud()
 {
-    id_points.clear();
+    indicator_points.clear();
     writeLog("DELETE");
 }
 

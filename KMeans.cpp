@@ -40,20 +40,9 @@ FindClusters KMeans::mainAlgorithm(bool silent) {
         pointDistribution();
         step++;
     }
-    FindClusters result(logs_a, "KMeans algorithm");
+    FindClusters result(logs_a, "KMeans algorithm", field.numPoints());
     int ind = 0;
     for (vector<int> cluster : clusters) {
-        // for (int a : cluster) {
-        //     if (a) {
-        //         vector<int> tmp_id_points;
-        //         for (int id_poi = 0; id_poi < number_poi; id_poi++) {
-        //             if (cluster[id_poi]) { tmp_id_points.push_back(id_poi); }
-        //         }
-        //         result += Cluster(ind, tmp_id_points, logs_a, &field);
-        //         ind++;
-        //         break;
-        //     }
-        // }
         if (any_of(cluster.begin(), cluster.end(), [](int a) {return a;})) {
             vector<int> tmp_id_points;
             for (int id_poi = 0; id_poi < number_poi; id_poi++) {

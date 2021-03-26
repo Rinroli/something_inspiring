@@ -16,8 +16,8 @@ Buffer::~Buffer()
 
 // Addition of id points from cluster to buffer.
 void Buffer::addCluster(Cluster& new_cluster) {
-    for (int id_in_cl = 0; id_in_cl < new_cluster.id_points.size(); id_in_cl++) {
-        Point new_point(new_cluster[id_in_cl]);
+    for (int id_in_cl : new_cluster.getPoints()) {
+        Point new_point(p_field->getPoint(id_in_cl));
         new_point.setID(id_in_cl);
         points.push_back(new_point);
     }

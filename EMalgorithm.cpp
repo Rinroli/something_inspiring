@@ -157,9 +157,18 @@ vector<vector<int>> EMAlgorithm::findNearest() {
     return clusters;
 }
 
+// Create clusters with indicator variables from point_clu_prob
+vector<Cluster> EMAlgorithm::toClusters() {
+    vector<Cluster> result;
+    for (int ind_clu = 0; ind_clu < k; ind_clu++) {
+        result.push_back(Cluster(ind_clu, point_clu_prob[ind_clu], logs_a, &field));
+    }
+    return result;
+}
+
 // Find clusters by em-algorithm
 FindClusters EMAlgorithm::mainAlgorithm() {
-    FindClusters result(logs_a, "EM-algorithm; k = " + to_string(k));
+    FindClusters result(logs_a, "EM-algorithm; k = " + to_string(k), field.numPoints());
     bool it_is_the_end = false;
     while (not it_is_the_end) {
         it_is_the_end = stepE();
@@ -168,9 +177,9 @@ FindClusters EMAlgorithm::mainAlgorithm() {
         writeLog("STEP #" + to_string(step));
         step++;
     }
-    vector<vector<int>> clusters = findNearest();
-    for (int id_clu = 0; id_clu < k; id_clu++) {
-        result += Cluster(id_clu, clusters[id_clu], logs_a, &field);
+    vector<Cluster> v_clu = toClusters();
+    for (int i = 0; i < k; i++) {
+        result += v_clu[i];
     }
 
     writeLog("\tTurned out " + to_string(result.numClusters()) + " clusters in " + to_string(step) + " steps");
