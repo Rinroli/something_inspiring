@@ -83,4 +83,7 @@ Commands:
 
     PUTB >> copy points from the buffer to the field.
 
-    EXIT >> exit program
+    stop >> stops the server.
+
+    EXIT >> exit program.
+    

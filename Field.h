@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 #include "Point.h"
 #include "Cluster.h"
@@ -30,14 +31,13 @@ using namespace std;
 class Field
 {
 public:
-    Field(vector<bool> if_logs, vector<string> name_logs);
+    Field(vector<bool> if_logs, vector<string> name_logs, stringstream& message);
     ~Field();
     bool createCloud(double mX, double mY,
         double sX, double sY, int nu_points);
     bool createCloud(vector<Point> points);
     void print(ofstream& out_f);
     void print(int i, ofstream& out_f);
-    void showBuffer();
     int numClouds();
     int numFClusters();
     int numPoints();
@@ -58,6 +58,7 @@ public:
     bool rotateBuffer(double alpha);
     bool moveBuffer(double x, double y);
     bool zoomBuffer(double k);
+    void showBuffer();
 
     int numBinMatrix();
     bool ifReadonly();
@@ -91,6 +92,8 @@ private:
     vector<BinMatrix> bin_matrixes;
     Tree* p_tree = nullptr;
     Triangulation* p_triangulation = nullptr;
+
+    stringstream& message;
 };
 
 #endif // FIELD

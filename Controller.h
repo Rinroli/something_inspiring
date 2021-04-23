@@ -4,6 +4,8 @@
 
 #include <vector>
 #include <iostream>
+#include <sstream>
+#include "string.h"
 
 #include "Field.h"  // WARNING
 #include "Cluster.h"
@@ -24,12 +26,14 @@ using namespace std;
 #ifndef CONTROLLER
 #define CONTROLLER
 
+#define BUFLEN_MESS  1024
+
 class Controller
 {
 public:
     Controller(vector<bool> if_logs, vector<string> name_logs);
     ~Controller();
-    bool showHelp();
+    // bool showHelp();
     bool showInfoField();
     bool showInfoFClusters();
     bool showBuffer();
@@ -60,6 +64,8 @@ public:
     bool displayGraph(int i);
     void beginTest(const string& output_dir, const string& output_na,
         const string& gen_f = "none");
+    string curMessage();
+    void cleanMessage();
     void writeLog(const string& message);
 
 private:
@@ -69,6 +75,12 @@ private:
     string output_directory = "data";
     string output_name;
     string gen_file;
+
+    stringstream message;
+    // char message_buffer[BUFLEN_MESS]{"\nMESSAGE:\n"};
+    // int message_len;
+
+    // bool addMessage(string message);
 };
 
 #endif // CONTROLLER

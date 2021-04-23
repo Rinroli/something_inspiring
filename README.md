@@ -1,8 +1,12 @@
 # something_inspiring
 
-Here you can find several algorithms written in **C++**.
+Here you can find several algorithms written in **C++** that work in a **client-server** system.
 
 Some info can be found in [help.txt](help.txt) and [changelog.md](logs/changelog.md).
+
+**NEW!** *Client-server!* There are 'client.exe' and 'server.exe' for run. Also see the [example](examples/client-server.gif)
+
+Supports **multiple** simultaneous connections to the server.
 
 Currently, some clustering algorithms are implemented:
 
@@ -19,7 +23,7 @@ Also **Delaunay triangulation** is implemented (algorithm "remove and build")!
 
 Before data analysis, you can work with normally distributed clouds by generating and working with a **buffer** - *rotate*, *shift*, *scale*.
 
-**Include test system.** You can run tests from *CLI* interface or from *bash-scripts*:
+**Include test system.** *(Not tested on client-server yet)* You can run tests from *CLI* interface or from *bash-scripts*:
 
 * For *CLI* enter *'test'* and then choose test type, test name and generation file (for *Algorithm*). All can be find at [tests](tests), generation files are in [Generation](tests/Generation)
 * For *bash-scripts* run the script you want from [bash_tests](bash_tests)

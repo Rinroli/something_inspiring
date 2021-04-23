@@ -258,9 +258,9 @@ void Cluster::clear() {
 }
 
 // Print info abput cluster.
-void Cluster::coutInfo() {
+void Cluster::coutInfo(ostream& str_to_cli) {
     updateProp();
-    cout << "\t\t#" << id << "  Points " << numPoints() << ";  Box: x:["
+    str_to_cli << "\t\t#" << id << "  Points " << numPoints() << ";  Box: x:["
         << setw(8) << box[0] << ":"
         << setw(8) << box[1] << "] y:[" << setw(8) << box[2] << ":" << setw(8) 
         << box[3] << "]" << endl
@@ -268,9 +268,9 @@ void Cluster::coutInfo() {
         << "\tR = " << setw(8) << getR()
         << "\t\tCenter: [";
     for (int i = 0; i < center.size(); ++i) {
-        cout << (*p_field_points)[center[i]] << ", ";
+        str_to_cli << (*p_field_points)[center[i]] << ", ";
     }
-    cout << "]" << endl;
+    str_to_cli << "]" << endl;
 }
 
 void Cluster::printGnu(ofstream& ofile) {

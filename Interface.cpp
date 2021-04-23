@@ -8,22 +8,46 @@ using namespace std;
 
 Interface::Interface(vector<bool> if_logss, vector<string> name_logss)
 : if_logs(if_logss), name_logs(name_logss) {
-    ctrl = new Controller(if_logss, name_logss);
     if (if_logs[2]) {
         logs.open("logs/" + name_logs[2], ios_base::app);
         logs << endl << "New session" << endl;
         writeLog("INIT");
     }
+
+    hostinfo = gethostbyname(SERVER_NAME);
+    if (hostinfo == NULL) {
+        writeLog("Unknown host " + string(SERVER_NAME), true);
+        exit(EXIT_FAILURE);
+    }
+
+    server_addr.sin_family = PF_INET;
+    server_addr.sin_port = htons(SERVER_PORT);
+    server_addr.sin_addr = *(struct in_addr*)hostinfo->h_addr;
+
+    sock = socket(PF_INET, SOCK_STREAM, 0);
+    if (sock < 0) {
+        writeLog("Client: socket was not created", true);
+        exit(EXIT_FAILURE);
+    }
+
+    err = connect(sock, (struct sockaddr*)&server_addr, sizeof(server_addr));
+    if (err < 0) {
+        writeLog("Client:  connect failure", true);
+        exit(EXIT_FAILURE);
+    }
+    writeLog("Connection is ready", true);
 }
 
 Interface::~Interface()
 {
     writeLog("DELETE");
+    close(sock);
     logs.close();
 }
 
 // Main loop for all program.
 bool Interface::mainLoop() {
+    writeLog("Start mainLoop");
     ifstream fin, gen_fin;
     string command;
 
@@ -40,6 +64,7 @@ bool Interface::mainLoop() {
             cout << "Command: ";
             getline(cin, command);
             runCommand(command);
+            if (command != "EXIT") { readFromServer(); }
         } while (command != "EXIT");
     }
     else {
@@ -62,7 +87,9 @@ bool Interface::mainLoop() {
                 cout << "At last - generation file:\n > ";
                 cin >> cur_gen;
                 gen_file = "tests/Generation/" + cur_gen;
-                ctrl->beginTest(output_directory, output_name, gen_file);
+                sendCommand("start_test");
+                sendCommand(output_directory);
+                sendCommand(gen_file);
                 writeLog("\tGen file >> " + gen_file + "/" + cur_gen + ".txt");
                 gen_fin.open(gen_file + "/" + cur_gen + ".txt");
 
@@ -71,7 +98,10 @@ bool Interface::mainLoop() {
                     return 0;
                 }
             } else {
-                ctrl->beginTest(output_directory, output_name);
+                sendCommand("start_test");
+                sendCommand(output_directory);
+                sendCommand(gen_file);
+                writeLog("\tGen file >> " + gen_file + "/" + cur_gen + ".txt");
             }
         }
         else {
@@ -83,6 +113,7 @@ bool Interface::mainLoop() {
             cout << "Wrong file! Exit..." << endl;
             return 0;
         }
+
         if (command == "test") {
                 getline(gen_fin, command);
                 while (!gen_fin.eof() and (command == "" or runCommand(command))) {
@@ -97,6 +128,7 @@ bool Interface::mainLoop() {
         } else {
             getline(fin, command);
             while (!fin.eof() and (command == "" or runCommand(command))) {
+                if (command != "EXIT") { readFromServer(); }
                 getline(fin, command);
             }
         }
@@ -105,19 +137,72 @@ bool Interface::mainLoop() {
     return 1;
 }
 
+// Send command to the server.
+bool Interface::sendCommand(string command) {
+    writeLog("Start sendCommand <" + command + "> " + to_string(command.size()));
+    int nbytes = write(sock, command.c_str(), command.size() + 1);
+    if (nbytes < 0) { writeLog("Write error"); return false; }
+    if (strstr(command.c_str(), "stop")) return false;
+    writeLog("\tEnd sendCommand");
+    return true;
+}
+
+// Recive commnd from the server.
+bool Interface::readFromServer()
+{
+    writeLog("Start readFromServer");
+    int   nbytes;
+    char  buf[BUFLEN];
+    char spec_buf[BUFLEN];
+
+    nbytes = read(sock, buf, BUFLEN);
+    if (nbytes < 0) {  // error
+        writeLog("Error", true);
+        return -1;
+    }
+    else if (nbytes == 0) {  // no data
+        writeLog("Server: no message", true);
+    }
+    else {  // success
+        if (not isNumber(string(buf))) {
+            cout << "Server's replay: " + string(buf);
+            writeLog("Receive message, len <" + to_string(nbytes - 1) + ">");
+        } else {
+            string get_str = "Get";
+            int nu_packages = stod(string(buf));
+            for (int i = 0; i < nu_packages; i++) {
+                nbytes = read(sock, spec_buf, BUFLEN);
+
+                cout << string(spec_buf);
+                if (i < nu_packages - 1) { cout << " " + colorString("|<-->|", "red", true) + " "; }
+                writeLog("Receive package #" + to_string(i) + " len <" +
+                    to_string(string(spec_buf).size()) + "> !! <" + to_string(nbytes) + ">");
+
+                write(sock, (get_str + " " + to_string(i)).c_str(), 
+                    (get_str + " " + to_string(i)).size() + 1);
+                writeLog("\tSend 'get'");
+            }
+        }
+    }
+    return 0;
+}
+
 // Get command from the user and compile it.
 bool Interface::runCommand(string command)
 {
     writeLog("GET COMMAND <" + command + ">");
-    cout << command << ": ";
-    bool result = false;
+    cout << colorString(command + ": ", "blue", true);
+
+    bool result = true;
+
+    char* s = new char[command.size() + 1];
+    strcpy(s, command.c_str());
+    char* pch = strtok(s, ", ()");
+    string com(pch);
+    vector<string> args;
+
     try
     {
-        char* s = new char[command.size() + 1];
-        strcpy(s, command.c_str());
-        char* pch = strtok(s, ", ()");
-        string com(pch);
-        vector<string> args;
         while (pch != NULL) {
             pch = strtok(NULL, " ,()");
             if (pch == NULL) {
@@ -125,142 +210,122 @@ bool Interface::runCommand(string command)
             }
             args.push_back(pch);
         }
+
+        string result_command(com);
+        for (string arg_tmp : args) {
+            result_command += " " + arg_tmp;
+        }
+
         if (command == "HELP") {
-            result = ctrl->showHelp();
-        }
-
-        else if ((com == "GEN_CLOUD") | (com == "GC")) {
-            if (args.size() == 0) { result = ctrl->genCloud(0, 0, 1, 1, N); }
-            else if (args.size() < 4) { throw - 1; }
-            else if (args.size() == 4) {
-                result = ctrl->genCloud(stod(args[0]), stod(args[1]),
-                    stod(args[2]), stod(args[3]), N);
+            writeLog("Begin showHelp");
+            ifstream help_file("help.txt");
+            string readline;
+            while (!help_file.eof()) {
+                getline(help_file, readline);
+                cout << readline << endl;
             }
-            else {
-                result = ctrl->genCloud(stod(args[0]), stod(args[1]),
-                    stod(args[2]), stod(args[3]), stod(args[4]));
-            }
-        }
-
-        else if (com == "BINARY") {
-            if (args.size() == 0) { result = ctrl->createIncMatrix(DELTA); }
-            else { result = ctrl->createIncMatrix(stod(args[0])); }
-        }
-
-        else if (com == "DBSCAN") {
-            if (args.size() == 0) { result = ctrl->createDBMatrix(DELTA, K); }
-            else if (args.size() < 2) { throw - 1; }
-            else { result = ctrl->createDBMatrix(stod(args[0]), stod(args[1])); }
-        }
-
-        else if ((com == "WAVE") | (com == "DBWAVE")) {
-            if (args.size() == 0) { result = ctrl->waveClusters(-1); }
-            else { result = ctrl->waveClusters(stod(args[0])); }
-        }
-
-        else if ((com == "DIBINARY") | (com == "DIDBSCAN") | (com == "DIB") | (com == "DID")) {
-            if (args.size() == 0) { result = ctrl->displayGraph(-1); }
-            else { result = ctrl->displayGraph(stod(args[0])); }
-        }
-
-        else if (com == "HIST") {
-            if (args.size() == 0) {
-                result = ctrl->saveHist();
-            }
-            else if (args.size() == 1) { throw - 1; }
-            else { result = ctrl->preHist(args); }
-        }
-
-        else if (com == "KMEANS") {
-            if (args.size() == 0) { result = ctrl->kMeans(25); }
-            else { result = ctrl->kMeans(stod(args[0])); }
-        }
-
-        else if (com == "KERKMEANS") {
-            if (args.size() == 0) { result = ctrl->kerKMeans(25, 5); }
-            else { result = ctrl->kerKMeans(stod(args[0]), stod(args[1])); }
-        }
-
-        else if (com == "FOREL") {
-            if (args.size() == 0) { result = ctrl->forelAlg(0.05); }
-            else { result = ctrl->forelAlg(stod(args[0])); }
-        }
-
-        else if (com == "HIERARCH") {
-            if (args.size() == 0) { result = ctrl->hierarchClustering(5); }
-            else { result = ctrl->hierarchClustering(stoi(args[0])); }
-        }
-
-        else if (com == "EM") {
-            if (args.size() == 0) { result = ctrl->eMAlgorithm(25); }
-            else { result = ctrl->eMAlgorithm(stod(args[0])); }
-        }
-
-        else if (com == "SAVE") {
-            if (args.size() == 0) { result = ctrl->printField(); }
-            else { result = ctrl->printField(false, stod(args[0])); }
-        }
-
-        else if (com == "ADDB") {
-            if (args.size() == 0) { result = ctrl->addToBuffer(-1); }
-            else { result = ctrl->addToBuffer(stod(args[0])); }
-        }
-
-        else if (com == "ROTB") {
-            if (args.size() < 1) { throw - 1; }
-            result = ctrl->rotateBuffer(stod(args[0]));
-        }
-
-        else if (com == "MOVEB") {
-            if (args.size() < 2) { throw - 1; }
-            result = ctrl->moveBuffer(stod(args[0]), stod(args[1]));
-        }
-
-        else if (com == "ZOOMB") {
-            if (args.size() < 1) { throw - 1; }
-            result = ctrl->zoomBuffer(stod(args[0]));
+            help_file.close();
+            writeLog("\tEnd showHelp");
         }
 
         else if (com == "EXIT") {
-            cout << "Okay..." << endl;
+            cout << "Okay!.." << endl;
+            sendCommand("EXIT");
+            readFromServer();
             writeLog("\tCorrect <" + command + ">");
             return false;
         }
-        else if (com == "INFO") {
-            result = ctrl->showInfoField();
+
+        else if ((com == "GEN_CLOUD") | (com == "GC")) {
+            if (args.size() == 0) { result_command = "GC 0 0 1 1 " + to_string(N); }
+            else if (args.size() < 4 or args.size() > 5) { throw - 1; }
+            else if (args.size() == 4) { result_command += " " + to_string(N); }
         }
-        else if (com == "INFOFC") {
-            result = ctrl->showInfoFClusters();
+
+        else if (com == "BINARY") {
+            if (args.size() == 0) { result_command += " " + to_string(DELTA); }
+            else if (args.size() > 1) { throw - 1; }
         }
-        else if ((com == "MATRIX") | (com == "ANALYSIS")) {
-            result = ctrl->enterAnalysis();
+
+        else if (com == "DBSCAN") {
+            if (args.size() == 0) { result_command += " " + to_string(DELTA) + " " + to_string(K); }
+            else if (args.size() < 2 or args.size() > 2) { throw - 1; }
         }
-        else if (com == "STREE") {
-            result = ctrl->minSpanTree();
+
+        else if ((com == "WAVE") | (com == "DBWAVE")) {
+            if (args.size() == 0) { result_command = "DBWAVE -1"; }
+            else if (args.size() > 1) { throw - 1; }
         }
-        else if (com == "DELAUNAY") {
-            result = ctrl->delaunayTriangulation();
+
+        else if ((com == "DIBINARY") | (com == "DIDBSCAN") | (com == "DIB") | (com == "DID")) {
+            if (args.size() == 0) { result_command = "DIBINARY -1"; }
+            else if (args.size() > 1) { throw - 1; }
         }
-        else if (com == "STRHIST") {
-            result = ctrl->streeHist();
+
+        else if (com == "HIST") {
+            if (args.size() == 0) { result_command = "HIST"; }
+            else if (args.size() == 1) { throw - 1; }
+            else if (args.size() > 3) { throw - 1; }
         }
-        else if (com == "FINDR") {
-            result = ctrl->findR();
+
+        else if (com == "KMEANS") {
+            if (args.size() == 0) { result_command += " 25"; }
+            else if (args.size() > 1) { throw - 1; }
         }
-        else if (com == "SHOWB") {
-            result = ctrl->showBuffer();
+
+        else if (com == "KERKMEANS") {
+            if (args.size() == 0) { result_command += " 25 5"; }
+            else if (args.size() > 1) { throw - 1; }
         }
-        else if (com == "PUTB") {
-            result = ctrl->putBuffer();
+
+        else if (com == "FOREL") {
+            if (args.size() == 0) { result_command += " 0.05"; }
+            else if (args.size() > 1) { throw - 1; }
         }
-        else if (com == "EMPTYB") {
-            result = ctrl->emptyBuffer();
+
+        else if (com == "HIERARCH") {
+            if (args.size() == 0) { result_command += " 5"; }
+            else if (args.size() > 1) { throw - 1; }
+        }
+
+        else if (com == "EM") {
+            if (args.size() == 0) { result_command += " 25"; }
+            else if (args.size() > 1) { throw - 1; }
+        }
+
+        else if (com == "SAVE") {
+            if (args.size() > 1) { throw - 1; }
+        }
+
+        else if (com == "ADDB") {
+            if (args.size() == 0) { result_command += " -1"; }
+            else if (args.size() > 1) { throw - 1; }
+        }
+
+        else if (com == "ROTB") {
+            if (args.size() < 1 or args.size() > 1) { throw - 1; }
+        }
+
+        else if (com == "MOVEB") {
+            if (args.size() < 2 or args.size() > 2) { throw - 1; }
+        }
+
+        else if (com == "ZOOMB") {
+            if (args.size() < 1 or args.size() > 1) { throw - 1; }
+        }
+
+        else if (com == "INFO" or com == "INFOFC" or com == "MATRIX" or com == "ANALYSIS"
+            or com == "STREE" or com == "DELAUNAY" or com == "STRHIST" or com == "FINDR"
+            or com == "SHOWB" or com == "PUTB" or com == "EMPTYB" or com == "stop") {
+                if (args.size() > 1) { throw - 1; }
         }
 
         else {
             cout << "No such command, sorry." << endl
                 << "Would you like to get some HELP?" << endl;
         }
+
+        sendCommand(result_command);
     }
     catch (int i) {
         result = false;
@@ -284,10 +349,18 @@ bool Interface::runCommand(string command)
     }
     if (result) { writeLog("\tCorrect <" + command + ">"); }
     else { writeLog("\tIncorrect <" + command + ">"); }
+    if (command == "stop") {  // Yeah, crutch! 
+        cout << "Okay..." << endl;
+        writeLog("\tCCorrect <" + command + ">");
+        return false;
+    }
     return true;
 }
 
 // Write log-message with date-time note.
-void Interface::writeLog(const string& message) {
+void Interface::writeLog(const string& message, bool cout_too) {
     logs << timeLog() << message << endl;
+    if (cout_too) {
+        cout << message << endl;
+    }
 }

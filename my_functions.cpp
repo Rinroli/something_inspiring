@@ -110,3 +110,32 @@ vector<double> findEigenvalues(const vector<vector<double>>& sigma) {
     }
     return lambdas;
 }
+
+// Return true if given string is an number.
+bool isNumber(string test_str) {
+    for (char ch : test_str) {
+        if (not isdigit(ch)) { return false; }
+    }
+    return true;
+}
+
+// Return colored string. Wow!
+string colorString(string given, string color, bool bold) {
+    string color_prefix = "\e[";
+
+    if (bold) { color_prefix += "1;"; }
+
+    if (color == "red") {
+        color_prefix += "31";
+    } else if (color == "green") {
+        color_prefix += "32";
+    } else if (color == "blue") {
+        color_prefix += "34";
+    } else if (color == "cyan") {
+        color_prefix += "36";
+    } else if (color == "grey") {
+        color_prefix += "37";
+    }
+
+    return color_prefix + "m" + given + "\e[0m";
+}

@@ -26,11 +26,11 @@ void FindClusters::setID(int i) {
 }
 
 // Cout info about FindClusters to the standart output.
-void FindClusters::coutInfo() {
-    cout << "\t#" << id << " Source: " << source << ", "
+void FindClusters::coutInfo(ostream& str_to_cli) {
+    str_to_cli << "\t#" << id << " Source: " << source << ", "
         << clusters.size() << " clusters." << endl;
     for (Cluster cl : clusters) {
-        cl.coutInfo();
+        cl.coutInfo(str_to_cli);
     }
 }
 

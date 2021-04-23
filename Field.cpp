@@ -2,7 +2,8 @@
 
 #include "Field.h"
 
-Field::Field(vector<bool> if_logs, vector<string> name_logs) {
+Field::Field(vector<bool> if_logs, vector<string> name_logs, stringstream& messagee) 
+: message(messagee) {
     readonly = false;
     buffer = new Buffer(this);
 
@@ -91,16 +92,16 @@ void Field::print(ofstream& out_f)
 // Show info about buffer.
 void Field::showBuffer() {
     if (buffer->isEmpty()) {
-        cout << "Empty buffer->" << endl;
+        message << "Empty buffer->" << endl;
     }
-    buffer->coutInfo();
+    buffer->coutInfo(message);
     writeLog("SHOWBUFFER");
 }
 
 // Add cloud to the buffer->
 bool Field::addToBuffer(int ind_cl) {
     if (numClouds() == 0) {
-        cout << "No clouds." << endl;
+        message << "No clouds." << endl;
         return false;
     }
     if (ind_cl == -1) { (*buffer) += clouds[numClouds() - 1]; }
@@ -111,7 +112,7 @@ bool Field::addToBuffer(int ind_cl) {
 // Copy buffer to the field.
 bool Field::putBuffer() {
     if (buffer->isEmpty()) {
-        cout << "Empty buffer->" << endl;
+        message << "Empty buffer->" << endl;
         return false;
     }
     buffer->putToField();
@@ -121,7 +122,7 @@ bool Field::putBuffer() {
 // Rotate buffer->
 bool Field::rotateBuffer(double alpha) {
     if (buffer->isEmpty()) {
-        cout << "Empty buffer->" << endl;
+        message << "Empty buffer->" << endl;
         return false;
     }
     buffer->rotatePoints(alpha);
@@ -131,7 +132,7 @@ bool Field::rotateBuffer(double alpha) {
 // Move buffer->
 bool Field::moveBuffer(double x, double y) {
     if (buffer->isEmpty()) {
-        cout << "Empty buffer->" << endl;
+        message << "Empty buffer->" << endl;
         return false;
     }
     buffer->movePoints(x, y);
@@ -141,7 +142,7 @@ bool Field::moveBuffer(double x, double y) {
 // Zoom buffer->
 bool Field::zoomBuffer(double k) {
     if (buffer->isEmpty()) {
-        cout << "Empty buffer->" << endl;
+        message << "Empty buffer->" << endl;
         return false;
     }
     buffer->zoomPoints(k);
@@ -151,7 +152,7 @@ bool Field::zoomBuffer(double k) {
 // Empty buffer->
 bool Field::emptyBuffer() {
     if (buffer->isEmpty()) {
-        cout << "Buffer is already empty!" << endl;
+        message << "Buffer is already empty!" << endl;
         return false;
     }
     buffer->deletePoints();
@@ -248,9 +249,9 @@ bool Field::ifReadonly() {
 // Enter readonly 'Analysis' mode.
 bool Field::enterAnalysis()
 {
-    cout << "Entering 'Analysis' mode." << endl;
+    message << "Entering 'Analysis' mode." << endl;
     if (numPoints() == 0) {
-        cout << "There is no points. You can do nothing with them." << endl;
+        message << "There is no points. You can do nothing with them." << endl;
         throw - 2;
     }
     try {

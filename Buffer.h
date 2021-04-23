@@ -3,6 +3,7 @@
 #pragma once
 
 #include <iostream>
+#include <sstream>
 
 #include "Point.h"
 #include "Field.h"
@@ -22,7 +23,7 @@ class Buffer
 public:
     explicit Buffer(Field* field);
     ~Buffer();
-    void coutInfo();
+    void coutInfo(stringstream& message);
     friend void operator+=(Buffer& left, Cluster& new_cl);
     void putToField();
     bool isEmpty();

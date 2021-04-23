@@ -6,12 +6,29 @@
 #include <iostream>
 #include <cstring>
 
-#include "Controller.h" // WARNING
+#include <stdio.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+
+// #include "Controller.h" // WARNING
 #include "my_functions.h"
 
-class Controller;
+// class Controller;
 
 using namespace std;
+
+#define  SERVER_PORT     5555
+#define  SERVER_NAME    "127.0.0.1"
+#define  BUFLEN          512
 
 #ifndef INTERFACE
 #define INTERFACE
@@ -22,21 +39,29 @@ public:
     explicit Interface(vector<bool> if_logs, vector<string> name_logs);
     ~Interface();
     bool mainLoop();
-    bool runCommand(string command);
     void printConfigs();
     void changeConfigs();
     void writeConfigs(vector<vector<string>>);
-    void writeLog(const string& command);
 
 private:
     ofstream logs;
-    Controller *ctrl;
+    // Controller *ctrl;
     bool if_test = false;
     string output_directory = "data";
     string output_name = "output.plt";
     string gen_file = "none";
     vector<bool> if_logs;
     vector<string> name_logs;
+
+    bool runCommand(string command);
+    bool sendCommand(string command);
+    bool readFromServer();
+    void writeLog(const string& command, bool cout_too=false);
+
+    int err;
+    int sock;
+    struct sockaddr_in server_addr;
+    struct hostent* hostinfo;
 };
 
 #endif // INTERFACE

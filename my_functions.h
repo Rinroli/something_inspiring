@@ -28,3 +28,7 @@ string timeLog();
 double distPoints(Point f_poi, Point s_poi);
 double distPoints(Point point, const vector<double>& center);
 double distPoints(const vector<double>& center1, const vector<double>& center2);
+
+bool isNumber(string test_str);
+
+string colorString(string given_str, string color="red", bool bold=true);

@@ -1,5 +1,5 @@
 // Copyright (c) 2020 Rinroli
-// Version 2.1.0
+// Version 2.2.0
 
 
 #include <stdlib.h>
@@ -41,7 +41,7 @@ int main() {
 
     bool result;
     Interface interface(configs.if_logs, configs.name_logs);
-    result = interface.mainLoop();
+    interface.mainLoop();
 
     return result;
 }

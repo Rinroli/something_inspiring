@@ -2,32 +2,38 @@ CC=g++
 
 CFLAGS=-c
 
-all: points
+all: points interface
 
-g: main_points.cpp BinMatrix.cpp Buffer.cpp Cloud.cpp Cluster.cpp Configs.cpp \
+interface: main_interface.o Interface.o Configs.o my_functions.o
+	$(CC) main_interface.o Interface.o Configs.o my_functions.o -o client.exe
+
+main_interface.o: main_interface.cpp
+	$(CC) $(CFLAGS) main_interface.cpp
+
+g: main_server.cpp BinMatrix.cpp Buffer.cpp Cloud.cpp Cluster.cpp Configs.cpp \
 	Controller.cpp Delaunay.cpp EMalgorithm.cpp Field.cpp \
-	FindClusters.cpp Forel.cpp Hierarch.cpp Interface.cpp \
+	FindClusters.cpp Forel.cpp Hierarch.cpp Server.cpp \
 	KerKMeans.cpp KMeans.cpp my_functions.cpp Point.cpp \
 	Tree.cpp Triangle.cpp Triangulation.cpp WaveClusters.cpp
-	$(CC) main_points.cpp BinMatrix.cpp Buffer.cpp Cloud.cpp Cluster.cpp Configs.cpp \
+	$(CC) main_server.cpp BinMatrix.cpp Buffer.cpp Cloud.cpp Cluster.cpp Configs.cpp \
 		Controller.cpp Delaunay.cpp EMalgorithm.cpp Field.cpp \
-		FindClusters.cpp Forel.cpp Hierarch.cpp Interface.cpp \
+		FindClusters.cpp Forel.cpp Hierarch.cpp Server.cpp \
 		KerKMeans.cpp KMeans.cpp my_functions.cpp Point.cpp \
 		Tree.cpp Triangle.cpp Triangulation.cpp WaveClusters.cpp -g -o debug
 
-points: main_points.o BinMatrix.o Buffer.o Cloud.o Cluster.o Configs.o \
+points: main_server.o BinMatrix.o Buffer.o Cloud.o Cluster.o Configs.o \
 	Controller.o Delaunay.o EMalgorithm.o Field.o \
-	FindClusters.o Forel.o Hierarch.o Interface.o \
+	FindClusters.o Forel.o Hierarch.o Server.o \
 	KerKMeans.o KMeans.o my_functions.o Point.o \
 	Tree.o Triangle.o Triangulation.o WaveClusters.o
-	$(CC) main_points.o BinMatrix.o Buffer.o Cloud.o Cluster.o Configs.o \
+	$(CC) main_server.o BinMatrix.o Buffer.o Cloud.o Cluster.o Configs.o \
 		Controller.o Delaunay.o EMalgorithm.o Field.o \
-		FindClusters.o Forel.o Hierarch.o Interface.o \
+		FindClusters.o Forel.o Hierarch.o Server.o \
 		KerKMeans.o KMeans.o my_functions.o Point.o \
-		Tree.o Triangle.o Triangulation.o WaveClusters.o -o points.exe
+		Tree.o Triangle.o Triangulation.o WaveClusters.o -o server.exe
 
-main_points.o: main_points.cpp
-	$(CC) $(CFLAGS) main_points.cpp
+main_server.o: main_server.cpp
+	$(CC) $(CFLAGS) main_server.cpp
 
 BinMatrix.o: BinMatrix.cpp
 	$(CC) $(CFLAGS) BinMatrix.cpp
@@ -91,3 +97,6 @@ Triangulation.o: Triangulation.cpp
 
 WaveClusters.o: WaveClusters.cpp
 	$(CC) $(CFLAGS) WaveClusters.cpp
+
+Server.o: Server.cpp
+	$(CC) $(CFLAGS) Server.cpp

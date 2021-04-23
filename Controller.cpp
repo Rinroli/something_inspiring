@@ -7,12 +7,14 @@ using namespace std;
 #define N 1000
 
 Controller::Controller(vector<bool> if_logs, vector<string> name_logs) {
-    field = new Field(if_logs, name_logs);
+    field = new Field(if_logs, name_logs, message);
     if (if_logs[1]) {
         logs.open("logs/" + name_logs[1], ios_base::app);
         logs << endl << "New session" << endl;
         writeLog("INIT");
     }
+    message << "M:\n";
+    // message_buffer[0] = 0;
 }
 
 // Write log-message with date-time note.
@@ -41,20 +43,6 @@ void Controller::beginTest(const string& output_dir, const string& output_na,
     field->beginTest(output_directory, output_name);
 }
 
-// Show help for command HELP.
-bool Controller::showHelp()
-{
-    writeLog("Begin showHelp");
-    ifstream help_file("help.txt");
-    string readline;
-    while (!help_file.eof()) {
-        getline(help_file, readline);
-        cout << readline << endl;
-    }
-    writeLog("\tEnd showHelp");
-    return true;
-}
-
 // Enter readonly 'Analysis' mode.
 bool Controller::enterAnalysis() {
     writeLog("Begin enterAnalysis");
@@ -68,7 +56,7 @@ bool Controller::createIncMatrix(double delta) {
     writeLog("Begin createIncMatrix");
     if (not field->ifReadonly()) { field->enterAnalysis(); }
     field->binMatrix(delta);
-    cout << "DONE!" << endl;
+    message << "DONE!" << endl;
     writeLog("\tEnd createIncMatrix");
     return true;
 }
@@ -78,7 +66,7 @@ bool Controller::createDBMatrix(double delta, int k) {
     writeLog("Begin createIncDBMatrix");
     if (not field->ifReadonly()) { field->enterAnalysis(); }
     field->binDBMatrix(delta, k);
-    cout << "DONE!" << endl;
+    message << "DONE!" << endl;
     writeLog("\tEnd createIncDBMatrix");
     return true;
 }
@@ -87,16 +75,17 @@ bool Controller::createDBMatrix(double delta, int k) {
 bool Controller::showInfoField() {
     writeLog("Begin showInfoField");
     if (not field->ifReadonly()) { field->enterAnalysis(); }
-    cout << "Info about field->\n"
+
+    // stringstream str_to_cli;
+    message << "Info about field->\n"
         << "\tNumber of points: " << field->numPoints() << "\tNumber of clouds: "
         << field->numClouds() << "\tNumber of FindClusters: " << field->numFClusters() << endl;
-    cout << "Clouds:" << endl;
+    message << "Clouds:" << endl;
     for (int cl = 0; cl < field->numClouds(); ++cl) {
-        field->getCloud(cl).coutInfo();
+        field->getCloud(cl).coutInfo(message);
     }
-    cout << "Number of binary matrixes " << field->numBinMatrix() << endl;
+    message << "Number of binary matrixes " << field->numBinMatrix() << endl;
 
-    writeLog("\tEnd showInfoField");
     return true;
 }
 
@@ -104,9 +93,9 @@ bool Controller::showInfoField() {
 bool Controller::showInfoFClusters() {
     writeLog("Begin showInfoFClusters");
     if (not field->ifReadonly()) { field->enterAnalysis(); }
-    cout << "Info about FindClusters:" << endl;
+    message << "Info about FindClusters:" << endl;
     for (int fc = 0; fc < field->numFClusters(); ++fc) {
-        field->getFCluster(fc).coutInfo();
+        field->getFCluster(fc).coutInfo(message);
     }
 
     writeLog("\tEnd showInfoFClusters");
@@ -125,12 +114,12 @@ bool Controller::showBuffer() {
 bool Controller::addToBuffer(int ind) {
     writeLog("Begin addBuffer");
     if (field->ifReadonly()) {
-        cout << "Analysis mode. I can't." << endl;
+        message << "Analysis mode. I can't." << endl;
         writeLog("\tEnd addBuffer (bad)");
         return false;
     }
     bool result = field->addToBuffer(ind);
-    cout << "DONE!" << endl;
+    message << "DONE!" << endl;
     writeLog("\tEnd addBuffer (success)");
     return result;
 }
@@ -139,12 +128,12 @@ bool Controller::addToBuffer(int ind) {
 bool Controller::putBuffer() {
     writeLog("Begin putBuffer");
     if (field->ifReadonly()) {
-        cout << "Analysis mode. I can't." << endl;
+        message << "Analysis mode. I can't." << endl;
         writeLog("\tEnd putBuffer (bad)");
         return false;
     }
     bool result = field->putBuffer();
-    cout << "DONE!" << endl;
+    message << "DONE!" << endl;
     writeLog("\tEnd putBuffer (success)");
     return result;
 }
@@ -153,12 +142,12 @@ bool Controller::putBuffer() {
 bool Controller::rotateBuffer(double alpha) {
     writeLog("Begin rotateBuffer");
     if (field->ifReadonly()) {
-        cout << "Analysis mode. I can't." << endl;
+        message << "Analysis mode. I can't." << endl;
         writeLog("\tEnd rotateBuffer (bad)");
         return false;
     }
     field->rotateBuffer(alpha);
-    cout << "DONE!" << endl;
+    message << "DONE!" << endl;
     writeLog("\tEnd rotateBuffer (success)");
     return true;
 }
@@ -167,12 +156,12 @@ bool Controller::rotateBuffer(double alpha) {
 bool Controller::moveBuffer(double x, double y) {
     writeLog("Begin moveBuffer");
     if (field->ifReadonly()) {
-        cout << "Analysis mode. I can't." << endl;
+        message << "Analysis mode. I can't." << endl;
         writeLog("\tEnd moveBuffer (bad)");
         return false;
     }
     field->moveBuffer(x, y);
-    cout << "DONE!" << endl;
+    message << "DONE!" << endl;
     writeLog("\tEnd moveBuffer (success)");
     return true;
 }
@@ -181,12 +170,12 @@ bool Controller::moveBuffer(double x, double y) {
 bool Controller::zoomBuffer(double k) {
     writeLog("Begin zoomBuffer");
     if (field->ifReadonly()) {
-        cout << "Analysis mode. I can't." << endl;
+        message << "Analysis mode. I can't." << endl;
         writeLog("\tEnd zoomBuffer (bad)");
         return false;
     }
     field->zoomBuffer(k);
-    cout << "DONE!" << endl;
+    message << "DONE!" << endl;
     writeLog("\tEnd zoomBuffer (success)");
     return true;
 }
@@ -195,12 +184,12 @@ bool Controller::zoomBuffer(double k) {
 bool Controller::emptyBuffer() {
     writeLog("Begin emptyBuffer");
     if (field->ifReadonly()) {
-        cout << "Analysis mode. I can't." << endl;
+        message << "Analysis mode. I can't." << endl;
         writeLog("\tEnd emptyBuffer (bad)");
         return false;
     }
     field->emptyBuffer();
-    cout << "DONE!" << endl;
+    message << "DONE!" << endl;
     writeLog("\tEnd emptyBuffer (success)");
     return true;
 }
@@ -213,13 +202,13 @@ bool Controller::preHist(vector<string> args) {
         if (args.size() < 3) { throw - 1; }
         if (first_arg >= field->numFClusters()) {
             writeLog("\t Wrong FCluster.");
-            cout << "No FCluster, no histogram." << endl;
+            message << "No FCluster, no histogram." << endl;
             return false;
         }
         FindClusters& cur_fc = (field->getFCluster(first_arg));
         if (stod(args[2]) >= cur_fc.numClusters()) {
             writeLog("\t Wrong cluster.");
-            cout << "No cluster, no histogram." << endl;
+            message << "No cluster, no histogram." << endl;
             return false;
         }
         return saveHist(cur_fc[stod(args[2])]);
@@ -227,7 +216,7 @@ bool Controller::preHist(vector<string> args) {
     else {
         if (first_arg >= field->numClouds()) {
             writeLog("\t Wrong cloud.");
-            cout << "No cloud, no histogram." << endl;
+            message << "No cloud, no histogram." << endl;
             return false;
         }
         return saveHist(field->getCloud(first_arg));
@@ -241,12 +230,12 @@ bool Controller::saveHist(Cluster cluster) {
     double max_x, min_x, max_y, min_y;
     double step_x, step_y;
     if (field->numPoints() == 0) {
-        cout << "No points." << endl;
+        message << "No points." << endl;
         writeLog("\t No points.");
         return false;
     }
     else if (cluster.numPoints() == 1) {
-        cout << "Only one point." << endl;
+        message << "Only one point." << endl;
         writeLog("\t Only one point.");
         return false;
     }
@@ -287,7 +276,7 @@ bool Controller::saveHist(Cluster cluster) {
     }
     hist.close();
 
-    cout << "DONE!" << endl;
+    message << "DONE!" << endl;
     writeLog("\tEnd saveHist");
     return true;
 }
@@ -309,7 +298,7 @@ bool Controller::saveHist()
 bool Controller::streeHist() {
     writeLog("Begin streeHist");
     if (field->p_tree == NULL) {
-        cout << "No tree yet" << endl;
+        message << "No tree yet" << endl;
         writeLog("\tEnd streeHist(no tree)");
         return false;
     }
@@ -344,7 +333,7 @@ bool Controller::streeHist() {
             << " index 0 title \"distances\" w boxes" << endl;
     }
     writeLog("\tEnd streeHist");
-    cout << "DONE!" << endl;
+    message << "DONE!" << endl;
     return true;
 }
 
@@ -352,7 +341,7 @@ bool Controller::streeHist() {
 bool Controller::findR() {
     writeLog("Begin findR");
     if (field->p_tree == NULL) {
-        cout << "No tree yet" << endl;
+        message << "No tree yet" << endl;
         writeLog("\tEnd findR(no tree)");
         return false;
     }
@@ -373,8 +362,8 @@ bool Controller::findR() {
     }
 
     writeLog("\tEnd findR");
-    cout << "Result delta = " << delta / 2 << endl;
-    cout << "DONE!" << endl;
+    message << "Result delta = " << delta / 2 << endl;
+    message << "DONE!" << endl;
     return true;
 }
 
@@ -434,7 +423,7 @@ bool Controller::printField(bool clouds, int i)
     }
     gnu.close();
     writeLog("\tEnd printField");
-    cout << "DONE!" << endl;
+    message << "DONE!" << endl;
     return true;
 }
 
@@ -443,12 +432,12 @@ bool Controller::genCloud(double mX, double mY, double sX, double sY, int nu_poi
 {
     writeLog("Begin genCloud");
     if (field->createCloud(mX, mY, sX, sY, nu_points)) {
-        cout << "DONE!" << endl;
+        message << "DONE!" << endl;
         writeLog("\tEnd genCloud (success)");
         return true;
     }
     else {
-        cout << "Access denied" << endl;
+        message << "Access denied" << endl;
         writeLog("\tEnd genCloud (forbidden)");
         return false;
     }
@@ -464,7 +453,7 @@ bool Controller::waveClusters(int i)
     WaveClusters wave(field->getBinMatrix(i), field->logs_a, field);
     field->addFC(wave.mainAlgorithm());
 
-    cout << "Saved!" << endl;
+    message << "Saved!" << endl;
     return true;
 }
 
@@ -475,7 +464,7 @@ bool Controller::kMeans(int n) {
     KMeans new_k_means(n, *field, field->logs_a);
     field->addFC(new_k_means.mainAlgorithm());
     writeLog("\tEnd kMeans");
-    cout << "DONE!" << endl;
+    message << "DONE!" << endl;
     return true;
 }
 
@@ -486,7 +475,7 @@ bool Controller::kerKMeans(int k, int p) {
     KerKMeans new_ker_kmeans(k, p, *field, field->logs_a);
     field->addFC(new_ker_kmeans.mainAlgorithm());
     writeLog("\tEnd kerKMeans");
-    cout << "DONE!" << endl;
+    message << "DONE!" << endl;
     return true;
 }
 
@@ -497,7 +486,7 @@ bool Controller::eMAlgorithm(int n) {
     EMAlgorithm new_em(n, *field, field->logs_a);
     field->addFC(new_em.mainAlgorithm());
     writeLog("\tEnd eMalgorithm");
-    cout << "DONE!" << endl;
+    message << "DONE!" << endl;
     return true;
 }
 
@@ -514,7 +503,7 @@ bool Controller::forelAlg(double R) {
         field->addFC(one_fc);
     }
     writeLog("\tEnd FOREL");
-    cout << "DONE!" << endl;
+    message << "DONE!" << endl;
     return true;
 }
 
@@ -525,7 +514,7 @@ bool Controller::hierarchClustering(int k) {
     Hierarch new_hierarch(k, field, field->logs_a);
     field->addFC(new_hierarch.mainAlgorithm());
     writeLog("\tEnd HIERARCH");
-    cout << "DONE!" << endl;
+    message << "DONE!" << endl;
     return true;
 }
 
@@ -551,7 +540,7 @@ bool Controller::displayGraph(int i) {
     }
     gnu.close();
     writeLog("\tEnd dispayGraph");
-    cout << "DONE! Saved!" << endl;
+    message << "DONE! Saved!" << endl;
     return true;
 }
 
@@ -567,8 +556,23 @@ bool Controller::minSpanTree() {
             << "set size ratio -1" << endl
             << "plot 'tests/Algorithm/spanning_tree/spanning_tree_data.plt' with lines lc rgb \"black\" notitle" << endl;
     }
-    cout << "DONE!" << endl;
+    message << "DONE!" << endl;
     return true;
+}
+
+// Return current message for client.
+string Controller::curMessage() {
+    writeLog("Show saved message");
+    // message_buffer[message_len] = 0;
+    // return message_buffer;
+    return message.str();
+}
+
+// Clean current message.
+void Controller::cleanMessage() {
+    message.str("M:\n");
+    writeLog("Message cleaned");
+    // message << "M:\n";
 }
 
 // Create Delaunay triangulation for field
@@ -579,6 +583,6 @@ bool Controller::delaunayTriangulation() {
     field->p_triangulation = delaunay.mainAlgorithm();
     writeLog("\tEnd delaunayTriangulation - find " +
         to_string(field->p_triangulation->size()) + " triangles");
-    cout << "DONE!" << endl;
+    message << "DONE!" << endl;
     return true;
 }

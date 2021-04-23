@@ -6,6 +6,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <sstream>
 
 #include "Point.h"
 #include "Field.h"
@@ -42,7 +43,7 @@ public:
     vector<int> getCenter();
     int getOnePoint(double bound=0.5);
     vector<double> getOnePointCoords(double bound=0.5);
-    void coutInfo();
+    void coutInfo(ostream& str_res=cout);
     void printGnu(ofstream& file_out);
     // Point& operator[](int i);
     // int getIdPoint(int i);

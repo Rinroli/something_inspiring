@@ -65,10 +65,10 @@ bool Buffer::isEmpty() {
 }
 
 // Print some info about buffer to standart output.
-void Buffer::coutInfo() {
-    cout << "Buffer:" << endl;
+void Buffer::coutInfo(stringstream& message) {
+    message << "Buffer:" << endl;
     for (Point point : points) {
-        cout << "\t" << point << endl;
+        message << "\t" << point << endl;
     }
 }
 

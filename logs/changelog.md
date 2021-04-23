@@ -9,7 +9,27 @@ List of commands can be found in [help.txt](../help.txt).
 
 ## Changelog
 
-### **Version 2.1.0 (24.03.2021)** - CURRENT VERSION
+### **Version 2.2.0 (24.04.2021)** - CURRENT VERSION
+
+**WOW** *Client-server system* From now on in reality!
+
+Run server by *'./server.exe'*, client - *'./client.exe'*
+
+Long messages between client and server will be automaticly divide into several parts.
+
+*ONLY for GNU/Linux!*
+
+Also added:
+
+* Color messages
+
+### **Version 2.1.1 (26.03.2021)**
+
+Changed:
+
+* Change Cluster structure. From now on, information about points is stored in indicator variables.
+
+### **Version 2.1.0 (24.03.2021)**
 
 Added:
 
