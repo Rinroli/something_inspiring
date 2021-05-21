@@ -6,7 +6,7 @@ hierarch
 '
 all_input+="${gen_file}"
 {
-echo "$all_input" | ./points.exe
+echo "$all_input" | ./client.exe
 ./tests/Algorithm/hierarch/hie_steps
 gnuplot 'tests/Algorithm/hierarch/gnu_hierarch.plt'
 } &> /dev/null

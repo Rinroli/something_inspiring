@@ -1,4 +1,6 @@
 echo 'Begin global algorithm testing
+
+IT DOES NOT WORK
 '
 for gen_file in circle two_ellipses five_ellipses
 do

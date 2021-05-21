@@ -1,5 +1,5 @@
 set terminal png size 900, 800 enhanced font "Helvetica,20"
-set output "tests/Generation/five_ellipses/wave_graph.png"
+set output "tests/Generation/circle/wave_graph.png"
 set title "wave graph"
 set size ratio -1
 plot \

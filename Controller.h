@@ -5,8 +5,11 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include <cmath>
 #include "string.h"
 
+#include "Prediction.h"
+#include "Point.h"
 #include "Field.h"  // WARNING
 #include "Cluster.h"
 #include "Delaunay.h"
@@ -56,6 +59,7 @@ public:
     bool enterAnalysis();
     bool minSpanTree();
     bool delaunayTriangulation();
+    bool pointPrediction(double x, double y);
     bool createIncMatrix(double delta);
     bool createDBMatrix(double delta, int k);
     bool preHist(vector<string> args);

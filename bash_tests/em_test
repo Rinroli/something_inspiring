@@ -6,7 +6,7 @@ em
 '
 all_input+="${gen_file}"
 {
-echo "$all_input" | ./points.exe
+echo "$all_input" | ./client.exe
 ./tests/Algorithm/em/em_steps
 gnuplot 'tests/Algorithm/em/gnu_em.plt'
 } &> /dev/null

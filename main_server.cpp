@@ -31,7 +31,14 @@ int main()
     cout << "Ready for requests >> " << endl;
 
     Server srv(configs.if_logs, configs.name_logs);
-    srv.startListen();
+    bool rest_in_peace = srv.startListen();
+    while (not rest_in_peace) {
+        // delete (&srv);
+        cout << "HERE" << endl;
+
+        Server new_srv(configs.if_logs, configs.name_logs);
+        rest_in_peace = new_srv.startListen();
+    }
     return 0;
 }
   

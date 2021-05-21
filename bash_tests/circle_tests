@@ -1,0 +1,18 @@
+echo 'Begin circle testing
+'
+echo circle | ./bash_tests/wave_test
+echo 'Done WAVE'
+echo circle | ./bash_tests/st_test
+echo 'Done ST'
+echo circle | ./bash_tests/kmeans_test
+echo 'Done KMEANS'
+echo circle | ./bash_tests/ker_kmeans_test
+echo 'Done KER_KMEANS'
+echo circle | ./bash_tests/hierarch_test
+echo 'Done HIERARCH'
+echo circle | ./bash_tests/forel_test
+echo 'Done FOREL'
+echo circle | ./bash_tests/em_test
+echo 'Done EM'
+echo circle | ./bash_tests/dbscan_test
+echo 'Done DBSCAN'

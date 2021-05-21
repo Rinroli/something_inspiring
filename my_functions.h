@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 #include "Point.h"
 
@@ -32,3 +33,5 @@ double distPoints(const vector<double>& center1, const vector<double>& center2);
 bool isNumber(string test_str);
 
 string colorString(string given_str, string color="red", bool bold=true);
+
+double funcValue(vector<double> point);

@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "Field.h"
+#include "Point.h"
 
 class Field;
 
@@ -32,6 +33,7 @@ public:
     double getRadius();
     bool isPhantom();
     vector<int> getVerts();
+    bool containPoint(vector<double>);
     void print(ofstream& stream_tri, ofstream& stream_circ, bool all_circ = false);
     Triangle(vector<int> verts, Field* p_fieldd);
     Triangle(int vert_1, int vert_2, int vert_3, Field* p_fieldd);

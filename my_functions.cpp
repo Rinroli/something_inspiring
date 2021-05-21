@@ -139,3 +139,10 @@ string colorString(string given, string color, bool bold) {
 
     return color_prefix + "m" + given + "\e[0m";
 }
+
+// Return function value of the point
+double funcValue(vector<double> point) {
+    // return point[0] * point[0] + point[1] * point[1];
+
+    return cos(point[0] + point[1]);
+}

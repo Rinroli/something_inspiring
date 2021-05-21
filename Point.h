@@ -24,6 +24,7 @@ public:
         int idd, ofstream& logs_field, int id_cloudd, int nu_points);
     Point(const vector<double>& coords, int idd, int id_cloud, ofstream& logs);
     explicit Point(ofstream& logs);
+    Point(double x, double y, ofstream& logs);
     void changeTo(Point point);
     void setID(int id);
     void setCoords(double x, double y);

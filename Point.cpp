@@ -24,6 +24,11 @@ Point::Point(ofstream& logss)
 {
 }
 
+Point::Point(double xx, double yy, ofstream& logss)
+    : x(xx), y(yy), id(-1), id_cloud(-1), logs_f(logss)
+{
+}
+
 // Changes point to the given one.
 void Point::changeTo(Point point) {
     x = point.x;

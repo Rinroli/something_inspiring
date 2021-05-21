@@ -7,11 +7,13 @@
 #include <set>
 
 #include "Field.h"
+#include "Point.h"
 #include "Triangle.h"
 
 #include "my_functions.h"
 
 class Field;
+class Point;
 class Triangle;
 
 using namespace std;
@@ -27,6 +29,8 @@ private:
     Field* p_field;
     bool checkDelaunayCondition(Triangle& cur_tri, int ind_poi);
 public:
+    Triangle* operator[](int i);
+    int findTriangle(vector<double> new_point);
     Triangulation(Field* p_fieldd) : p_field(p_fieldd) {};
     void addTriangle(Triangle triangle);
     set<int> deleteTriangles(int ind_poi);

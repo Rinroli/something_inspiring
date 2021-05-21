@@ -6,7 +6,7 @@ spanning_tree
 '
 all_input+="${gen_file}"
 {
-echo "$all_input" | ./points.exe
+echo "$all_input" | ./client.exe
 gnuplot 'tests/Algorithm/spanning_tree/gnu_tree_hist.plt'
 gnuplot 'tests/Algorithm/spanning_tree/gnu_tree.plt'
 } &> /dev/null

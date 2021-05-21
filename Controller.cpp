@@ -32,6 +32,7 @@ Controller::~Controller()
 // Begin test, change main work directories.
 void Controller::beginTest(const string& output_dir, const string& output_na,
     const string& gen_f) {
+    writeLog("beginTest");
     if_test = true;
     output_directory = "tests/" + output_dir;
     output_name = output_na;
@@ -41,6 +42,7 @@ void Controller::beginTest(const string& output_dir, const string& output_na,
         gen_file = gen_f;
     }
     field->beginTest(output_directory, output_name);
+    writeLog("\tendTest");
 }
 
 // Enter readonly 'Analysis' mode.
@@ -584,5 +586,24 @@ bool Controller::delaunayTriangulation() {
     writeLog("\tEnd delaunayTriangulation - find " +
         to_string(field->p_triangulation->size()) + " triangles");
     message << "DONE!" << endl;
+    return true;
+}
+
+
+// Make point value prediction
+bool Controller::pointPrediction(double x, double y) {
+    writeLog("Begin pointPrediction");
+    if (not field->p_triangulation) {
+        writeLog("There is no triangulations!");
+        message << "There is no triangulations!" << endl;
+        return false;
+    }
+    Prediction predict(vector<double>{x, y}, field->p_triangulation, field, field->logs_a);
+    double result = predict.predictPoint();
+    writeLog("Find value <" + to_string(result) + ">");
+    message << endl << "\tFind value <" +
+        colorString(to_string(result)) + ">" << endl;
+    message << "\tReal value <" << 
+        colorString(to_string(funcValue(vector<double>{x, y}))) << ">" << endl;
     return true;
 }

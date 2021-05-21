@@ -65,6 +65,18 @@ vector<int> Triangle::getVerts() {
     return vert;
 }
 
+// Return if triangle contains point
+bool Triangle::containPoint(vector<double> gp) {
+    if (((gp[0] - p_0[0]) * (p_1[1] - p_0[1]) - (gp[1] - p_0[1]) * (p_1[0] - p_0[0])) * 
+        ((p_2[0] - p_0[0]) * (p_1[1] - p_0[1]) - (p_2[1] - p_0[1]) * (p_1[0] - p_0[0])) >= 0 &&
+        ((gp[0] - p_1[0]) * (p_2[1] - p_1[1]) - (gp[1] - p_1[1]) * (p_2[0] - p_1[0])) *
+        ((p_0[0] - p_1[0]) * (p_2[1] - p_1[1]) - (p_0[1] - p_1[1]) * (p_2[0] - p_1[0])) >= 0 && 
+        ((gp[0] - p_2[0]) * (p_0[1] - p_2[1]) - (gp[1] - p_2[1]) * (p_0[0] - p_2[0])) * 
+        ((p_1[0] - p_2[0]) * (p_0[1] - p_2[1]) - (p_1[1] - p_2[1]) * (p_0[0] - p_2[0])) >= 0) { return true; }
+    
+    return false;
+}
+
 // Print all adges to the stream.
 void Triangle::print(ofstream& stream_tri, ofstream& stream_circ, bool all_circ) {
     stream_tri << endl << p_0[0] << " " << p_0[1] << endl;

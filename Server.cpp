@@ -69,14 +69,36 @@ bool Server::startListen() {
                         exit(EXIT_FAILURE);
                     }
                     writeLog("Connect from client #" + to_string(new_sock), true);
+                    string if_test = readFromClient(new_sock);
+                    if (if_test == "true") {
+                        writeToClient(new_sock, "Wait for names");
+                        startNewTest(new_sock);
+                    }
                     FD_SET(new_sock, &active_set);
                 }
                 else {
-                    readParseAndAnswer(i);
+                    if (not readParseAndAnswer(i)) {
+                        return false;
+                    }
+
                 }
             }
         }
     }
+}
+
+bool Server::startNewTest(int socket) {
+    writeLog("TEST");
+    string o_dir = readFromClient(socket);
+    writeToClient(socket, "Yes");
+    string o_name = readFromClient(socket);
+    writeToClient(socket, "Yes");
+    string o_file = readFromClient(socket);
+    writeToClient(socket, "Recieve all");
+    writeLog("\t" + o_dir + " " + o_name + " " + o_file);
+
+    p_ctrl->beginTest(o_dir, o_name, o_file);
+    return true;
 }
 
 bool Server::readParseAndAnswer(int curr_sock) {
@@ -95,6 +117,13 @@ bool Server::readParseAndAnswer(int curr_sock) {
             writeToClient(curr_sock, "Stop. Good Bye!");
             exit(0);
         }
+        else if (read_str == "restart") {
+            close(curr_sock);
+            FD_CLR(curr_sock, &active_set);
+            writeLog("Restart", true);
+            writeToClient(curr_sock, "Restart");
+            return false;
+        }
         else {
             parseAndAnswer(curr_sock, read_str);
         }
@@ -103,79 +132,81 @@ bool Server::readParseAndAnswer(int curr_sock) {
 }
 
 bool Server::parseAndAnswer(int fd, string message) {
+    writeLog("Start parseAndAnswer <" + message + ">");
     char* s = new char[message.size() + 1];
-        strcpy(s, message.c_str());
-        char* pch = strtok(s, ", ()");
-        string com(pch);
-        vector<string> args;
-        while (pch != NULL) {
-            pch = strtok(NULL, " ,()");
-            if (pch == NULL) { break; }
-            args.push_back(pch);
-        }
+    strcpy(s, message.c_str());
+    char* pch = strtok(s, ", ()");
+    string com(pch);
+    vector<string> args;
+    while (pch != NULL) {
+        pch = strtok(NULL, " ,()");
+        if (pch == NULL) { break; }
+        args.push_back(pch);
+    }
 
-        bool result = true;
-        bool spec_message = true;
+    bool result = true;
+    bool spec_message = true;
 
-        if ((com == "GEN_CLOUD") | (com == "GC")) {
-            result = p_ctrl->genCloud(stod(args[0]), stod(args[1]),
-                stod(args[2]), stod(args[3]), stod(args[4]));
-        }
-        else if (com == "EXIT") {
-            writeLog("Client asks to close connection <" + to_string(fd) + ">", true);
-            close(fd);
-            FD_CLR(fd, &active_set);
-            writeToClient(fd, "Stop connection");
-            return true;  
-        }
-        else if (com == "BINARY") { result = p_ctrl->createIncMatrix(stod(args[0])); }
-        else if (com == "DBSCAN") { result = p_ctrl->createDBMatrix(stod(args[0]), stod(args[1])); }
-        else if (com == "WAVE" or com == "DBWAVE") { result = p_ctrl->waveClusters(stod(args[1])); }
-        else if ((com == "DIBINARY") | (com == "DIDBSCAN") | (com == "DIB") | (com == "DID") ) {
-            result = p_ctrl->displayGraph(stod(args[0]));
-        }
-        else if (com == "HIST") {
-            if (args.size() == 0) {
-                result = p_ctrl->saveHist();
-            } else { result = p_ctrl->preHist(args); }
-        }
-        else if (com == "KMEANS") { result = p_ctrl->kMeans(stod(args[0])); }
-        else if (com == "KERKMEANS") { result = p_ctrl->kerKMeans(stod(args[0]), stod(args[1])); }
-        else if (com == "FOREL") { result = p_ctrl->forelAlg(stod(args[0])); }
-        else if (com == "HIERARCH") { result = p_ctrl->hierarchClustering(stod(args[0])); }
-        else if (com == "EM") { result = p_ctrl->eMAlgorithm(stod(args[0])); }
-        else if (com == "SAVE") {
-            if (args.size() == 0) {
-                result = p_ctrl->printField();
-            } else {
-                result = p_ctrl->printField(false, stod(args[0]));
-            }
-        }
-        else if (com == "ADDB") { p_ctrl->addToBuffer(stod(args[0])); }
-        else if (com == "ROTB") { p_ctrl->rotateBuffer(stod(args[0])); }
-        else if (com == "MOVEB") { p_ctrl->moveBuffer(stod(args[0]), stod(args[1])); }
-        else if (com == "ZOOMB") { p_ctrl->zoomBuffer(stod(args[0])); }
-        else if (com == "INFO") { result = p_ctrl->showInfoField(); }
-        else if (com == "INFOFC") { result = p_ctrl->showInfoFClusters(); }
-        else if ((com == "MATRIX") | (com == "ANALYSIS")) { result = p_ctrl->enterAnalysis(); }
-        else if (com == "STREE") { result = p_ctrl->minSpanTree(); }
-        else if (com == "DELAUNAY") { result = p_ctrl->delaunayTriangulation(); }
-        else if (com == "STRHIST") { result = p_ctrl->streeHist(); }
-        else if (com == "FINDR") { result = p_ctrl->findR(); }
-        else if (com == "SHOWB") { result = p_ctrl->showBuffer(); }
-        else if (com == "PUTB") { result = p_ctrl->putBuffer(); }
-        else if (com == "EMPTYB") { result = p_ctrl->emptyBuffer(); }
-
-        writeLog("End step <" + to_string(fd) + ">");
-        if (spec_message) {
-            // cout << "<" << p_ctrl->curMessage() << ">" << endl;
-            writeToClient(fd, p_ctrl->curMessage());
+    if ((com == "GEN_CLOUD") | (com == "GC")) {
+        result = p_ctrl->genCloud(stod(args[0]), stod(args[1]),
+            stod(args[2]), stod(args[3]), stod(args[4]));
+    }
+    else if (com == "EXIT") {
+        writeLog("Client asks to close connection <" + to_string(fd) + ">", true);
+        close(fd);
+        FD_CLR(fd, &active_set);
+        writeToClient(fd, "Stop connection");
+        return true;  
+    }
+    else if (com == "BINARY") { result = p_ctrl->createIncMatrix(stod(args[0])); }
+    else if (com == "DBSCAN") { result = p_ctrl->createDBMatrix(stod(args[0]), stod(args[1])); }
+    else if (com == "WAVE" or com == "DBWAVE") { result = p_ctrl->waveClusters(stod(args[0])); }
+    else if ((com == "DIBINARY") | (com == "DIDBSCAN") | (com == "DIB") | (com == "DID") ) {
+        result = p_ctrl->displayGraph(stod(args[0]));
+    }
+    else if (com == "HIST") {
+        if (args.size() == 0) {
+            result = p_ctrl->saveHist();
+        } else { result = p_ctrl->preHist(args); }
+    }
+    else if (com == "KMEANS") { result = p_ctrl->kMeans(stod(args[0])); }
+    else if (com == "KERKMEANS") { result = p_ctrl->kerKMeans(stod(args[0]), stod(args[1])); }
+    else if (com == "FOREL") { result = p_ctrl->forelAlg(stod(args[0])); }
+    else if (com == "HIERARCH") { result = p_ctrl->hierarchClustering(stod(args[0])); }
+    else if (com == "EM") { result = p_ctrl->eMAlgorithm(stod(args[0])); }
+    else if (com == "SAVE") {
+        if (args.size() == 0) {
+            result = p_ctrl->printField();
         } else {
-            writeToClient(fd, message);
+            result = p_ctrl->printField(false, stod(args[0]));
         }
-        p_ctrl->cleanMessage();
+    }
+    else if (com == "ADDB") { p_ctrl->addToBuffer(stod(args[0])); }
+    else if (com == "ROTB") { p_ctrl->rotateBuffer(stod(args[0])); }
+    else if (com == "MOVEB") { p_ctrl->moveBuffer(stod(args[0]), stod(args[1])); }
+    else if (com == "ZOOMB") { p_ctrl->zoomBuffer(stod(args[0])); }
+    else if (com == "INFO") { result = p_ctrl->showInfoField(); }
+    else if (com == "INFOFC") { result = p_ctrl->showInfoFClusters(); }
+    else if ((com == "MATRIX") | (com == "ANALYSIS")) { result = p_ctrl->enterAnalysis(); }
+    else if (com == "STREE") { result = p_ctrl->minSpanTree(); }
+    else if (com == "DELAUNAY") { result = p_ctrl->delaunayTriangulation(); }
+    else if (com == "STRHIST") { result = p_ctrl->streeHist(); }
+    else if (com == "FINDR") { result = p_ctrl->findR(); }
+    else if (com == "SHOWB") { result = p_ctrl->showBuffer(); }
+    else if (com == "PUTB") { result = p_ctrl->putBuffer(); }
+    else if (com == "EMPTYB") { result = p_ctrl->emptyBuffer(); }
+    else if (com == "PREDICT") { result = p_ctrl->pointPrediction(stod(args[0]), stod(args[1])); }
 
-        return result;
+    writeLog("End step <" + to_string(fd) + ">");
+    if (spec_message) {
+        // cout << "<" << p_ctrl->curMessage() << ">" << endl;
+        writeToClient(fd, p_ctrl->curMessage());
+    } else {
+        writeToClient(fd, message);
+    }
+    p_ctrl->cleanMessage();
+
+    return result;
 }
 
 string Server::readFromClient(int fd) {

@@ -26,7 +26,7 @@ class Controller;
 
 using namespace std;
 
-#define PORT    5555
+#define PORT    5559
 #define BUFLEN  512
 
 class Server
@@ -54,6 +54,7 @@ private:
 public:
     Server(vector<bool> if_logs, vector<string> name_logs);
     bool startListen();
+    bool startNewTest(int socket);
     string readFromClient(int fds);
     bool readParseAndAnswer(int curr_sock);
     bool writeToClient(int fd, string message);

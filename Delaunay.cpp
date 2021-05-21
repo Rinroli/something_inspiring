@@ -49,6 +49,10 @@ Triangulation* Delaunay::mainAlgorithm() {
     anim << "\t\t'" << p_field->output_directory << "/delaunay/points_'.i.'.plt' index 0 w p lt 5 lc rgb \"blue\" title \"points\",\\" << endl;
     // anim << "\t\t'" << p_field->output_directory << "/delaunay/circles_'.i.'.plt' using 1:2:3 with circles lc rgb \"red\" title \"circles\",\\" << endl;
     anim << "\t\t'" << p_field->output_directory << "/delaunay/points_'.i.'.plt' index 1 w p lt 7 lc rgb \"red\" title \"current\"\n}" << endl;
+    
+    // Point new_point(vector<double>{1,1}, -1, -1, p_field->logs_a);
+    // int ind_tr = triangulation->findTriangle(new_point);
+    // cout << "Ind triangle " << ind_tr << endl;
     return triangulation;
 }
 

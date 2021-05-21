@@ -413,6 +413,7 @@ void Field::beginTest(const string& output_dir, const string& output_na) {
 
 // Print edges to the file graph_edges.plt.
 void Field::drawBinGraph(int i) {
+    writeLog("Begin drawBinGraph");
     ofstream graph_edges(output_directory + "/" + output_name + "_edges.plt");
     ofstream graph_points(output_directory + "/" + output_name + "_points.plt");
 
@@ -446,6 +447,7 @@ void Field::drawBinGraph(int i) {
         }
     }
     graph_points.close();
+    writeLog("\tEnd drawBinGraph");
 }
 
 // Create minimal spanning tree.

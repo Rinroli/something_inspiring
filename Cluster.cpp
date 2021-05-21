@@ -281,5 +281,5 @@ void Cluster::printGnu(ofstream& ofile) {
 
 // Write log-message with date-time note.
 void Cluster::writeLog(const string& message) {
-    logs_a << timeLog() << "CLUSTER(id:" << id << "): " << message << endl;
+    // logs_a << timeLog() << "CLUSTER(id:" << id << "): " << message << endl;
 }

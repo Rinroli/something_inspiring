@@ -1,4 +1,5 @@
 .vscode/*
+.project
 .directory
 include_guard/*
 *.o
@@ -32,3 +33,5 @@ include_guard/*
 
 /**/beamer/*
 /tests/**/*.pdf
+
+/bash_tests/all_tests

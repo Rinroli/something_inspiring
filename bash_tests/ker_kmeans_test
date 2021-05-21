@@ -6,7 +6,7 @@ ker_kmeans
 '
 all_input+="${gen_file}"
 {
-echo "$all_input" | ./points.exe
+echo "$all_input" | ./client.exe
 ./tests/Algorithm/ker_kmeans/ker_steps
 gnuplot 'tests/Algorithm/ker_kmeans/gnu_ker_kmeans.plt'
 } &> /dev/null

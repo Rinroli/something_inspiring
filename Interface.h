@@ -26,7 +26,7 @@
 
 using namespace std;
 
-#define  SERVER_PORT     5555
+#define  SERVER_PORT     5559
 #define  SERVER_NAME    "127.0.0.1"
 #define  BUFLEN          512
 

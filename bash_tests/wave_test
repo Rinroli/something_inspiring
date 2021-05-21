@@ -6,7 +6,7 @@ wave
 '
 all_input+="${gen_file}"
 {
-echo "$all_input" | ./points.exe
+echo "$all_input" | ./client.exe
 gnuplot 'tests/Algorithm/wave/gnu_wave.plt'
 gnuplot 'tests/Algorithm/wave/gnu_graph.plt'
 } &> /dev/null

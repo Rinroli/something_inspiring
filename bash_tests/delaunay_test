@@ -6,6 +6,6 @@ delaunay
 '
 all_input+="${gen_file}"
 {
-echo "$all_input" | ./points.exe
+echo "$all_input" | ./client.exe
 ./tests/Algorithm/delaunay/del_steps
 } &> /dev/null

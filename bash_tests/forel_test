@@ -6,7 +6,7 @@ forel
 '
 all_input+="${gen_file}"
 {
-echo "$all_input" | ./points.exe
+echo "$all_input" | ./client.exe
 ./tests/Algorithm/forel/forel_steps
 gnuplot 'tests/Algorithm/forel/gnu_forel.plt'
 } &> /dev/null

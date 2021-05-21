@@ -26,6 +26,19 @@ bool Triangulation::checkDelaunayCondition(Triangle& tri, int ind_poi) {
     return distPoints((p_field)->getPoint(ind_poi), tri.getCenter()) < tri.getRadius();
 }
 
+// Search for a triangle containing a given point
+int Triangulation::findTriangle(vector<double> new_point) {
+    for (int ind_tri = 0; ind_tri < nu_triangles; ind_tri++) {
+        if (triangles[ind_tri].containPoint(new_point)) { return ind_tri; }
+    }
+    return -1;
+}
+
+// Return triangle by index
+Triangle* Triangulation::operator[](int i) {
+    return &(triangles[i]);
+}
+
 // Delete phantom enclosing triangle and connected triangles.
 void Triangulation::deleteEnclosingTriangle() {
     for (int ind_tri = 0; ind_tri < nu_triangles; ind_tri++) {

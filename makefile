@@ -14,29 +14,32 @@ g: main_server.cpp BinMatrix.cpp Buffer.cpp Cloud.cpp Cluster.cpp Configs.cpp \
 	Controller.cpp Delaunay.cpp EMalgorithm.cpp Field.cpp \
 	FindClusters.cpp Forel.cpp Hierarch.cpp Server.cpp \
 	KerKMeans.cpp KMeans.cpp my_functions.cpp Point.cpp \
-	Tree.cpp Triangle.cpp Triangulation.cpp WaveClusters.cpp
+	Tree.cpp Triangle.cpp Triangulation.cpp WaveClusters.cpp Prediction.cpp
 	$(CC) main_server.cpp BinMatrix.cpp Buffer.cpp Cloud.cpp Cluster.cpp Configs.cpp \
 		Controller.cpp Delaunay.cpp EMalgorithm.cpp Field.cpp \
 		FindClusters.cpp Forel.cpp Hierarch.cpp Server.cpp \
 		KerKMeans.cpp KMeans.cpp my_functions.cpp Point.cpp \
-		Tree.cpp Triangle.cpp Triangulation.cpp WaveClusters.cpp -g -o debug
+		Tree.cpp Triangle.cpp Triangulation.cpp WaveClusters.cpp Prediction.cpp -g -o debug
 
 points: main_server.o BinMatrix.o Buffer.o Cloud.o Cluster.o Configs.o \
 	Controller.o Delaunay.o EMalgorithm.o Field.o \
 	FindClusters.o Forel.o Hierarch.o Server.o \
 	KerKMeans.o KMeans.o my_functions.o Point.o \
-	Tree.o Triangle.o Triangulation.o WaveClusters.o
+	Tree.o Triangle.o Triangulation.o WaveClusters.o Prediction.o
 	$(CC) main_server.o BinMatrix.o Buffer.o Cloud.o Cluster.o Configs.o \
 		Controller.o Delaunay.o EMalgorithm.o Field.o \
 		FindClusters.o Forel.o Hierarch.o Server.o \
 		KerKMeans.o KMeans.o my_functions.o Point.o \
-		Tree.o Triangle.o Triangulation.o WaveClusters.o -o server.exe
+		Tree.o Triangle.o Triangulation.o WaveClusters.o Prediction.o -o server.exe
 
 main_server.o: main_server.cpp
 	$(CC) $(CFLAGS) main_server.cpp
 
 BinMatrix.o: BinMatrix.cpp
 	$(CC) $(CFLAGS) BinMatrix.cpp
+
+Prediction.o: Prediction.cpp
+	$(CC) $(CFLAGS) Prediction.cpp
 
 Buffer.o: Buffer.cpp
 	$(CC) $(CFLAGS) Buffer.cpp

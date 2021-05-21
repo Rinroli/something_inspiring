@@ -60,8 +60,9 @@ bool Interface::mainLoop() {
     getline(cin, command);
     if (command == "cin") {
         writeLog("Command Line Interface");
+        sendCommand("false");
         do {
-            cout << "Command: ";
+            cout << colorString("Command: ", "cyan");
             getline(cin, command);
             runCommand(command);
             if (command != "EXIT") { readFromServer(); }
@@ -87,9 +88,14 @@ bool Interface::mainLoop() {
                 cout << "At last - generation file:\n > ";
                 cin >> cur_gen;
                 gen_file = "tests/Generation/" + cur_gen;
-                sendCommand("start_test");
+                sendCommand("true");
+                readFromServer();
                 sendCommand(output_directory);
+                readFromServer();
+                sendCommand(output_name);
+                readFromServer();
                 sendCommand(gen_file);
+                readFromServer();
                 writeLog("\tGen file >> " + gen_file + "/" + cur_gen + ".txt");
                 gen_fin.open(gen_file + "/" + cur_gen + ".txt");
 
@@ -98,14 +104,21 @@ bool Interface::mainLoop() {
                     return 0;
                 }
             } else {
-                sendCommand("start_test");
+                gen_file = "tests/Generation/" + cur_gen;
+                sendCommand("true");
+                readFromServer();
                 sendCommand(output_directory);
+                readFromServer();
+                sendCommand(output_name);
+                readFromServer();
                 sendCommand(gen_file);
+                readFromServer();
                 writeLog("\tGen file >> " + gen_file + "/" + cur_gen + ".txt");
             }
         }
         else {
             writeLog("From File");
+            sendCommand("false");
             fin.open("command_files/" + command);
         }
 
@@ -117,13 +130,16 @@ bool Interface::mainLoop() {
         if (command == "test") {
                 getline(gen_fin, command);
                 while (!gen_fin.eof() and (command == "" or runCommand(command))) {
+                    readFromServer();
                     getline(gen_fin, command);
+                    break;
                 }
                 gen_fin.close();
                 writeLog("RETURN to test file");
                 getline(fin, command);
                 while (!fin.eof() and (command == "" or runCommand(command))) {
                     getline(fin, command);
+                    if (command != "EXIT") { readFromServer(); }
                 }
         } else {
             getline(fin, command);
@@ -165,7 +181,7 @@ bool Interface::readFromServer()
     }
     else {  // success
         if (not isNumber(string(buf))) {
-            cout << "Server's replay: " + string(buf);
+            cout << "Server's replay: " + string(buf) << endl;
             writeLog("Receive message, len <" + to_string(nbytes - 1) + ">");
         } else {
             string get_str = "Get";
@@ -239,7 +255,19 @@ bool Interface::runCommand(string command)
         else if ((com == "GEN_CLOUD") | (com == "GC")) {
             if (args.size() == 0) { result_command = "GC 0 0 1 1 " + to_string(N); }
             else if (args.size() < 4 or args.size() > 5) { throw - 1; }
-            else if (args.size() == 4) { result_command += " " + to_string(N); }
+            else {
+                result_command = "GC";
+                for (int nu_a = 0; nu_a < 5; nu_a++) {
+                    if (args.size() > nu_a) {
+                        result_command += " " + args[nu_a];
+                    } else {
+                        if (nu_a < 2) { result_command += " 0"; }
+                        else if (nu_a < 4) { result_command += " 1"; }
+                        else {result_command += " " + to_string(N); }
+                    }
+                }
+            }
+
         }
 
         else if (com == "BINARY") {
@@ -266,6 +294,10 @@ bool Interface::runCommand(string command)
             if (args.size() == 0) { result_command = "HIST"; }
             else if (args.size() == 1) { throw - 1; }
             else if (args.size() > 3) { throw - 1; }
+        }
+
+        else if (com == "PREDICT") {
+            if (args.size() != 2) { throw -1; }
         }
 
         else if (com == "KMEANS") {
@@ -316,7 +348,8 @@ bool Interface::runCommand(string command)
 
         else if (com == "INFO" or com == "INFOFC" or com == "MATRIX" or com == "ANALYSIS"
             or com == "STREE" or com == "DELAUNAY" or com == "STRHIST" or com == "FINDR"
-            or com == "SHOWB" or com == "PUTB" or com == "EMPTYB" or com == "stop") {
+            or com == "SHOWB" or com == "PUTB" or com == "EMPTYB" or com == "stop"
+            or com == "restart") {
                 if (args.size() > 1) { throw - 1; }
         }
 

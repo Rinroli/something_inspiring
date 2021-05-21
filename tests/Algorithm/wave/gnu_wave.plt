@@ -1,6 +1,6 @@
 set terminal png size 900,800 enhanced font "Helvetica,20"
 set nokey
-set output "tests/Generation/five_ellipses/wave.png"
+set output "tests/Generation/circle/wave.png"
 set title "Clusters, Wave clustering (delta = 0.200000)"
 set size ratio -1
 plot 'tests/Algorithm/wave/data_wave.plt' index 0 w p title "0",\
@@ -40,32 +40,4 @@ plot 'tests/Algorithm/wave/data_wave.plt' index 0 w p title "0",\
 'tests/Algorithm/wave/data_wave.plt' index 34 w p title "34",\
 'tests/Algorithm/wave/data_wave.plt' index 35 w p title "35",\
 'tests/Algorithm/wave/data_wave.plt' index 36 w p title "36",\
-'tests/Algorithm/wave/data_wave.plt' index 37 w p title "37",\
-'tests/Algorithm/wave/data_wave.plt' index 38 w p title "38",\
-'tests/Algorithm/wave/data_wave.plt' index 39 w p title "39",\
-'tests/Algorithm/wave/data_wave.plt' index 40 w p title "40",\
-'tests/Algorithm/wave/data_wave.plt' index 41 w p title "41",\
-'tests/Algorithm/wave/data_wave.plt' index 42 w p title "42",\
-'tests/Algorithm/wave/data_wave.plt' index 43 w p title "43",\
-'tests/Algorithm/wave/data_wave.plt' index 44 w p title "44",\
-'tests/Algorithm/wave/data_wave.plt' index 45 w p title "45",\
-'tests/Algorithm/wave/data_wave.plt' index 46 w p title "46",\
-'tests/Algorithm/wave/data_wave.plt' index 47 w p title "47",\
-'tests/Algorithm/wave/data_wave.plt' index 48 w p title "48",\
-'tests/Algorithm/wave/data_wave.plt' index 49 w p title "49",\
-'tests/Algorithm/wave/data_wave.plt' index 50 w p title "50",\
-'tests/Algorithm/wave/data_wave.plt' index 51 w p title "51",\
-'tests/Algorithm/wave/data_wave.plt' index 52 w p title "52",\
-'tests/Algorithm/wave/data_wave.plt' index 53 w p title "53",\
-'tests/Algorithm/wave/data_wave.plt' index 54 w p title "54",\
-'tests/Algorithm/wave/data_wave.plt' index 55 w p title "55",\
-'tests/Algorithm/wave/data_wave.plt' index 56 w p title "56",\
-'tests/Algorithm/wave/data_wave.plt' index 57 w p title "57",\
-'tests/Algorithm/wave/data_wave.plt' index 58 w p title "58",\
-'tests/Algorithm/wave/data_wave.plt' index 59 w p title "59",\
-'tests/Algorithm/wave/data_wave.plt' index 60 w p title "60",\
-'tests/Algorithm/wave/data_wave.plt' index 61 w p title "61",\
-'tests/Algorithm/wave/data_wave.plt' index 62 w p title "62",\
-'tests/Algorithm/wave/data_wave.plt' index 63 w p title "63",\
-'tests/Algorithm/wave/data_wave.plt' index 64 w p title "64",\
-'tests/Algorithm/wave/data_wave.plt' index 65 w p title "65"
+'tests/Algorithm/wave/data_wave.plt' index 37 w p title "37"
