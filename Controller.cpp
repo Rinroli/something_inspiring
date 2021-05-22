@@ -599,6 +599,13 @@ bool Controller::pointPrediction(double x, double y) {
         return false;
     }
     Prediction predict(vector<double>{x, y}, field->p_triangulation, field, field->logs_a);
+    
+    if (not predict.real) {
+        writeLog("Out of triangulation");
+        message << "Out of triangulation" << endl;
+        return false;
+    }
+    
     double result = predict.predictPoint();
     writeLog("Find value <" + to_string(result) + ">");
     message << endl << "\tFind value <" +

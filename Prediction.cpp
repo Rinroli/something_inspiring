@@ -6,6 +6,13 @@ Prediction::Prediction(vector<double> new_pointt, Triangulation* p_triangulation
     Field* p_field,  ofstream& logs_aa) 
 : logs_a(logs_aa), new_point(new_pointt) {
     int predict_ind = p_triangulation->findTriangle(new_point);
+
+    if (predict_ind < 0) {
+        writeLog("Out of triangulation");
+        real = false;
+        return;
+    }
+
     Triangle* cur_triangle = (*p_triangulation)[predict_ind];
 
     vector<int> tri_ind = cur_triangle->getVerts();
@@ -21,6 +28,7 @@ Prediction::Prediction(vector<double> new_pointt, Triangulation* p_triangulation
 
 // Predict value of the given point
 double Prediction::predictPoint() {
+
     vector<double> plane = findPlane();
 
     return (-plane[3] - plane[0] * new_point[0] - plane[1] * new_point[1]) / plane[2];

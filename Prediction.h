@@ -26,6 +26,7 @@ public:
     Prediction(vector<double> new_point, Triangulation* p_triangulation,
         Field* p_field, ofstream& logs_a);
     double predictPoint();
+    bool real=true;
 private:
     vector<double> findPlane();  // Ax + By + Cz + D = 0
     void writeLog(const string& message);
