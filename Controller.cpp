@@ -614,3 +614,50 @@ bool Controller::pointPrediction(double x, double y) {
         colorString(to_string(funcValue(vector<double>{x, y}))) << ">" << endl;
     return true;
 }
+
+// Find efficiency factor as \sum(val_real - val_predicted)^2 / \sum (val_real - val_mean)^2
+bool Controller::predictionCoeff() {
+    writeLog("Begin predictCoeff >> " + to_string(field->p_triangulation->size()));
+    if (not field->p_triangulation) {
+        writeLog("There is no triangulations!");
+        message << "There is no triangulations!" << endl;
+        return false;
+    }
+
+    int nu_real_p = 0;
+    double sum_square_err = 0;
+    double sum_square_dev = 0;
+    double sum_val = 0;
+    vector<double> real_val;
+    
+    for (int ind_poi = 0; ind_poi < field->numPoints(); ind_poi++) {
+        Delaunay* cur_del = new Delaunay(field, field->logs_a);
+        // Triangulation* cur_tr = field->p_triangulation->withoutPoint(ind_poi);
+        
+        Prediction predict(field->getPoint(ind_poi).getCoord(),
+            cur_del->mainAlgorithm(ind_poi), field, field->logs_a);
+
+        if (not predict.real) {
+            writeLog("Out of triangulation");
+        } else {
+            double result = predict.predictPoint();
+            cout <<"P:" << result << " <> R:" << funcValue(field->getPoint(ind_poi).getCoord()) << endl;
+            real_val.push_back(result);
+            sum_val += result;
+            sum_square_err += pow(funcValue(field->getPoint(ind_poi).getCoord()) - result, 2);
+        }
+        delete cur_del;
+    }
+
+    double mean_val = sum_val / real_val.size();
+
+    for (double r_val : real_val) {
+        sum_square_dev += pow(r_val - mean_val, 2);
+    }
+
+    message << endl << "\tCoefficient <" +
+        colorString(to_string(1 - sum_square_err / sum_square_dev)) + ">" << endl;
+
+    writeLog("\t End predict Coeff <" + to_string(1 - sum_square_err / sum_square_dev) + ">");
+    return true;
+}

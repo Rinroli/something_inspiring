@@ -9,7 +9,15 @@ List of commands can be found in [help.txt](../help.txt).
 
 ## Changelog
 
-### **Version 2.2.0 (24.04.2021)** - CURRENT VERSION
+### **Version 2.3.0 (27.04.2021)** - CURRENT VERSION
+
+Added:
+
+* The ability to *predict* the value of a point by field points. You can also calculate the efficiency factor. Commands are *PREDICT* or *PREDICT (x,y)*.
+
+* Run commands from *.txt* files - now work in client-server implementation!
+
+### **Version 2.2.0 (24.04.2021)**
 
 **WOW** *Client-server system* From now on in reality!
 

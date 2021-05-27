@@ -195,7 +195,13 @@ bool Server::parseAndAnswer(int fd, string message) {
     else if (com == "SHOWB") { result = p_ctrl->showBuffer(); }
     else if (com == "PUTB") { result = p_ctrl->putBuffer(); }
     else if (com == "EMPTYB") { result = p_ctrl->emptyBuffer(); }
-    else if (com == "PREDICT") { result = p_ctrl->pointPrediction(stod(args[0]), stod(args[1])); }
+    else if (com == "PREDICT") {
+        if (args.size() == 0) {
+            result = p_ctrl->predictionCoeff();
+        } else {
+            result = p_ctrl->pointPrediction(stod(args[0]), stod(args[1]));
+        }
+    }
 
     writeLog("End step <" + to_string(fd) + ">");
     if (spec_message) {
@@ -205,6 +211,7 @@ bool Server::parseAndAnswer(int fd, string message) {
         writeToClient(fd, message);
     }
     p_ctrl->cleanMessage();
+    cout << "Wait for command >> ";
 
     return result;
 }

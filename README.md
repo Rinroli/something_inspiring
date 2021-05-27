@@ -21,6 +21,8 @@ Currently, some clustering algorithms are implemented:
 (**UPDATED**)
 Also **Delaunay triangulation** is implemented (algorithm "remove and build")!
 
+You can predict values of the point by extrapolation from the field points - current value function is *cos(3\*(x+y))*.
+
 Before data analysis, you can work with normally distributed clouds by generating and working with a **buffer** - *rotate*, *shift*, *scale*.
 
 **Include test system.** *(Not tested on client-server yet)* You can run tests from *CLI* interface or from *bash-scripts*:

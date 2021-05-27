@@ -1,5 +1,5 @@
 // Copyright (c) 2020 Rinroli
-// Version 0.0.2
+// Version 0.0.3
 
 #include "Server.h"
 #include "Configs.h"

@@ -12,13 +12,14 @@ Delaunay::Delaunay(Field* p_fieldd, ofstream& logs_al)
 }
 
 // Main Delaunay triangulation algorithm.
-Triangulation* Delaunay::mainAlgorithm() {
+Triangulation* Delaunay::mainAlgorithm(int without_point) {
     writeLog("Begin mainAlgorithm");
 
     triangulation->addTriangle(findEnclosingTriangle());
     writeLog("\tFind enclosing triangle");
 
     for (int ind_poi = 0; ind_poi < p_field->numPoints(); ind_poi++) {
+        if (ind_poi == without_point) { continue; }
         set<int> polygon = triangulation->deleteTriangles(ind_poi);
         vector<int> sorted = sortPolygon(polygon, ind_poi);
         saveStep(ind_poi);
@@ -75,10 +76,10 @@ Triangle Delaunay::findEnclosingTriangle() {
 vector<int> Delaunay::sortPolygon(set<int> polygon, int ind_poi) {
     writeLog("Begin sortPolygone");
     vector<tmp_int_double> zip;
+    double poi_x = p_field->getPoint(ind_poi).getCoord()[0];
+    double poi_y = p_field->getPoint(ind_poi).getCoord()[1];
     for (int pol_poi : polygon) {
         double pol_x, pol_y, hipoth, angle;
-        double poi_x = p_field->getPoint(ind_poi).getCoord()[0];
-        double poi_y = p_field->getPoint(ind_poi).getCoord()[1];
         if (pol_poi >= 0) {
             pol_x = p_field->getPoint(pol_poi).getCoord()[0];
             pol_y = p_field->getPoint(pol_poi).getCoord()[1];

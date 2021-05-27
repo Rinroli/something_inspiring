@@ -60,6 +60,7 @@ public:
     bool minSpanTree();
     bool delaunayTriangulation();
     bool pointPrediction(double x, double y);
+    bool predictionCoeff();
     bool createIncMatrix(double delta);
     bool createDBMatrix(double delta, int k);
     bool preHist(vector<string> args);
@@ -79,7 +80,6 @@ private:
     string output_directory = "data";
     string output_name;
     string gen_file;
-
     stringstream message;
     // char message_buffer[BUFLEN_MESS]{"\nMESSAGE:\n"};
     // int message_len;

@@ -44,7 +44,7 @@ private:
     void writeLog(const string& message);
 public:
     Delaunay(Field* p_field, ofstream& logs_al);
-    Triangulation* mainAlgorithm(); //  WARNING
+    Triangulation* mainAlgorithm(int without_point = -1); //  WARNING
 };
 
 #endif // DELAUNAY

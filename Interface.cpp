@@ -297,7 +297,7 @@ bool Interface::runCommand(string command)
         }
 
         else if (com == "PREDICT") {
-            if (args.size() != 2) { throw -1; }
+            if (args.size() != 2 and args.size() != 0) { throw -1; }
         }
 
         else if (com == "KMEANS") {

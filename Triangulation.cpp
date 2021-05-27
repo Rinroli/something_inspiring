@@ -5,13 +5,31 @@
 // Delete triangles that don't satisfy the Delaunay condition.
 // Return vector of points of these triangles.
 set<int> Triangulation::deleteTriangles(int ind_poi) {
+    bool next = false;
     set<int> polygon_unsorted;
     for (int ind_tri = 0; ind_tri < nu_triangles; ind_tri++) {
-        if (checkDelaunayCondition(triangles[ind_tri], ind_poi)) {
-            vector<int> verts = triangles[ind_tri].getVerts();
-            polygon_unsorted.insert(verts[0]);
-            polygon_unsorted.insert(verts[1]);
-            polygon_unsorted.insert(verts[2]);
+        next = false;
+        vector<int> verts = triangles[ind_tri].getVerts();
+        for (int id_vert : verts) {
+            if (id_vert == ind_poi) {
+                next = true;
+                for (int i = 0; i < 3; i++) {
+                    if (verts[i] != ind_poi) {
+                        polygon_unsorted.insert(verts[i]);
+                    }
+                }
+                triangles.erase(triangles.begin() + ind_tri);
+                ind_tri--;
+                nu_triangles--;
+                break;
+            }
+        }
+        if ((not next) and checkDelaunayCondition(triangles[ind_tri], ind_poi)) {
+            for (int i = 0; i < 3; i++) {
+                if (verts[i] != ind_poi) {
+                    polygon_unsorted.insert(verts[i]);
+                }
+            }
 
             triangles.erase(triangles.begin() + ind_tri);
             ind_tri--;
@@ -19,6 +37,14 @@ set<int> Triangulation::deleteTriangles(int ind_poi) {
         }
     }
     return polygon_unsorted;
+}
+
+
+// Copy Triangulation
+Triangulation::Triangulation(Triangulation* tr_to_copy) 
+: p_field(tr_to_copy->p_field), nu_triangles(tr_to_copy-> nu_triangles),
+triangles(tr_to_copy->triangles)
+{
 }
 
 // Check Delaunay conditions for triangle and point.

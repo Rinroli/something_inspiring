@@ -144,5 +144,5 @@ string colorString(string given, string color, bool bold) {
 double funcValue(vector<double> point) {
     // return point[0] * point[0] + point[1] * point[1];
 
-    return cos(point[0] + point[1]);
+    return cos(3*(point[0] + point[1]));
 }

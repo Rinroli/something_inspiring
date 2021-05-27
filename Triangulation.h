@@ -32,7 +32,10 @@ public:
     Triangle* operator[](int i);
     int findTriangle(vector<double> new_point);
     Triangulation(Field* p_fieldd) : p_field(p_fieldd) {};
+    Triangulation(Triangulation* tr_to_copy);
     void addTriangle(Triangle triangle);
+    // Triangulation* withoutPoint(int id_point);
+    // vector<int> sortPolygon(set<int> polygon, int id_poi);
     set<int> deleteTriangles(int ind_poi);
     void deleteEnclosingTriangle();
     int size();
